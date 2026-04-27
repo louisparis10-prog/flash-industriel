@@ -57,14 +57,14 @@ async function checkStatus() {
 }
 
 function updateStatusUI(data) {
-  const services = ['securite', 'production', 'qualite', 'maintenance'];
+  const services = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
+  const labels = { securite: 'Sécurité', production: 'Production', qualite: 'Qualité', maintenance: 'Maintenance', utilites: 'Utilités' };
   services.forEach(s => {
     const ok = data.submitted.includes(s);
-    // Header bar
     const el = document.getElementById('status-' + s);
     if (el) {
       el.className = 'feu ' + (ok ? 'feu-vert' : 'feu-gris');
-      el.textContent = { securite: 'Sécurité', production: 'Production', qualite: 'Qualité', maintenance: 'Maintenance' }[s];
+      el.textContent = labels[s];
     }
     // Cards
     const card = document.getElementById('card-' + s);
@@ -98,7 +98,7 @@ function initForms() {
   });
 
   // Form submissions
-  ['securite', 'production', 'qualite', 'maintenance'].forEach(service => {
+  ['securite', 'production', 'qualite', 'maintenance', 'utilites'].forEach(service => {
     const form = document.getElementById('form-' + service);
     if (form) form.addEventListener('submit', (e) => { e.preventDefault(); submitForm(service, form); });
   });
@@ -284,6 +284,7 @@ function renderDashboard(d, status, date) {
   const prod = d.production || null;
   const qual = d.qualite || null;
   const maint = d.maintenance || null;
+  const util = d.utilites || null;
 
   // Calcul statut global
   const statuts = [
@@ -336,9 +337,9 @@ function renderDashboard(d, status, date) {
         </p>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
-        ${['securite','production','qualite','maintenance'].map(s => {
+        ${['securite','production','qualite','maintenance','utilites'].map(s => {
           const ok = status.submitted.includes(s);
-          const names = {securite:'🦺 Sécu',production:'⚙️ Prod',qualite:'✅ Qualité',maintenance:'🔧 Maint'};
+          const names = {securite:'🦺 Sécu',production:'⚙️ Prod',qualite:'✅ Qualité',maintenance:'🔧 Maint',utilites:'🏭 Utilités'};
           return `<span class="feu ${ok?'feu-vert':'feu-gris'}">${names[s]}</span>`;
         }).join('')}
       </div>
@@ -541,6 +542,43 @@ function renderDashboard(d, status, date) {
           ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire non soumis</p></div>'}
         </div>
       </div>
+    </div>
+
+    <!-- UTILITÉS -->
+    <div class="section-title">🏭 Utilités</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;">
+      ${util ? `
+      <div style="display:grid;grid-template-columns:180px 100px 1fr 120px;gap:0;">
+        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Indicateur</div>
+        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);text-align:center;">Statut</div>
+        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Événements / Informations</div>
+        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Délai</div>
+        ${[
+          ['Clarification', 'clarification'],
+          ['Zone déchets', 'zone_dechets'],
+          ['Protection incendie', 'incendie'],
+          ['STEP (1)', 'step1'],
+          ['STEP (2)', 'step2'],
+          ['Chaufferies — Biomasse', 'biomasse'],
+          ['Gaz', 'gaz'],
+          ['Dalkia', 'dalkia'],
+          ['Air Comprimé', 'air'],
+          ['Climatisation / cond.', 'clim'],
+          ['Effacement Énergétique', 'effacement'],
+        ].map(([label, key]) => {
+          const statut = util[key + '_statut'];
+          const info = util[key + '_info'] || '—';
+          const delai = util[key + '_delai'] || '';
+          return `
+            <div style="padding:10px 14px;font-size:13px;font-weight:${label.includes('—')||label==='Gaz'||label==='Dalkia'?'400':'600'};color:${label.includes('—')||label==='Gaz'||label==='Dalkia'?'var(--text2)':'var(--text)'};border-bottom:1px solid rgba(51,65,85,.3);padding-left:${label==='Gaz'||label==='Dalkia'?'28px':'14px'};">${label.replace('Chaufferies — ','Chaufferies — ')}</div>
+            <div style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(51,65,85,.3);">${statut ? `<span class="feu feu-${statut}"></span>` : '<span class="feu feu-gris"></span>'}</div>
+            <div style="padding:10px 14px;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(51,65,85,.3);">${info}</div>
+            <div style="padding:10px 14px;font-size:12px;color:var(--text2);border-bottom:1px solid rgba(51,65,85,.3);">${delai}</div>
+          `;
+        }).join('')}
+      </div>
+      ${util.commentaire_general ? `<div style="padding:12px 16px;font-size:13px;color:var(--text2);border-top:1px solid var(--border);">💬 ${util.commentaire_general}</div>` : ''}
+      ` : `<div class="no-data" style="padding:32px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire Utilités non soumis</p></div>`}
     </div>
 
     <!-- POINTS À INVESTIGUER -->

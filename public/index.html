@@ -21,6 +21,7 @@
     <button class="nav-btn" onclick="showPage('production')" style="--accent:var(--production)">⚙️ Production</button>
     <button class="nav-btn" onclick="showPage('qualite')" style="--accent:var(--qualite)">✅ Qualité</button>
     <button class="nav-btn" onclick="showPage('maintenance')" style="--accent:var(--maintenance)">🔧 Maintenance</button>
+    <button class="nav-btn" onclick="showPage('utilites')" style="--accent:#06b6d4">🔧 Utilités</button>
     <button class="nav-btn" onclick="showPage('dashboard')">📊 Tableau de bord</button>
   </nav>
   <div class="header-date" id="header-date">—</div>
@@ -52,6 +53,7 @@
         <span id="status-production" class="feu feu-gris">Production</span>
         <span id="status-qualite" class="feu feu-gris">Qualité</span>
         <span id="status-maintenance" class="feu feu-gris">Maintenance</span>
+        <span id="status-utilites" class="feu feu-gris">Utilités</span>
         <span id="status-complete" style="margin-left:auto;font-size:13px;font-weight:700;color:var(--text2)"></span>
       </div>
     </div>
@@ -80,6 +82,12 @@
         <h3>Maintenance</h3>
         <p>Pannes · Risques · Points à investiguer</p>
         <span class="status-badge badge-missing" id="card-maintenance">⏳ En attente</span>
+      </div>
+      <div class="service-card" style="--accent:#06b6d4" onclick="showPage('utilites')">
+        <span class="icon">🏭</span>
+        <h3>Utilités</h3>
+        <p>Clarification · STEP · Chaufferies · Énergie</p>
+        <span class="status-badge badge-missing" id="card-utilites">⏳ En attente</span>
       </div>
     </div>
   </div>
@@ -843,6 +851,200 @@
 
       <div class="form-submit-bar">
         <button type="submit" class="btn-submit">✅ Envoyer le Flash Maintenance</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════ UTILITÉS ═══════════════════ -->
+<div id="page-utilites" class="page">
+  <div class="form-page" style="--accent:#06b6d4">
+    <div class="form-header">
+      <div class="accent-bar"></div>
+      <div>
+        <h2>🏭 Utilités</h2>
+        <p>NT/OL · 2 mn — renseignez les indicateurs utilités du jour</p>
+      </div>
+    </div>
+
+    <form id="form-utilites">
+
+      <div class="form-section">
+        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom de l'animateur</label>
+              <input type="text" name="animateur" placeholder="Prénom NOM">
+            </div>
+            <div class="form-group">
+              <label>Statut global Utilités</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="vert">🟢 OK</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="orange">🟠 Écart</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="rouge">🔴 Critique</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tableau indicateurs -->
+      <div class="form-section">
+        <div class="form-section-title">📋 Indicateurs Utilités</div>
+        <div class="form-body">
+
+          <!-- En-tête colonnes -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;margin-bottom:6px;padding:0 4px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;">Indicateur</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;text-align:center;">Statut</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;">Événements / Informations</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;">Délai</div>
+          </div>
+
+          <!-- Clarification -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+            <div style="font-size:14px;font-weight:600;">Clarification</div>
+            <div class="statut-group" style="flex-direction:column;gap:4px;">
+              <button type="button" class="statut-btn" data-field="clarification_statut" data-val="vert" style="padding:6px 4px;font-size:12px;">🟢</button>
+              <button type="button" class="statut-btn" data-field="clarification_statut" data-val="orange" style="padding:6px 4px;font-size:12px;">🟠</button>
+              <button type="button" class="statut-btn" data-field="clarification_statut" data-val="rouge" style="padding:6px 4px;font-size:12px;">🔴</button>
+            </div>
+            <input type="text" name="clarification_info" placeholder="Événements / informations..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="clarification_delai" placeholder="ex: 28-avr" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+          <!-- Zone déchets -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+            <div style="font-size:14px;font-weight:600;">Zone déchets</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="zone_dechets_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="zone_dechets_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="zone_dechets_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="zone_dechets_info" placeholder="Événements / informations..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="zone_dechets_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+          <!-- Protection incendie -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+            <div style="font-size:14px;font-weight:600;">Protection incendie</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="incendie_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="incendie_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="incendie_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="incendie_info" placeholder="Événements / informations..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="incendie_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+          <!-- STEP ligne 1 -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(51,65,85,.3);">
+            <div style="font-size:14px;font-weight:600;">STEP</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="step1_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="step1_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="step1_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="step1_info" placeholder="Ex: DI à réaliser pompe bassin lavage" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="step1_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+          <!-- STEP ligne 2 -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+            <div></div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="step2_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="step2_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="step2_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="step2_info" placeholder="Ex: Attente résultat analyse LC 300L" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="step2_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+          <!-- Chaufferies - Biomasse -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(51,65,85,.3);">
+            <div style="font-size:14px;font-weight:600;">Chaufferies — <span style="font-weight:400;color:var(--text2)">Biomasse</span></div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="biomasse_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="biomasse_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="biomasse_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="biomasse_info" placeholder="Ex: En fonctionnement" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="biomasse_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+          <!-- Chaufferies - Gaz -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(51,65,85,.3);">
+            <div style="font-size:14px;font-weight:400;color:var(--text2);padding-left:12px;">Gaz</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="gaz_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="gaz_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="gaz_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="gaz_info" placeholder="Ex: Prête à démarrer" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="gaz_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+          <!-- Chaufferies - Dalkia -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+            <div style="font-size:14px;font-weight:400;color:var(--text2);padding-left:12px;">Dalkia</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="dalkia_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="dalkia_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="dalkia_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="dalkia_info" placeholder="Ex: D1 arrêtée, D2 en fonctionnement, D3 en bouillotte" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="dalkia_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+          <!-- Air Comprimé -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+            <div style="font-size:14px;font-weight:600;">Air Comprimé</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="air_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="air_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="air_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="air_info" placeholder="Événements / informations..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="air_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+          <!-- Climatisation -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+            <div style="font-size:14px;font-weight:600;">Climatisation / cond.</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="clim_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="clim_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="clim_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="clim_info" placeholder="Événements / informations..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="clim_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+          <!-- Effacement Énergétique -->
+          <div style="display:grid;grid-template-columns:180px 120px 1fr 120px;gap:8px;align-items:center;padding:8px 4px;">
+            <div style="font-size:14px;font-weight:600;">Effacement Énergétique</div>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="effacement_statut" data-val="vert">🟢</button>
+              <button type="button" class="statut-btn" data-field="effacement_statut" data-val="orange">🟠</button>
+              <button type="button" class="statut-btn" data-field="effacement_statut" data-val="rouge">🔴</button>
+            </div>
+            <input type="text" name="effacement_info" placeholder="Événements / informations..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+            <input type="text" name="effacement_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
+          </div>
+
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-body">
+          <div class="form-group">
+            <textarea name="commentaire_general" rows="2" placeholder="Points de vigilance à partager avec les autres services..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-submit-bar">
+        <button type="submit" class="btn-submit">✅ Envoyer le Flash Utilités</button>
       </div>
     </form>
   </div>

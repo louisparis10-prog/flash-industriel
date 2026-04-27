@@ -52,7 +52,7 @@ app.get('/api/submissions/:date', (req, res) => {
 
 app.post('/api/submissions/:date/:service', (req, res) => {
   const { date, service } = req.params;
-  const services = ['securite', 'production', 'qualite', 'maintenance'];
+  const services = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
   if (!services.includes(service)) return res.status(400).json({ error: 'service invalide' });
 
   db.prepare('INSERT OR IGNORE INTO flash_sessions (date) VALUES (?)').run([date]);
@@ -68,7 +68,7 @@ app.post('/api/submissions/:date/:service', (req, res) => {
 app.get('/api/status/:date', (req, res) => {
   const rows = db.prepare('SELECT service FROM submissions WHERE session_date = ?').all([req.params.date]);
   const submitted = rows.map(r => r.service);
-  const all = ['securite', 'production', 'qualite', 'maintenance'];
+  const all = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
   res.json({
     submitted,
     complete: all.every(s => submitted.includes(s)),
