@@ -1,0 +1,5 @@
+node_modules/
+flash.db
+flash.db-shm
+flash.db-wal
+.DS_Store
