@@ -143,32 +143,25 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🎯 TEOS — Tournées d'Écoute et d'Observation Sécurité</div>
+        <div class="form-section-title">🎯 TEOS — Semaine en cours</div>
         <div class="form-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>TEOS Maintenance — Réalisés</label>
-              <input type="number" name="teos_maint_reel" min="0" value="0">
-            </div>
-            <div class="form-group">
-              <label>TEOS Maintenance — Objectif</label>
-              <input type="number" name="teos_maint_obj" min="0" value="0">
-            </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:4px 0;">Service</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:4px 0;text-align:center;">Réalisés</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:4px 0;text-align:center;">Objectif semaine</div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>TEOS Production — Réalisés</label>
-              <input type="number" name="teos_prod_reel" min="0" value="0">
-            </div>
-            <div class="form-group">
-              <label>TEOS Production — Objectif</label>
-              <input type="number" name="teos_prod_obj" min="0" value="0">
-            </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px;">
+            <div style="font-size:13px;color:var(--text2);font-weight:600;">Maintenance</div>
+            <input type="number" name="teos_maint_reel" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
+            <input type="number" name="teos_maint_obj" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--orange);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
+            <div style="font-size:13px;color:var(--text2);font-weight:600;">Production</div>
+            <input type="number" name="teos_prod_reel" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
+            <input type="number" name="teos_prod_obj" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--orange);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
           </div>
           <div class="form-group">
-            <label>Statut TEOS global</label>
+            <label>Statut TEOS</label>
             <div class="statut-group">
-              <button type="button" class="statut-btn" data-field="teos_statut" data-val="vert">🟢 OK</button>
+              <button type="button" class="statut-btn" data-field="teos_statut" data-val="vert">🟢 Objectif atteint</button>
               <button type="button" class="statut-btn" data-field="teos_statut" data-val="orange">🟠 Écart</button>
               <button type="button" class="statut-btn" data-field="teos_statut" data-val="rouge">🔴 Non réalisé</button>
             </div>
@@ -176,55 +169,6 @@
         </div>
       </div>
 
-      <div class="form-section">
-        <div class="form-section-title">🔥 Chaufferies</div>
-        <div class="form-body">
-          <div class="form-row-3">
-            <div class="form-group">
-              <label>Biomasse</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="biomasse" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="biomasse" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="biomasse" data-val="rouge">🔴</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Gaz</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gaz" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gaz" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gaz" data-val="rouge">🔴</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Fioul</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="fioul" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="fioul" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="fioul" data-val="rouge">🔴</button>
-              </div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Air comprimé</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="air_comprime" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="air_comprime" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="air_comprime" data-val="rouge">🔴</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Efficacité Énergétique</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="efficacite_energetique" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="efficacite_energetique" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="efficacite_energetique" data-val="rouge">🔴</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div class="form-section">
         <div class="form-section-title">💬 Commentaire général</div>
@@ -404,46 +348,46 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🔍 GEMBA — Zones</div>
+        <div class="form-section-title">🔍 Tournée Terrain</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
-              <label>Chargement</label>
+              <label>Préparation 1</label>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_chargement" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_chargement" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_chargement" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="gemba_prep1" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_prep1" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_prep1" data-val="rouge">🔴</button>
               </div>
             </div>
             <div class="form-group">
-              <label>Préparation</label>
+              <label>Préparation 3</label>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_preparation" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_preparation" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_preparation" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="gemba_prep3" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_prep3" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_prep3" data-val="rouge">🔴</button>
               </div>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Machine</label>
+              <label>Machine 1</label>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_machine" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_machine" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_machine" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine1" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine1" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine1" data-val="rouge">🔴</button>
               </div>
             </div>
             <div class="form-group">
-              <label>Finition</label>
+              <label>Machine 3</label>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_finition" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_finition" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_finition" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine3" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine3" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine3" data-val="rouge">🔴</button>
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label>Commentaire GEMBA</label>
+            <label>Commentaire tournée terrain</label>
             <input type="text" name="gemba_commentaire" placeholder="Observations terrain...">
           </div>
         </div>
