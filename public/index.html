@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flash Industriel</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">
+    ⚡ <span>FLASH</span> INDUSTRIEL
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="showPage('home')">🏠 Accueil</button>
+    <button class="nav-btn" onclick="showPage('securite')" style="--accent:var(--securite)">🦺 Sécurité</button>
+    <button class="nav-btn" onclick="showPage('production')" style="--accent:var(--production)">⚙️ Production</button>
+    <button class="nav-btn" onclick="showPage('qualite')" style="--accent:var(--qualite)">✅ Qualité</button>
+    <button class="nav-btn" onclick="showPage('maintenance')" style="--accent:var(--maintenance)">🔧 Maintenance</button>
+    <button class="nav-btn" onclick="showPage('dashboard')">📊 Tableau de bord</button>
+  </nav>
+  <div class="header-date" id="header-date">—</div>
+</header>
+
+<!-- ═══════════════════ ACCUEIL ═══════════════════ -->
+<div id="page-home" class="page active">
+  <div class="container">
+    <div class="home-header">
+      <h1>⚡ Flash Industriel — <span>Animation Quotidienne</span></h1>
+      <p>Sélectionnez la date de la réunion, puis chaque service saisit ses indicateurs</p>
+    </div>
+
+    <div class="date-picker-section">
+      <div>
+        <label>Date du Flash :</label>
+        <input type="date" id="session-date">
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn-primary" onclick="setDate()">Valider la date</button>
+        <button class="btn-dashboard" onclick="showPage('dashboard')">📊 Ouvrir le tableau de bord →</button>
+      </div>
+    </div>
+
+    <div id="home-status-bar" style="margin:14px 0 0;display:none;">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--text2);font-weight:600;">FORMULAIRES REÇUS :</span>
+        <span id="status-securite" class="feu feu-gris">Sécurité</span>
+        <span id="status-production" class="feu feu-gris">Production</span>
+        <span id="status-qualite" class="feu feu-gris">Qualité</span>
+        <span id="status-maintenance" class="feu feu-gris">Maintenance</span>
+        <span id="status-complete" style="margin-left:auto;font-size:13px;font-weight:700;color:var(--text2)"></span>
+      </div>
+    </div>
+
+    <div class="home-grid" id="home-cards">
+      <div class="service-card" style="--accent:var(--securite)" onclick="showPage('securite')">
+        <span class="icon">🦺</span>
+        <h3>Sécurité</h3>
+        <p>Incidents · Zones · Utilités · Énergie</p>
+        <span class="status-badge badge-missing" id="card-securite">⏳ En attente</span>
+      </div>
+      <div class="service-card" style="--accent:var(--production)" onclick="showPage('production')">
+        <span class="icon">⚙️</span>
+        <h3>Production</h3>
+        <p>TRS · Productions · Objectifs · OEE</p>
+        <span class="status-badge badge-missing" id="card-production">⏳ En attente</span>
+      </div>
+      <div class="service-card" style="--accent:var(--qualite)" onclick="showPage('qualite')">
+        <span class="icon">✅</span>
+        <h3>Qualité</h3>
+        <p>Qualité FH · Manques · IQ · Résultats</p>
+        <span class="status-badge badge-missing" id="card-qualite">⏳ En attente</span>
+      </div>
+      <div class="service-card" style="--accent:var(--maintenance)" onclick="showPage('maintenance')">
+        <span class="icon">🔧</span>
+        <h3>Maintenance</h3>
+        <p>Pannes · Risques · Points à investiguer</p>
+        <span class="status-badge badge-missing" id="card-maintenance">⏳ En attente</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SÉCURITÉ ═══════════════════ -->
+<div id="page-securite" class="page">
+  <div class="form-page" style="--accent:var(--securite)">
+    <div class="form-header">
+      <div class="accent-bar"></div>
+      <div>
+        <h2>🦺 Sécurité</h2>
+        <p>Animateur : renseignez les indicateurs sécurité du jour</p>
+      </div>
+    </div>
+
+    <form id="form-securite">
+
+      <div class="form-section">
+        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom de l'animateur</label>
+              <input type="text" name="animateur" placeholder="Prénom NOM">
+            </div>
+            <div class="form-group">
+              <label>Indicateur couleur global</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="couleur_globale" data-val="vert">🟢 Vert</button>
+                <button type="button" class="statut-btn" data-field="couleur_globale" data-val="orange">🟠 Orange</button>
+                <button type="button" class="statut-btn" data-field="couleur_globale" data-val="rouge">🔴 Rouge</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">⚠️ Événements / Incidents</div>
+        <div class="form-body">
+          <div class="form-group">
+            <label>Description des événements du jour</label>
+            <textarea name="evenements" rows="3" placeholder="Ex: Chute de plain-pied dans l'atelier A — action : baliser la zone..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre d'événements</label>
+              <input type="number" name="nb_evenements" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label>Niveau de gravité</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="gravite" data-val="vert">🟢 Faible</button>
+                <button type="button" class="statut-btn" data-field="gravite" data-val="orange">🟠 Moyen</button>
+                <button type="button" class="statut-btn" data-field="gravite" data-val="rouge">🔴 Élevé</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🏷️ Indicateurs Zones</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Qualification</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="qualification" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="qualification" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="qualification" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Zone déchets</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_dechets" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_dechets" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_dechets" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Protection incendie</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="protection_incendie" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="protection_incendie" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="protection_incendie" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Utilités / NTOL</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="utilites" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="utilites" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="utilites" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Commentaire zones</label>
+            <input type="text" name="commentaire_zones" placeholder="Observations sur les zones...">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🔥 Chaufferies</div>
+        <div class="form-body">
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>Biomasse</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="biomasse" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="biomasse" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="biomasse" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Gaz</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="gaz" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gaz" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gaz" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Fioul</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="fioul" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="fioul" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="fioul" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Air comprimé</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="air_comprime" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="air_comprime" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="air_comprime" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Efficacité Énergétique</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="efficacite_energetique" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="efficacite_energetique" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="efficacite_energetique" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-body">
+          <div class="form-group">
+            <textarea name="commentaire_general" rows="3" placeholder="Points de vigilance à partager avec les autres services..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-submit-bar">
+        <button type="submit" class="btn-submit">✅ Envoyer le Flash Sécurité</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════ PRODUCTION ═══════════════════ -->
+<div id="page-production" class="page">
+  <div class="form-page" style="--accent:var(--production)">
+    <div class="form-header">
+      <div class="accent-bar"></div>
+      <div>
+        <h2>⚙️ Production</h2>
+        <p>Animateur : renseignez les indicateurs de production du jour</p>
+      </div>
+    </div>
+
+    <form id="form-production">
+
+      <div class="form-section">
+        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom de l'animateur</label>
+              <input type="text" name="animateur" placeholder="Prénom NOM">
+            </div>
+            <div class="form-group">
+              <label>Statut global production</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="vert">🟢 OK</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="orange">🟠 Écart</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="rouge">🔴 Critique</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🏭 Machine MFT1</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Production réelle (m²)</label>
+              <input type="number" name="mft1_prod_reel" step="0.1" min="0">
+            </div>
+            <div class="form-group">
+              <label>Objectif (m²)</label>
+              <input type="number" name="mft1_prod_obj" step="0.1" min="0">
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>TRS réel (%)</label>
+              <input type="number" name="mft1_trs_reel" step="0.1" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>TRS objectif (%)</label>
+              <input type="number" name="mft1_trs_obj" step="0.1" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>% TSSE m/h</label>
+              <input type="number" name="mft1_tsse" step="0.1" min="0" max="100">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>% MT Global</label>
+              <input type="number" name="mft1_mt_global" step="0.1" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>Statut MFT1</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="mft1_statut" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="mft1_statut" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="mft1_statut" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Informations / écarts MFT1</label>
+            <textarea name="mft1_info" rows="2" placeholder="Causes d'écarts, actions mises en place..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🏭 Machine MFT3</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Production réelle (m²)</label>
+              <input type="number" name="mft3_prod_reel" step="0.1" min="0">
+            </div>
+            <div class="form-group">
+              <label>Objectif (m²)</label>
+              <input type="number" name="mft3_prod_obj" step="0.1" min="0">
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>TRS réel (%)</label>
+              <input type="number" name="mft3_trs_reel" step="0.1" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>TRS objectif (%)</label>
+              <input type="number" name="mft3_trs_obj" step="0.1" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>% TSSE m/h</label>
+              <input type="number" name="mft3_tsse" step="0.1" min="0" max="100">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>% MT Global</label>
+              <input type="number" name="mft3_mt_global" step="0.1" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>Statut MFT3</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="mft3_statut" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="mft3_statut" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="mft3_statut" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Informations / écarts MFT3</label>
+            <textarea name="mft3_info" rows="2" placeholder="Causes d'écarts, actions mises en place..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🔍 GEMBA — Zones</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Chargement</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="gemba_chargement" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_chargement" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_chargement" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Préparation</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="gemba_preparation" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_preparation" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_preparation" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Machine</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="gemba_machine" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_machine" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Finition</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="gemba_finition" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="gemba_finition" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="gemba_finition" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Commentaire GEMBA</label>
+            <input type="text" name="gemba_commentaire" placeholder="Observations terrain...">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-body">
+          <div class="form-group">
+            <textarea name="commentaire_general" rows="3" placeholder="Points importants à partager..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-submit-bar">
+        <button type="submit" class="btn-submit">✅ Envoyer le Flash Production</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════ QUALITÉ ═══════════════════ -->
+<div id="page-qualite" class="page">
+  <div class="form-page" style="--accent:var(--qualite)">
+    <div class="form-header">
+      <div class="accent-bar"></div>
+      <div>
+        <h2>✅ Qualité</h2>
+        <p>Technicien Qualité : renseignez les indicateurs qualité du jour</p>
+      </div>
+    </div>
+
+    <form id="form-qualite">
+
+      <div class="form-section">
+        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom du technicien</label>
+              <input type="text" name="animateur" placeholder="Prénom NOM">
+            </div>
+            <div class="form-group">
+              <label>Indicateur qualité global</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="vert">🟢 OK</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="orange">🟠 Écart</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="rouge">🔴 Critique</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Temporalité</label>
+              <select name="temporalite">
+                <option value="">Sélectionner...</option>
+                <option value="J">J — Production terminée</option>
+                <option value="J-1">J-1 — Production terminée</option>
+                <option value="en_cours">Production en cours</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Statut général</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="statut_general" data-val="vert">🟢 Vert</button>
+                <button type="button" class="statut-btn" data-field="statut_general" data-val="orange">🟠 Orange</button>
+                <button type="button" class="statut-btn" data-field="statut_general" data-val="rouge">🔴 Rouge</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📊 Qualité FH — MFT1</div>
+        <div class="form-body">
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>% h réel</label>
+              <input type="number" name="mft1_qual_h_reel" step="0.01" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>% h objectif</label>
+              <input type="number" name="mft1_qual_h_obj" step="0.01" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>% jour</label>
+              <input type="number" name="mft1_qual_jour" step="0.01" min="0" max="100">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nb manques</label>
+              <input type="number" name="mft1_nb_manques" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label>Résultat MFT1</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="mft1_resultat" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="mft1_resultat" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="mft1_resultat" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Semaine IQ MFT1</label>
+            <input type="text" name="mft1_semaine_iq" placeholder="Ex: GWS00/26-03">
+          </div>
+          <div class="form-group">
+            <label>Autre résultat / commentaire</label>
+            <textarea name="mft1_autre_resultat" rows="2" placeholder="Incidents qualité, non-conformités..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📊 Qualité FH — MFT3</div>
+        <div class="form-body">
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>% h réel</label>
+              <input type="number" name="mft3_qual_h_reel" step="0.01" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>% h objectif</label>
+              <input type="number" name="mft3_qual_h_obj" step="0.01" min="0" max="100">
+            </div>
+            <div class="form-group">
+              <label>% jour</label>
+              <input type="number" name="mft3_qual_jour" step="0.01" min="0" max="100">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nb manques</label>
+              <input type="number" name="mft3_nb_manques" min="0" value="0">
+            </div>
+            <div class="form-group">
+              <label>Résultat MFT3</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="mft3_resultat" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="mft3_resultat" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="mft3_resultat" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Semaine IQ MFT3</label>
+            <input type="text" name="mft3_semaine_iq" placeholder="Ex: GW17/26-11">
+          </div>
+          <div class="form-group">
+            <label>Autre résultat / commentaire</label>
+            <textarea name="mft3_autre_resultat" rows="2" placeholder="Incidents qualité, non-conformités..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🔴 Remontées / Non-conformités</div>
+        <div class="form-body">
+          <div class="form-group">
+            <label>Description des remontées</label>
+            <textarea name="remontees" rows="3" placeholder="Orange : écart qualité mineur identifié — traitement normal&#10;Rouge : majeur qualité identifié — traitement immédiat"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Consigne</label>
+            <input type="text" name="consigne" placeholder="Consigne qualité du jour...">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-submit-bar">
+        <button type="submit" class="btn-submit">✅ Envoyer le Flash Qualité</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════ MAINTENANCE ═══════════════════ -->
+<div id="page-maintenance" class="page">
+  <div class="form-page" style="--accent:var(--maintenance)">
+    <div class="form-header">
+      <div class="accent-bar"></div>
+      <div>
+        <h2>🔧 Maintenance</h2>
+        <p>Animateur : renseignez les événements et points à investiguer</p>
+      </div>
+    </div>
+
+    <form id="form-maintenance">
+
+      <div class="form-section">
+        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom de l'animateur</label>
+              <input type="text" name="animateur" placeholder="Prénom NOM">
+            </div>
+            <div class="form-group">
+              <label>Statut maintenance global</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="vert">🟢 OK</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="orange">🟠 Risque</button>
+                <button type="button" class="statut-btn" data-field="statut_global" data-val="rouge">🔴 Impact</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🔴 Événements impactant la performance</div>
+        <div class="form-body" id="events-impact-container">
+          <div class="event-item" data-prefix="impact_0">
+            <div class="form-row" style="align-items:end">
+              <div class="form-group" style="grid-column:span 2">
+                <label>Description de l'événement</label>
+                <input type="text" name="impact_0_desc" placeholder="Ex: Panne convoyeur MFT1 — arrêt 2h30">
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label>Machine / Zone</label>
+                <select name="impact_0_machine">
+                  <option value="">Sélectionner...</option>
+                  <option>MFT1</option><option>MFT3</option>
+                  <option>Finition</option><option>Chargement</option>
+                  <option>Préparation</option><option>Autre</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Durée d'arrêt (h)</label>
+                <input type="number" name="impact_0_duree" step="0.5" min="0">
+              </div>
+              <div class="form-group">
+                <label>Urgence</label>
+                <div class="statut-group">
+                  <button type="button" class="statut-btn" data-field="impact_0_urgence" data-val="orange">🟠</button>
+                  <button type="button" class="statut-btn" data-field="impact_0_urgence" data-val="rouge">🔴</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-body" style="padding-top:0">
+          <button type="button" onclick="addEvent('impact')" style="background:var(--bg3);border:1px dashed var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">+ Ajouter un événement</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🟠 Événements risquant d'impacter la performance</div>
+        <div class="form-body" id="events-risque-container">
+          <div class="event-item">
+            <div class="form-row">
+              <div class="form-group" style="grid-column:span 2">
+                <label>Description du risque</label>
+                <input type="text" name="risque_0_desc" placeholder="Ex: Huile de coupe à surveiller — remplacement probable sous 48h">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Machine / Zone</label>
+                <select name="risque_0_machine">
+                  <option value="">Sélectionner...</option>
+                  <option>MFT1</option><option>MFT3</option>
+                  <option>Finition</option><option>Chargement</option>
+                  <option>Préparation</option><option>Autre</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Délai estimé</label>
+                <input type="text" name="risque_0_delai" placeholder="Ex: 48h, Fin de semaine...">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-body" style="padding-top:0">
+          <button type="button" onclick="addEvent('risque')" style="background:var(--bg3);border:1px dashed var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">+ Ajouter un risque</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🔍 Points à investiguer</div>
+        <div class="form-body" id="points-container">
+          <div class="event-item">
+            <div class="form-row">
+              <div class="form-group" style="grid-column:span 2">
+                <label>Description du point</label>
+                <input type="text" name="point_0_desc" placeholder="Ex: Vibrations anormales caisson 11 — à investiguer">
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label>Machine / Zone</label>
+                <select name="point_0_machine">
+                  <option value="">Sélectionner...</option>
+                  <option>MFT1</option><option>MFT3</option>
+                  <option>Finition 1</option><option>Finition 2</option>
+                  <option>Finition 3</option><option>Autre</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Responsable</label>
+                <input type="text" name="point_0_responsable" placeholder="Qui ?">
+              </div>
+              <div class="form-group">
+                <label>Délai</label>
+                <input type="text" name="point_0_delai" placeholder="Ex: 12/04, fin semaine...">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Statut</label>
+                <div class="statut-group">
+                  <button type="button" class="statut-btn" data-field="point_0_statut" data-val="vert">🟢 Soldé</button>
+                  <button type="button" class="statut-btn" data-field="point_0_statut" data-val="orange">🟠 En cours</button>
+                  <button type="button" class="statut-btn" data-field="point_0_statut" data-val="rouge">🔴 En retard</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-body" style="padding-top:0">
+          <button type="button" onclick="addEvent('point')" style="background:var(--bg3);border:1px dashed var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">+ Ajouter un point</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-body">
+          <div class="form-group">
+            <textarea name="commentaire_general" rows="3" placeholder="Points de vigilance, suivi des actions, consignes..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-submit-bar">
+        <button type="submit" class="btn-submit">✅ Envoyer le Flash Maintenance</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="dashboard">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
+      <div>
+        <div class="dashboard-title">📊 Tableau de Bord — Flash Industriel</div>
+        <div class="dashboard-sub" id="dash-date-label">Aucune session sélectionnée</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="date" id="dash-date-picker" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:14px;">
+        <button class="btn-primary" onclick="loadDashboard()">Charger</button>
+        <button onclick="window.print()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Imprimer</button>
+      </div>
+    </div>
+
+    <div id="dashboard-content">
+      <div class="no-data">
+        <span class="icon">📋</span>
+        <p>Sélectionnez une date et cliquez sur <strong>Charger</strong> pour afficher le tableau de bord</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="success-toast" id="toast">✅ Formulaire envoyé !</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
