@@ -153,21 +153,18 @@
       <div class="form-section">
         <div class="form-section-title">🎯 TEOS — Semaine en cours</div>
         <div class="form-body">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;">
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:4px 0;">Service</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:4px 0;text-align:center;">Réalisés</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:4px 0;text-align:center;">Objectif semaine</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px;">
-            <div style="font-size:13px;color:var(--text2);font-weight:600;">Maintenance</div>
-            <input type="number" name="teos_maint_reel" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
-            <input type="number" name="teos_maint_obj" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--orange);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
-            <div style="font-size:13px;color:var(--text2);font-weight:600;">Production</div>
-            <input type="number" name="teos_prod_reel" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
-            <input type="number" name="teos_prod_obj" min="0" value="0" style="background:var(--bg3);border:1px solid var(--border);color:var(--orange);padding:8px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre de TEOS réalisés</label>
+              <input type="number" name="teos_reel" min="0" value="0" style="font-size:20px;font-weight:700;text-align:center;">
+            </div>
+            <div class="form-group">
+              <label>Objectif semaine</label>
+              <input type="number" name="teos_obj" min="0" value="0" style="font-size:20px;font-weight:700;text-align:center;color:var(--orange);">
+            </div>
           </div>
           <div class="form-group">
-            <label>Statut TEOS</label>
+            <label>Statut</label>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="teos_statut" data-val="vert">🟢 Objectif atteint</button>
               <button type="button" class="statut-btn" data-field="teos_statut" data-val="orange">🟠 Écart</button>
