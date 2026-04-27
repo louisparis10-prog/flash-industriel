@@ -143,47 +143,35 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🏷️ Indicateurs Zones</div>
+        <div class="form-section-title">🎯 TEOS — Tournées d'Écoute et d'Observation Sécurité</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
-              <label>Qualification</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="qualification" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="qualification" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="qualification" data-val="rouge">🔴</button>
-              </div>
+              <label>TEOS Maintenance — Réalisés</label>
+              <input type="number" name="teos_maint_reel" min="0" value="0">
             </div>
             <div class="form-group">
-              <label>Zone déchets</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="zone_dechets" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="zone_dechets" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="zone_dechets" data-val="rouge">🔴</button>
-              </div>
+              <label>TEOS Maintenance — Objectif</label>
+              <input type="number" name="teos_maint_obj" min="0" value="0">
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Protection incendie</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="protection_incendie" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="protection_incendie" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="protection_incendie" data-val="rouge">🔴</button>
-              </div>
+              <label>TEOS Production — Réalisés</label>
+              <input type="number" name="teos_prod_reel" min="0" value="0">
             </div>
             <div class="form-group">
-              <label>Utilités / NTOL</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="utilites" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="utilites" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="utilites" data-val="rouge">🔴</button>
-              </div>
+              <label>TEOS Production — Objectif</label>
+              <input type="number" name="teos_prod_obj" min="0" value="0">
             </div>
           </div>
           <div class="form-group">
-            <label>Commentaire zones</label>
-            <input type="text" name="commentaire_zones" placeholder="Observations sur les zones...">
+            <label>Statut TEOS global</label>
+            <div class="statut-group">
+              <button type="button" class="statut-btn" data-field="teos_statut" data-val="vert">🟢 OK</button>
+              <button type="button" class="statut-btn" data-field="teos_statut" data-val="orange">🟠 Écart</button>
+              <button type="button" class="statut-btn" data-field="teos_statut" data-val="rouge">🔴 Non réalisé</button>
+            </div>
           </div>
         </div>
       </div>
@@ -288,97 +276,129 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🏭 Machine MFT1</div>
+        <div class="form-section-title">🏭 Machine 1</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
-              <label>Production réelle (m²)</label>
-              <input type="number" name="mft1_prod_reel" step="0.1" min="0">
+              <label>Référence en cours (ex: GW17/26-10)</label>
+              <input type="text" name="m1_ref" placeholder="Ex: GW17/26-10">
             </div>
             <div class="form-group">
-              <label>Objectif (m²)</label>
-              <input type="number" name="mft1_prod_obj" step="0.1" min="0">
-            </div>
-          </div>
-          <div class="form-row-3">
-            <div class="form-group">
-              <label>TRS réel (%)</label>
-              <input type="number" name="mft1_trs_reel" step="0.1" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>TRS objectif (%)</label>
-              <input type="number" name="mft1_trs_obj" step="0.1" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>% TSSE m/h</label>
-              <input type="number" name="mft1_tsse" step="0.1" min="0" max="100">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>% MT Global</label>
-              <input type="number" name="mft1_mt_global" step="0.1" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>Statut MFT1</label>
+              <label>Statut Machine 1</label>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="mft1_statut" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="mft1_statut" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="mft1_statut" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="m1_statut" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="m1_statut" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="m1_statut" data-val="rouge">🔴</button>
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Informations / écarts MFT1</label>
-            <textarea name="mft1_info" rows="2" placeholder="Causes d'écarts, actions mises en place..."></textarea>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;">Indicateur</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cumul</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">J-1 5H/5H</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cible</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;">
+            <div style="font-size:13px;color:var(--text2)">PHNR (kg/h)</div>
+            <input type="number" name="m1_phnr_cumul" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_phnr_j1" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_phnr_cible" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Production (t)</div>
+            <input type="number" name="m1_prod_cumul" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_prod_j1" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_prod_cible" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">CDC (durée)</div>
+            <input type="text" name="m1_cdc_cumul" placeholder="ex: 4:25" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m1_cdc_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m1_cdc_cible" placeholder="ex: 3:00" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">% Arrêt global</div>
+            <input type="text" name="m1_arret_cumul" placeholder="ex: 5h00" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m1_arret_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m1_arret_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">% DE CASSE</div>
+            <input type="text" name="m1_casse_cumul" placeholder="ex: 0h35" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m1_casse_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m1_casse_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Vitesse (m/min)</div>
+            <input type="number" name="m1_vitesse_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_vitesse_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_vitesse_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Laize (cm)</div>
+            <input type="number" name="m1_laize_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_laize_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_laize_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Rendement (%)</div>
+            <input type="number" name="m1_rdt_cumul" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m1_rdt_j1" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m1_rdt_cible" placeholder="ex: 70%/90%" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label>Événements en cours / informations</label>
+            <textarea name="m1_info" rows="2" placeholder="Causes d'écarts, événements en cours..."></textarea>
           </div>
         </div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🏭 Machine MFT3</div>
+        <div class="form-section-title">🏭 Machine 3</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
-              <label>Production réelle (m²)</label>
-              <input type="number" name="mft3_prod_reel" step="0.1" min="0">
+              <label>Référence en cours (ex: GW17/26-11)</label>
+              <input type="text" name="m3_ref" placeholder="Ex: GW17/26-11">
             </div>
             <div class="form-group">
-              <label>Objectif (m²)</label>
-              <input type="number" name="mft3_prod_obj" step="0.1" min="0">
-            </div>
-          </div>
-          <div class="form-row-3">
-            <div class="form-group">
-              <label>TRS réel (%)</label>
-              <input type="number" name="mft3_trs_reel" step="0.1" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>TRS objectif (%)</label>
-              <input type="number" name="mft3_trs_obj" step="0.1" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>% TSSE m/h</label>
-              <input type="number" name="mft3_tsse" step="0.1" min="0" max="100">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>% MT Global</label>
-              <input type="number" name="mft3_mt_global" step="0.1" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>Statut MFT3</label>
+              <label>Statut Machine 3</label>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="mft3_statut" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="mft3_statut" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="mft3_statut" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="m3_statut" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="m3_statut" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="m3_statut" data-val="rouge">🔴</button>
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Informations / écarts MFT3</label>
-            <textarea name="mft3_info" rows="2" placeholder="Causes d'écarts, actions mises en place..."></textarea>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;">Indicateur</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cumul</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">J-1 5H/5H</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cible</div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;">
+            <div style="font-size:13px;color:var(--text2)">PHNR (kg/h)</div>
+            <input type="number" name="m3_phnr_cumul" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_phnr_j1" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_phnr_cible" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Production (t)</div>
+            <input type="number" name="m3_prod_cumul" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_prod_j1" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_prod_cible" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">CDC (durée)</div>
+            <input type="text" name="m3_cdc_cumul" placeholder="ex: 3:36" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m3_cdc_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m3_cdc_cible" placeholder="ex: 3:00" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">% Arrêt global</div>
+            <input type="text" name="m3_arret_cumul" placeholder="ex: 7h15" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m3_arret_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m3_arret_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">% DE CASSE</div>
+            <input type="text" name="m3_casse_cumul" placeholder="ex: 3h30" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m3_casse_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m3_casse_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Vitesse (m/min)</div>
+            <input type="number" name="m3_vitesse_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_vitesse_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_vitesse_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Laize (cm)</div>
+            <input type="number" name="m3_laize_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_laize_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_laize_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <div style="font-size:13px;color:var(--text2)">Rendement (%)</div>
+            <input type="number" name="m3_rdt_cumul" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="number" name="m3_rdt_j1" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+            <input type="text" name="m3_rdt_cible" placeholder="ex: 94%/104%" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label>Événements en cours / informations</label>
+            <textarea name="m3_info" rows="2" placeholder="Causes d'écarts, événements en cours..."></textarea>
           </div>
         </div>
       </div>
@@ -498,99 +518,139 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📊 Qualité FH — MFT1</div>
+        <div class="form-section-title">📊 Machine 1</div>
         <div class="form-body">
-          <div class="form-row-3">
-            <div class="form-group">
-              <label>% h réel</label>
-              <input type="number" name="mft1_qual_h_reel" step="0.01" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>% h objectif</label>
-              <input type="number" name="mft1_qual_h_obj" step="0.01" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>% jour</label>
-              <input type="number" name="mft1_qual_jour" step="0.01" min="0" max="100">
-            </div>
-          </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Nb manques</label>
-              <input type="number" name="mft1_nb_manques" min="0" value="0">
+              <label>Produit en cours (ex: GW17/26-10)</label>
+              <input type="text" name="m1_produit" placeholder="Ex: GW17/26-10">
             </div>
             <div class="form-group">
-              <label>Résultat MFT1</label>
+              <label>Résultat global Machine 1</label>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="mft1_resultat" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="mft1_resultat" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="mft1_resultat" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="m1_resultat" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="m1_resultat" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="m1_resultat" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Résultat PF</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="form-group">
+                <label>TC % réel</label>
+                <input type="number" name="m1_tc_reel" step="0.1" min="0" max="100" placeholder="ex: 41.6">
+              </div>
+              <div class="form-group">
+                <label>TC % cible</label>
+                <input type="text" name="m1_tc_cible" placeholder="ex: 42,0→41,5">
+              </div>
+              <div class="form-group">
+                <label>Statut TC</label>
+                <div class="statut-group">
+                  <button type="button" class="statut-btn" data-field="m1_tc_statut" data-val="vert">🟢</button>
+                  <button type="button" class="statut-btn" data-field="m1_tc_statut" data-val="orange">🟠</button>
+                  <button type="button" class="statut-btn" data-field="m1_tc_statut" data-val="rouge">🔴</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>E% Perco réel</label>
+                <input type="number" name="m1_perco_reel" step="0.1" min="0" max="100" placeholder="ex: 37.5">
+              </div>
+              <div class="form-group">
+                <label>E% Perco cible</label>
+                <input type="number" name="m1_perco_cible" step="0.1" min="0" max="100" placeholder="ex: 38.0">
+              </div>
+              <div class="form-group">
+                <label>E% PIR</label>
+                <input type="text" name="m1_pir" placeholder="ex: Non Applicable">
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label>Semaine IQ MFT1</label>
-            <input type="text" name="mft1_semaine_iq" placeholder="Ex: GWS00/26-03">
+            <label>Autre résultat (Aspect, Compactage, Couleur, Paramètres...)</label>
+            <textarea name="m1_autre_resultat" rows="3" placeholder="Aspect : Ok&#10;Compactage : Se délite&#10;Couleur : OK&#10;Paramètres process : ..."></textarea>
           </div>
           <div class="form-group">
-            <label>Autre résultat / commentaire</label>
-            <textarea name="mft1_autre_resultat" rows="2" placeholder="Incidents qualité, non-conformités..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-title">📊 Qualité FH — MFT3</div>
-        <div class="form-body">
-          <div class="form-row-3">
-            <div class="form-group">
-              <label>% h réel</label>
-              <input type="number" name="mft3_qual_h_reel" step="0.01" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>% h objectif</label>
-              <input type="number" name="mft3_qual_h_obj" step="0.01" min="0" max="100">
-            </div>
-            <div class="form-group">
-              <label>% jour</label>
-              <input type="number" name="mft3_qual_jour" step="0.01" min="0" max="100">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Nb manques</label>
-              <input type="number" name="mft3_nb_manques" min="0" value="0">
-            </div>
-            <div class="form-group">
-              <label>Résultat MFT3</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="mft3_resultat" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="mft3_resultat" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="mft3_resultat" data-val="rouge">🔴</button>
-              </div>
-            </div>
+            <label>Fait marquant</label>
+            <textarea name="m1_fait_marquant" rows="2" placeholder="Fait marquant qualité du jour..."></textarea>
           </div>
           <div class="form-group">
-            <label>Semaine IQ MFT3</label>
-            <input type="text" name="mft3_semaine_iq" placeholder="Ex: GW17/26-11">
-          </div>
-          <div class="form-group">
-            <label>Autre résultat / commentaire</label>
-            <textarea name="mft3_autre_resultat" rows="2" placeholder="Incidents qualité, non-conformités..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-title">🔴 Remontées / Non-conformités</div>
-        <div class="form-body">
-          <div class="form-group">
-            <label>Description des remontées</label>
-            <textarea name="remontees" rows="3" placeholder="Orange : écart qualité mineur identifié — traitement normal&#10;Rouge : majeur qualité identifié — traitement immédiat"></textarea>
+            <label>Demande CQ</label>
+            <textarea name="m1_demande_cq" rows="2" placeholder="Demandes CQ en cours..."></textarea>
           </div>
           <div class="form-group">
             <label>Consigne</label>
-            <input type="text" name="consigne" placeholder="Consigne qualité du jour...">
+            <input type="text" name="m1_consigne" placeholder="Ex: Prévenir TQ pour assister au compactage vers 8h00 et 14h00">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📊 Machine 3</div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Produit en cours (ex: MK4/26-03)</label>
+              <input type="text" name="m3_produit" placeholder="Ex: MK4/26-03">
+            </div>
+            <div class="form-group">
+              <label>Résultat global Machine 3</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="m3_resultat" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="m3_resultat" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="m3_resultat" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Résultat PF</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+              <div class="form-group">
+                <label>TC % réel</label>
+                <input type="number" name="m3_tc_reel" step="0.1" min="0" max="100" placeholder="ex: 43.6">
+              </div>
+              <div class="form-group">
+                <label>TC % cible</label>
+                <input type="text" name="m3_tc_cible" placeholder="ex: 43,5→44,5">
+              </div>
+              <div class="form-group">
+                <label>Statut TC</label>
+                <div class="statut-group">
+                  <button type="button" class="statut-btn" data-field="m3_tc_statut" data-val="vert">🟢</button>
+                  <button type="button" class="statut-btn" data-field="m3_tc_statut" data-val="orange">🟠</button>
+                  <button type="button" class="statut-btn" data-field="m3_tc_statut" data-val="rouge">🔴</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>E% Perco réel</label>
+                <input type="number" name="m3_perco_reel" step="0.1" min="0" max="100" placeholder="ex: 36.9">
+              </div>
+              <div class="form-group">
+                <label>E% Perco cible</label>
+                <input type="number" name="m3_perco_cible" step="0.1" min="0" max="100" placeholder="ex: 38.0">
+              </div>
+              <div class="form-group">
+                <label>E% PIR</label>
+                <input type="text" name="m3_pir" placeholder="ex: Non Applicable">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Autre résultat (Aspect, Compactage, Couleur, Paramètres...)</label>
+            <textarea name="m3_autre_resultat" rows="3" placeholder="Aspect : Ok&#10;Compactage : Se délite&#10;Couleur : Ok&#10;..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Fait marquant</label>
+            <textarea name="m3_fait_marquant" rows="2" placeholder="Fait marquant qualité du jour..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Demande CQ</label>
+            <textarea name="m3_demande_cq" rows="2" placeholder="Demandes CQ en cours..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Consigne</label>
+            <input type="text" name="m3_consigne" placeholder="Ex: Prévenir TQ pour assister au compactage vers 8h00 et 14h00">
           </div>
         </div>
       </div>
@@ -631,6 +691,82 @@
                 <button type="button" class="statut-btn" data-field="statut_global" data-val="rouge">🔴 Impact</button>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🏷️ Indicateurs Zones</div>
+        <div class="form-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+              <label>MT1</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_mt1" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_mt1" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_mt1" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>MT3</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_mt3" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_mt3" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_mt3" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Chargement 1</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_charg1" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_charg1" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_charg1" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Chargement 3</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_charg3" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_charg3" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_charg3" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Préparation 1</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_prep1" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_prep1" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_prep1" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Préparation 3</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_prep3" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_prep3" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_prep3" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Finition 1</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_fin1" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_fin1" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_fin1" data-val="rouge">🔴</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Finition 3</label>
+              <div class="statut-group">
+                <button type="button" class="statut-btn" data-field="zone_fin3" data-val="vert">🟢</button>
+                <button type="button" class="statut-btn" data-field="zone_fin3" data-val="orange">🟠</button>
+                <button type="button" class="statut-btn" data-field="zone_fin3" data-val="rouge">🔴</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:4px;">
+            <label>Commentaire zones</label>
+            <input type="text" name="zones_commentaire" placeholder="Observations sur les zones...">
           </div>
         </div>
       </div>
