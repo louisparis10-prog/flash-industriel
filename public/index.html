@@ -13,16 +13,16 @@
 <!-- HEADER -->
 <header class="header">
   <div class="header-logo">
-    ⚡ <span>FLASH</span> INDUSTRIEL
+    <span>FLASH</span> INDUSTRIEL
   </div>
   <nav class="header-nav">
-    <button class="nav-btn active" onclick="showPage('home')">🏠 Accueil</button>
-    <button class="nav-btn" onclick="showPage('securite')" style="--accent:var(--securite)">🦺 Sécurité</button>
-    <button class="nav-btn" onclick="showPage('production')" style="--accent:var(--production)">⚙️ Production</button>
-    <button class="nav-btn" onclick="showPage('qualite')" style="--accent:var(--qualite)">✅ Qualité</button>
-    <button class="nav-btn" onclick="showPage('maintenance')" style="--accent:var(--maintenance)">🔧 Maintenance</button>
-    <button class="nav-btn" onclick="showPage('utilites')" style="--accent:#06b6d4">🔧 Utilités</button>
-    <button class="nav-btn" onclick="showPage('dashboard')">📊 Tableau de bord</button>
+    <button class="nav-btn active" onclick="showPage('home')">Accueil</button>
+    <button class="nav-btn" onclick="showPage('securite')" style="--accent:var(--securite)">Sécurité</button>
+    <button class="nav-btn" onclick="showPage('production')" style="--accent:var(--production)">Production</button>
+    <button class="nav-btn" onclick="showPage('qualite')" style="--accent:var(--qualite)">Qualité</button>
+    <button class="nav-btn" onclick="showPage('maintenance')" style="--accent:var(--maintenance)">Maintenance</button>
+    <button class="nav-btn" onclick="showPage('utilites')" style="--accent:#06b6d4">Utilités</button>
+    <button class="nav-btn" onclick="showPage('dashboard')">Tableau de bord</button>
   </nav>
   <div class="header-date" id="header-date">—</div>
 </header>
@@ -31,7 +31,7 @@
 <div id="page-home" class="page active">
   <div class="container">
     <div class="home-header">
-      <h1>⚡ Flash Industriel — <span>Animation Quotidienne</span></h1>
+      <h1>Flash Industriel — <span>Animation Quotidienne</span></h1>
       <p>Sélectionnez la date de la réunion, puis chaque service saisit ses indicateurs</p>
     </div>
 
@@ -42,7 +42,7 @@
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
         <button class="btn-primary" onclick="setDate()">Valider la date</button>
-        <button class="btn-dashboard" onclick="showPage('dashboard')">📊 Ouvrir le tableau de bord →</button>
+        <button class="btn-dashboard" onclick="showPage('dashboard')">Ouvrir le tableau de bord →</button>
       </div>
     </div>
 
@@ -60,31 +60,31 @@
 
     <div class="home-grid" id="home-cards">
       <div class="service-card" style="--accent:var(--securite)" onclick="showPage('securite')">
-        <span class="icon">🦺</span>
+        
         <h3>Sécurité</h3>
         <p>Incidents · Zones · Utilités · Énergie</p>
         <span class="status-badge badge-missing" id="card-securite">⏳ En attente</span>
       </div>
       <div class="service-card" style="--accent:var(--production)" onclick="showPage('production')">
-        <span class="icon">⚙️</span>
+        
         <h3>Production</h3>
         <p>TRS · Productions · Objectifs · OEE</p>
         <span class="status-badge badge-missing" id="card-production">⏳ En attente</span>
       </div>
       <div class="service-card" style="--accent:var(--qualite)" onclick="showPage('qualite')">
-        <span class="icon">✅</span>
+        
         <h3>Qualité</h3>
         <p>Qualité FH · Manques · IQ · Résultats</p>
         <span class="status-badge badge-missing" id="card-qualite">⏳ En attente</span>
       </div>
       <div class="service-card" style="--accent:var(--maintenance)" onclick="showPage('maintenance')">
-        <span class="icon">🔧</span>
+        
         <h3>Maintenance</h3>
         <p>Pannes · Risques · Points à investiguer</p>
         <span class="status-badge badge-missing" id="card-maintenance">⏳ En attente</span>
       </div>
       <div class="service-card" style="--accent:#06b6d4" onclick="showPage('utilites')">
-        <span class="icon">🏭</span>
+        
         <h3>Utilités</h3>
         <p>Clarification · STEP · Chaufferies · Énergie</p>
         <span class="status-badge badge-missing" id="card-utilites">⏳ En attente</span>
@@ -99,7 +99,7 @@
     <div class="form-header">
       <div class="accent-bar"></div>
       <div>
-        <h2>🦺 Sécurité</h2>
+        <h2>Sécurité</h2>
         <p>Animateur : renseignez les indicateurs sécurité du jour</p>
       </div>
     </div>
@@ -107,7 +107,7 @@
     <form id="form-securite">
 
       <div class="form-section">
-        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-section-title">Animateur</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
@@ -127,7 +127,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">⚠️ Événements / Incidents</div>
+        <div class="form-section-title">Événements / Incidents</div>
         <div class="form-body">
           <div class="form-group">
             <label>Description des événements du jour</label>
@@ -153,7 +153,7 @@
 
 
       <div class="form-section">
-        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-section-title">Commentaire général</div>
         <div class="form-body">
           <div class="form-group">
             <textarea name="commentaire_general" rows="3" placeholder="Points de vigilance à partager avec les autres services..."></textarea>
@@ -162,7 +162,7 @@
       </div>
 
       <div class="form-submit-bar">
-        <button type="submit" class="btn-submit">✅ Envoyer le Flash Sécurité</button>
+        <button type="submit" class="btn-submit">Envoyer le Flash Sécurité</button>
       </div>
     </form>
   </div>
@@ -174,7 +174,7 @@
     <div class="form-header">
       <div class="accent-bar"></div>
       <div>
-        <h2>⚙️ Production</h2>
+        <h2>Production</h2>
         <p>Animateur : renseignez les indicateurs de production du jour</p>
       </div>
     </div>
@@ -183,7 +183,7 @@
 
       <!-- Animateur + statut -->
       <div class="form-section">
-        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-section-title">Animateur</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
@@ -205,7 +205,7 @@
       <!-- MACHINE 1 -->
       <div class="form-section" style="border-color:#3b82f6;border-width:2px;">
         <div class="form-section-title" style="background:linear-gradient(90deg,#3b82f6,#1d4ed8);font-size:16px;font-weight:800;color:#fff;padding:16px 20px;letter-spacing:.04em;">
-          🏭 &nbsp;MACHINE 1
+          MACHINE 1
         </div>
         <div class="form-body" style="gap:20px">
 
@@ -308,7 +308,7 @@
 
           <!-- Événements -->
           <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px;">
-            <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📋 Événements en cours / informations</div>
+            <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Événements en cours / informations</div>
             <textarea name="m1_info" rows="2" placeholder="Causes d'écarts, événements en cours..." style="width:100%;background:transparent;border:none;color:var(--text);font-size:13px;resize:vertical;outline:none;font-family:inherit;"></textarea>
           </div>
 
@@ -318,7 +318,7 @@
       <!-- MACHINE 3 -->
       <div class="form-section" style="border-color:#10b981;border-width:2px;">
         <div class="form-section-title" style="background:linear-gradient(90deg,#10b981,#059669);font-size:16px;font-weight:800;color:#fff;padding:16px 20px;letter-spacing:.04em;">
-          🏭 &nbsp;MACHINE 3
+          MACHINE 3
         </div>
         <div class="form-body" style="gap:20px">
 
@@ -400,7 +400,7 @@
           </div>
 
           <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px;">
-            <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📋 Événements en cours / informations</div>
+            <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Événements en cours / informations</div>
             <textarea name="m3_info" rows="2" placeholder="Causes d'écarts, événements en cours..." style="width:100%;background:transparent;border:none;color:var(--text);font-size:13px;resize:vertical;outline:none;font-family:inherit;"></textarea>
           </div>
 
@@ -408,53 +408,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🔍 Tournée Terrain</div>
-        <div class="form-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Préparation 1</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_prep1" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_prep1" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_prep1" data-val="rouge">🔴</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Préparation 3</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_prep3" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_prep3" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_prep3" data-val="rouge">🔴</button>
-              </div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Machine 1</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_machine1" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_machine1" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_machine1" data-val="rouge">🔴</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Machine 3</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="gemba_machine3" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="gemba_machine3" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="gemba_machine3" data-val="rouge">🔴</button>
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Commentaire tournée terrain</label>
-            <input type="text" name="gemba_commentaire" placeholder="Observations terrain...">
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-section-title">Commentaire général</div>
         <div class="form-body">
           <div class="form-group">
             <textarea name="commentaire_general" rows="3" placeholder="Points importants à partager..."></textarea>
@@ -463,7 +417,7 @@
       </div>
 
       <div class="form-submit-bar">
-        <button type="submit" class="btn-submit">✅ Envoyer le Flash Production</button>
+        <button type="submit" class="btn-submit">Envoyer le Flash Production</button>
       </div>
     </form>
   </div>
@@ -475,7 +429,7 @@
     <div class="form-header">
       <div class="accent-bar"></div>
       <div>
-        <h2>✅ Qualité</h2>
+        <h2>Qualité</h2>
         <p>Technicien Qualité : renseignez les indicateurs qualité du jour</p>
       </div>
     </div>
@@ -483,7 +437,7 @@
     <form id="form-qualite">
 
       <div class="form-section">
-        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-section-title">Animateur</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
@@ -522,7 +476,7 @@
       </div>
 
       <div class="form-section" style="border-color:#3b82f6;border-width:2px;">
-        <div class="form-section-title" style="background:linear-gradient(90deg,#3b82f6,#1d4ed8);font-size:16px;font-weight:800;color:#fff;padding:16px 20px;letter-spacing:.04em;">📊 &nbsp;MACHINE 1</div>
+        <div class="form-section-title" style="background:linear-gradient(90deg,#3b82f6,#1d4ed8);font-size:16px;font-weight:800;color:#fff;padding:16px 20px;letter-spacing:.04em;">MACHINE 1</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
@@ -591,7 +545,7 @@
       </div>
 
       <div class="form-section" style="border-color:#10b981;border-width:2px;">
-        <div class="form-section-title" style="background:linear-gradient(90deg,#10b981,#059669);font-size:16px;font-weight:800;color:#fff;padding:16px 20px;letter-spacing:.04em;">📊 &nbsp;MACHINE 3</div>
+        <div class="form-section-title" style="background:linear-gradient(90deg,#10b981,#059669);font-size:16px;font-weight:800;color:#fff;padding:16px 20px;letter-spacing:.04em;">MACHINE 3</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
@@ -660,7 +614,7 @@
       </div>
 
       <div class="form-submit-bar">
-        <button type="submit" class="btn-submit">✅ Envoyer le Flash Qualité</button>
+        <button type="submit" class="btn-submit">Envoyer le Flash Qualité</button>
       </div>
     </form>
   </div>
@@ -672,7 +626,7 @@
     <div class="form-header">
       <div class="accent-bar"></div>
       <div>
-        <h2>🔧 Maintenance</h2>
+        <h2>Maintenance</h2>
         <p>Animateur : renseignez les événements et points à investiguer</p>
       </div>
     </div>
@@ -680,7 +634,7 @@
     <form id="form-maintenance">
 
       <div class="form-section">
-        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-section-title">Animateur</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
@@ -700,7 +654,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🏷️ Indicateurs Zones</div>
+        <div class="form-section-title">Indicateurs Zones</div>
         <div class="form-body">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group">
@@ -776,7 +730,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🔴 Événements impactant la performance</div>
+        <div class="form-section-title">Événements impactant la performance</div>
         <div class="form-body" id="events-impact-container">
           <div class="event-item" data-prefix="impact_0">
             <div class="form-row" style="align-items:end">
@@ -815,7 +769,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🟠 Événements risquant d'impacter la performance</div>
+        <div class="form-section-title">Événements risquant d'impacter la performance</div>
         <div class="form-body" id="events-risque-container">
           <div class="event-item">
             <div class="form-row">
@@ -847,7 +801,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">🔍 Points à investiguer</div>
+        <div class="form-section-title">Points à investiguer</div>
         <div class="form-body" id="points-container">
           <div class="event-item">
             <div class="form-row">
@@ -893,7 +847,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-section-title">Commentaire général</div>
         <div class="form-body">
           <div class="form-group">
             <textarea name="commentaire_general" rows="3" placeholder="Points de vigilance, suivi des actions, consignes..."></textarea>
@@ -902,7 +856,7 @@
       </div>
 
       <div class="form-submit-bar">
-        <button type="submit" class="btn-submit">✅ Envoyer le Flash Maintenance</button>
+        <button type="submit" class="btn-submit">Envoyer le Flash Maintenance</button>
       </div>
     </form>
   </div>
@@ -914,7 +868,7 @@
     <div class="form-header">
       <div class="accent-bar"></div>
       <div>
-        <h2>🏭 Utilités</h2>
+        <h2>Utilités</h2>
         <p>NT/OL · 2 mn — renseignez les indicateurs utilités du jour</p>
       </div>
     </div>
@@ -922,7 +876,7 @@
     <form id="form-utilites">
 
       <div class="form-section">
-        <div class="form-section-title">👤 Animateur</div>
+        <div class="form-section-title">Animateur</div>
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
@@ -943,7 +897,7 @@
 
       <!-- Tableau indicateurs -->
       <div class="form-section">
-        <div class="form-section-title">📋 Indicateurs Utilités</div>
+        <div class="form-section-title">Indicateurs Utilités</div>
         <div class="form-body">
 
           <!-- En-tête colonnes -->
@@ -1087,7 +1041,7 @@
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">💬 Commentaire général</div>
+        <div class="form-section-title">Commentaire général</div>
         <div class="form-body">
           <div class="form-group">
             <textarea name="commentaire_general" rows="2" placeholder="Points de vigilance à partager avec les autres services..."></textarea>
@@ -1096,7 +1050,7 @@
       </div>
 
       <div class="form-submit-bar">
-        <button type="submit" class="btn-submit">✅ Envoyer le Flash Utilités</button>
+        <button type="submit" class="btn-submit">Envoyer le Flash Utilités</button>
       </div>
     </form>
   </div>
@@ -1107,13 +1061,13 @@
   <div class="dashboard">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px;">
       <div>
-        <div class="dashboard-title">📊 Tableau de Bord — Flash Industriel</div>
+        <div class="dashboard-title">Tableau de Bord — Flash Industriel</div>
         <div class="dashboard-sub" id="dash-date-label">Aucune session sélectionnée</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <input type="date" id="dash-date-picker" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:14px;">
         <button class="btn-primary" onclick="loadDashboard()">Charger</button>
-        <button onclick="window.print()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;">🖨️ Imprimer</button>
+        <button onclick="window.print()" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;">Imprimer</button>
       </div>
     </div>
 

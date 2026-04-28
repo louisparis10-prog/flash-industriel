@@ -70,13 +70,13 @@ function updateStatusUI(data) {
     const card = document.getElementById('card-' + s);
     if (card) {
       card.className = 'status-badge ' + (ok ? 'badge-ok' : 'badge-missing');
-      card.textContent = ok ? '✅ Envoyé' : '⏳ En attente';
+      card.textContent = ok ? '✅ Envoyé' : ' En attente';
     }
   });
   const complete = document.getElementById('status-complete');
   if (complete) {
     if (data.complete) {
-      complete.textContent = '🎉 Tous les services ont répondu — tableau de bord prêt !';
+      complete.textContent = 'Tous les services ont répondu — tableau de bord prêt !';
       complete.style.color = 'var(--vert)';
     } else {
       complete.textContent = `${data.submitted.length}/5 services`;
@@ -126,7 +126,7 @@ async function submitForm(service, form) {
       body: JSON.stringify(data)
     });
     if (res.ok) {
-      showToast('✅ Flash ' + service.charAt(0).toUpperCase() + service.slice(1) + ' envoyé !');
+      showToast('Flash ' + service.charAt(0).toUpperCase() + service.slice(1) + ' envoyé !');
       checkStatus();
       setTimeout(() => showPage('home'), 1200);
     }
@@ -339,14 +339,14 @@ function renderDashboard(d, status, date) {
       <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
         ${['securite','production','qualite','maintenance','utilites'].map(s => {
           const ok = status.submitted.includes(s);
-          const names = {securite:'🦺 Sécu',production:'⚙️ Prod',qualite:'✅ Qualité',maintenance:'🔧 Maint',utilites:'🏭 Utilités'};
+          const names = {securite:'Sécurité',production:'Production',qualite:'Qualité',maintenance:'Maintenance',utilites:'Utilités'};
           return `<span class="feu ${ok?'feu-vert':'feu-gris'}">${names[s]}</span>`;
         }).join('')}
       </div>
     </div>
 
     <!-- KPIs rapides -->
-    <div class="section-title">⚡ Indicateurs clés</div>
+    <div class="section-title">Indicateurs clés</div>
     <div class="kpi-grid">
       ${prod ? `
         <div class="kpi-card" style="--kpi-color:${prod.m1_statut==='rouge'?'var(--rouge)':prod.m1_statut==='orange'?'var(--orange)':'var(--vert)'}">
@@ -391,13 +391,13 @@ function renderDashboard(d, status, date) {
     </div>
 
     <!-- Panels services -->
-    <div class="section-title">🏭 Détail par service</div>
+    <div class="section-title">Détail par service</div>
     <div class="services-grid">
 
       <!-- SÉCURITÉ -->
       <div class="service-panel" style="--accent:var(--securite)">
         <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--securite)"></div>🦺 Sécurité</div>
+          <div class="service-name"><div class="dot" style="background:var(--securite)"></div>Sécurité</div>
           ${sec ? feu(sec.couleur_globale, sec.couleur_globale === 'vert' ? 'OK' : sec.couleur_globale === 'orange' ? 'Vigilance' : 'Critique') : '<span class="feu feu-gris">En attente</span>'}
         </div>
         <div class="service-panel-body">
@@ -412,15 +412,15 @@ function renderDashboard(d, status, date) {
             <div class="metric-row"><span class="metric-name">Air comprimé</span><span class="metric-val">${feu(sec.air_comprime)}</span></div>
             <div class="metric-row"><span class="metric-name">Énergie</span><span class="metric-val">${feu(sec.efficacite_energetique)}</span></div>
             ${sec.evenements ? `<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);"><strong style="color:var(--text)">⚠️ Événements :</strong> ${sec.evenements}</div>` : ''}
-            ${sec.commentaire_general ? `<div style="margin-top:8px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">💬 ${sec.commentaire_general}</div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire non soumis</p></div>'}
+            ${sec.commentaire_general ? `<div style="margin-top:8px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${sec.commentaire_general}</div>` : ''}
+          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
         </div>
       </div>
 
       <!-- PRODUCTION -->
       <div class="service-panel" style="--accent:var(--production)">
         <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--production)"></div>⚙️ Production</div>
+          <div class="service-name"><div class="dot" style="background:var(--production)"></div>Production</div>
           ${prod ? feu(prod.statut_global, prod.statut_global === 'vert' ? 'OK' : prod.statut_global === 'orange' ? 'Écart' : 'Critique') : '<span class="feu feu-gris">En attente</span>'}
         </div>
         <div class="service-panel-body">
@@ -438,7 +438,7 @@ function renderDashboard(d, status, date) {
               ${prod.m1_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m1_phnr_j1}</strong> kg/h${prod.m1_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m1_phnr_cible}</span>` : ''}</span></div>` : ''}
               ${prod.m1_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_arret_cumul}</span></div>` : ''}
               ${prod.m1_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_casse_cumul}</span></div>` : ''}
-              ${prod.m1_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${prod.m1_info}</div>` : ''}
+              ${prod.m1_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m1_info}</div>` : ''}
             </div>
             <div style="border-top:1px solid var(--border);padding-top:14px;">
               <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
@@ -453,7 +453,7 @@ function renderDashboard(d, status, date) {
               ${prod.m3_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m3_phnr_j1}</strong> kg/h${prod.m3_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m3_phnr_cible}</span>` : ''}</span></div>` : ''}
               ${prod.m3_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_arret_cumul}</span></div>` : ''}
               ${prod.m3_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_casse_cumul}</span></div>` : ''}
-              ${prod.m3_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${prod.m3_info}</div>` : ''}
+              ${prod.m3_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m3_info}</div>` : ''}
             </div>
             ${(prod.gemba_prep1 || prod.gemba_prep3 || prod.gemba_machine1 || prod.gemba_machine3) ? `
             <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;">
@@ -465,14 +465,14 @@ function renderDashboard(d, status, date) {
                 <div class="gemba-zone"><div class="gemba-zone-name">Machine 3</div><div class="gemba-dot" style="background:var(--${prod.gemba_machine3 || 'gris'})"></div></div>
               </div>
             </div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire non soumis</p></div>'}
+          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
         </div>
       </div>
 
       <!-- QUALITÉ -->
       <div class="service-panel" style="--accent:var(--qualite)">
         <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--qualite)"></div>✅ Qualité</div>
+          <div class="service-name"><div class="dot" style="background:var(--qualite)"></div>Qualité</div>
           ${qual ? feu(qual.statut_global, qual.statut_global === 'vert' ? 'OK' : qual.statut_global === 'orange' ? 'Écart' : 'Critique') : '<span class="feu feu-gris">En attente</span>'}
         </div>
         <div class="service-panel-body">
@@ -487,8 +487,8 @@ function renderDashboard(d, status, date) {
               ${qual.m1_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
                 ${progressBar(qual.m1_perco_reel, qual.m1_perco_cible, '%')}
               </span></div>` : ''}
-              ${qual.m1_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">⭐ ${qual.m1_fait_marquant}</div>` : ''}
-              ${qual.m1_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">📌 ${qual.m1_consigne}</div>` : ''}
+              ${qual.m1_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m1_fait_marquant}</div>` : ''}
+              ${qual.m1_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m1_consigne}</div>` : ''}
             </div>
             <div style="border-top:1px solid var(--border);padding-top:14px;">
               <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
@@ -500,25 +500,25 @@ function renderDashboard(d, status, date) {
               ${qual.m3_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
                 ${progressBar(qual.m3_perco_reel, qual.m3_perco_cible, '%')}
               </span></div>` : ''}
-              ${qual.m3_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">⭐ ${qual.m3_fait_marquant}</div>` : ''}
-              ${qual.m3_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">📌 ${qual.m3_consigne}</div>` : ''}
+              ${qual.m3_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m3_fait_marquant}</div>` : ''}
+              ${qual.m3_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m3_consigne}</div>` : ''}
             </div>
-            ${qual.remontees ? `<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;font-size:13px;color:var(--text2);">🔴 <strong style="color:var(--text)">Remontées :</strong> ${qual.remontees}</div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire non soumis</p></div>'}
+            ${qual.remontees ? `<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;font-size:13px;color:var(--text2);"><strong style="color:var(--text)">Remontées :</strong> ${qual.remontees}</div>` : ''}
+          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
         </div>
       </div>
 
       <!-- MAINTENANCE -->
       <div class="service-panel" style="--accent:var(--maintenance)">
         <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--maintenance)"></div>🔧 Maintenance</div>
+          <div class="service-name"><div class="dot" style="background:var(--maintenance)"></div>Maintenance</div>
           ${maint ? feu(maint.statut_global, maint.statut_global === 'vert' ? 'OK' : maint.statut_global === 'orange' ? 'Risque' : 'Impact') : '<span class="feu feu-gris">En attente</span>'}
         </div>
         <div class="service-panel-body">
           ${maint ? `
             ${impacts.length > 0 ? `
               <div style="margin-bottom:12px;">
-                <div style="font-size:12px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">🔴 Impact performance</div>
+                <div style="font-size:12px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Impact performance</div>
                 ${impacts.map(ev => `
                   <div class="incident-item">
                     <div class="incident-dot" style="background:var(--${ev.urgence})"></div>
@@ -529,7 +529,7 @@ function renderDashboard(d, status, date) {
                   </div>
                 `).join('')}
               </div>
-            ` : `<div style="padding:10px;background:rgba(34,197,94,.08);border-radius:8px;font-size:13px;color:var(--vert);margin-bottom:12px;">✅ Aucune panne impactant la performance</div>`}
+            ` : `<div style="padding:10px;background:rgba(34,197,94,.08);border-radius:8px;font-size:13px;color:var(--vert);margin-bottom:12px;">Aucune panne impactant la performance</div>`}
             ${(() => {
               const risques = [];
               for (let i = 0; i < 10; i++) {
@@ -538,7 +538,7 @@ function renderDashboard(d, status, date) {
               }
               return risques.length > 0 ? `
                 <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px;">
-                  <div style="font-size:12px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">🟠 Risques à surveiller</div>
+                  <div style="font-size:12px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Risques à surveiller</div>
                   ${risques.map(r => `
                     <div class="incident-item">
                       <div class="incident-dot" style="background:var(--orange)"></div>
@@ -550,14 +550,14 @@ function renderDashboard(d, status, date) {
                   `).join('')}
                 </div>` : '';
             })()}
-            ${maint.commentaire_general ? `<div style="padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">💬 ${maint.commentaire_general}</div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire non soumis</p></div>'}
+            ${maint.commentaire_general ? `<div style="padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${maint.commentaire_general}</div>` : ''}
+          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
         </div>
       </div>
     </div>
 
     <!-- UTILITÉS -->
-    <div class="section-title">🏭 Utilités</div>
+    <div class="section-title">Utilités</div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;">
       ${util ? `
       <div style="display:grid;grid-template-columns:180px 100px 1fr 120px;gap:0;">
@@ -589,40 +589,40 @@ function renderDashboard(d, status, date) {
           `;
         }).join('')}
       </div>
-      ${util.commentaire_general ? `<div style="padding:12px 16px;font-size:13px;color:var(--text2);border-top:1px solid var(--border);">💬 ${util.commentaire_general}</div>` : ''}
-      ` : `<div class="no-data" style="padding:32px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire Utilités non soumis</p></div>`}
+      ${util.commentaire_general ? `<div style="padding:12px 16px;font-size:13px;color:var(--text2);border-top:1px solid var(--border);">${util.commentaire_general}</div>` : ''}
+      ` : `<div class="no-data" style="padding:32px"><span class="icon" style="font-size:24px"></span><p>Formulaire Utilités non soumis</p></div>`}
     </div>
 
     <!-- TENDANCES DU MOIS -->
-    <div class="section-title">📈 Tendances du mois</div>
+    <div class="section-title">Tendances du mois</div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;">
       <div id="trends-month-label" style="font-size:13px;color:var(--text2);margin-bottom:16px;font-weight:600;"></div>
       <div id="trends-loading" style="text-align:center;color:var(--text2);padding:32px;">
-        <div style="font-size:24px;margin-bottom:8px;">⏳</div><p>Chargement des tendances...</p>
+        <div style="font-size:24px;margin-bottom:8px;"></div><p>Chargement des tendances...</p>
       </div>
       <div id="trends-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:16px;">
         <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #3b82f6">
-          <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:12px;">📦 Production M1 (t)</div>
+          <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:12px;">Production M1 (t)</div>
           <div style="position:relative;height:140px;"><canvas id="chart-prod-m1"></canvas></div>
         </div>
         <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #10b981">
-          <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;margin-bottom:12px;">📦 Production M3 (t)</div>
+          <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;margin-bottom:12px;">Production M3 (t)</div>
           <div style="position:relative;height:140px;"><canvas id="chart-prod-m3"></canvas></div>
         </div>
         <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #8b5cf6">
-          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">⚡ PHNR M1 (kg/h)</div>
+          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">PHNR M1 (kg/h)</div>
           <div style="position:relative;height:140px;"><canvas id="chart-phnr-m1"></canvas></div>
         </div>
         <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #8b5cf6">
-          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">⚡ PHNR M3 (kg/h)</div>
+          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">PHNR M3 (kg/h)</div>
           <div style="position:relative;height:140px;"><canvas id="chart-phnr-m3"></canvas></div>
         </div>
         <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #22c55e">
-          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">📈 Rendement M1 (%)</div>
+          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">Rendement M1 (%)</div>
           <div style="position:relative;height:140px;"><canvas id="chart-rdt-m1"></canvas></div>
         </div>
         <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #22c55e">
-          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">📈 Rendement M3 (%)</div>
+          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">Rendement M3 (%)</div>
           <div style="position:relative;height:140px;"><canvas id="chart-rdt-m3"></canvas></div>
         </div>
       </div>
@@ -630,7 +630,7 @@ function renderDashboard(d, status, date) {
 
     <!-- POINTS À INVESTIGUER -->
     ${points.length > 0 ? `
-    <div class="section-title">🔍 Points à investiguer</div>
+    <div class="section-title">Points à investiguer</div>
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;">
       <table class="points-table">
         <thead>
@@ -677,7 +677,7 @@ async function loadTrendCharts(date) {
   const gridEl = document.getElementById('trends-grid');
   if (!labelEl) return;
 
-  labelEl.textContent = `📅 Données du mois de ${monthNames[+month]} ${year}`;
+  labelEl.textContent = `Données du mois de ${monthNames[+month]} ${year}`;
   loadingEl.style.display = 'block';
   gridEl.style.display = 'none';
 
