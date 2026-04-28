@@ -1,100 +1,132 @@
 const express = require('express');
 const path = require('path');
-const { Database } = require('node-sqlite3-wasm');
+const { Pool } = require('pg');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-const db = new Database(path.join(__dirname, 'flash.db'));
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+});
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS flash_sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT NOT NULL UNIQUE,
-    created_at TEXT DEFAULT (datetime('now'))
-  );
-  CREATE TABLE IF NOT EXISTS submissions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    session_date TEXT NOT NULL,
-    service TEXT NOT NULL,
-    data TEXT NOT NULL,
-    submitted_at TEXT DEFAULT (datetime('now')),
-    UNIQUE(session_date, service)
-  );
-`);
+// Initialisation des tables
+async function initDB() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS flash_sessions (
+      id SERIAL PRIMARY KEY,
+      date TEXT NOT NULL UNIQUE,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS submissions (
+      id SERIAL PRIMARY KEY,
+      session_date TEXT NOT NULL,
+      service TEXT NOT NULL,
+      data TEXT NOT NULL,
+      submitted_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(session_date, service)
+    );
+  `);
+  console.log('Base de données initialisée ✅');
+}
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/sessions', (req, res) => {
-  const rows = db.prepare('SELECT * FROM flash_sessions ORDER BY date DESC LIMIT 30').all();
-  res.json(rows);
-});
-
-app.post('/api/sessions', (req, res) => {
-  const { date } = req.body;
-  if (!date) return res.status(400).json({ error: 'date requis' });
+app.get('/api/sessions', async (req, res) => {
   try {
-    db.prepare('INSERT OR IGNORE INTO flash_sessions (date) VALUES (?)').run([date]);
-    const row = db.prepare('SELECT * FROM flash_sessions WHERE date = ?').get([date]);
-    res.json(row);
+    const result = await pool.query('SELECT * FROM flash_sessions ORDER BY date DESC LIMIT 30');
+    res.json(result.rows);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-app.get('/api/submissions/:date', (req, res) => {
-  const rows = db.prepare('SELECT * FROM submissions WHERE session_date = ?').all([req.params.date]);
-  const result = {};
-  rows.forEach(r => { result[r.service] = JSON.parse(r.data); });
-  res.json(result);
+app.post('/api/sessions', async (req, res) => {
+  const { date } = req.body;
+  if (!date) return res.status(400).json({ error: 'date requis' });
+  try {
+    await pool.query('INSERT INTO flash_sessions (date) VALUES ($1) ON CONFLICT (date) DO NOTHING', [date]);
+    const result = await pool.query('SELECT * FROM flash_sessions WHERE date = $1', [date]);
+    res.json(result.rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.post('/api/submissions/:date/:service', (req, res) => {
+app.get('/api/submissions/:date', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM submissions WHERE session_date = $1', [req.params.date]);
+    const out = {};
+    result.rows.forEach(r => { out[r.service] = JSON.parse(r.data); });
+    res.json(out);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/submissions/:date/:service', async (req, res) => {
   const { date, service } = req.params;
   const services = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
   if (!services.includes(service)) return res.status(400).json({ error: 'service invalide' });
 
-  db.prepare('INSERT OR IGNORE INTO flash_sessions (date) VALUES (?)').run([date]);
-  db.prepare(`
-    INSERT INTO submissions (session_date, service, data)
-    VALUES (?, ?, ?)
-    ON CONFLICT(session_date, service) DO UPDATE SET data = excluded.data, submitted_at = datetime('now')
-  `).run([date, service, JSON.stringify(req.body)]);
-
-  res.json({ ok: true });
+  try {
+    await pool.query('INSERT INTO flash_sessions (date) VALUES ($1) ON CONFLICT (date) DO NOTHING', [date]);
+    await pool.query(`
+      INSERT INTO submissions (session_date, service, data)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (session_date, service) DO UPDATE SET data = EXCLUDED.data, submitted_at = NOW()
+    `, [date, service, JSON.stringify(req.body)]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Données mensuelles pour les graphiques tendances
-app.get('/api/monthly/:year/:month', (req, res) => {
+app.get('/api/monthly/:year/:month', async (req, res) => {
   const { year, month } = req.params;
-  const prefix = `${year}-${month.padStart(2,'0')}`;
-  const rows = db.prepare(
-    "SELECT * FROM submissions WHERE session_date LIKE ? ORDER BY session_date ASC"
-  ).all([prefix + '%']);
-  const byDate = {};
-  rows.forEach(r => {
-    if (!byDate[r.session_date]) byDate[r.session_date] = {};
-    byDate[r.session_date][r.service] = JSON.parse(r.data);
-  });
-  res.json(byDate);
+  const prefix = `${year}-${month.padStart(2, '0')}%`;
+  try {
+    const result = await pool.query(
+      'SELECT * FROM submissions WHERE session_date LIKE $1 ORDER BY session_date ASC',
+      [prefix]
+    );
+    const byDate = {};
+    result.rows.forEach(r => {
+      if (!byDate[r.session_date]) byDate[r.session_date] = {};
+      byDate[r.session_date][r.service] = JSON.parse(r.data);
+    });
+    res.json(byDate);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-app.get('/api/status/:date', (req, res) => {
-  const rows = db.prepare('SELECT service FROM submissions WHERE session_date = ?').all([req.params.date]);
-  const submitted = rows.map(r => r.service);
-  const all = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
-  res.json({
-    submitted,
-    complete: all.every(s => submitted.includes(s)),
-    missing: all.filter(s => !submitted.includes(s))
-  });
+app.get('/api/status/:date', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT service FROM submissions WHERE session_date = $1', [req.params.date]);
+    const submitted = result.rows.map(r => r.service);
+    const all = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
+    res.json({
+      submitted,
+      complete: all.every(s => submitted.includes(s)),
+      missing: all.filter(s => !submitted.includes(s))
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Flash Industriel → http://localhost:${PORT}`);
+initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Flash Industriel → http://localhost:${PORT}`);
+  });
+}).catch(err => {
+  console.error('Erreur connexion DB:', err.message);
+  process.exit(1);
 });
