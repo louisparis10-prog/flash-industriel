@@ -65,6 +65,21 @@ app.post('/api/submissions/:date/:service', (req, res) => {
   res.json({ ok: true });
 });
 
+// Données mensuelles pour les graphiques tendances
+app.get('/api/monthly/:year/:month', (req, res) => {
+  const { year, month } = req.params;
+  const prefix = `${year}-${month.padStart(2,'0')}`;
+  const rows = db.prepare(
+    "SELECT * FROM submissions WHERE session_date LIKE ? ORDER BY session_date ASC"
+  ).all([prefix + '%']);
+  const byDate = {};
+  rows.forEach(r => {
+    if (!byDate[r.session_date]) byDate[r.session_date] = {};
+    byDate[r.session_date][r.service] = JSON.parse(r.data);
+  });
+  res.json(byDate);
+});
+
 app.get('/api/status/:date', (req, res) => {
   const rows = db.prepare('SELECT service FROM submissions WHERE session_date = ?').all([req.params.date]);
   const submitted = rows.map(r => r.service);

@@ -79,7 +79,7 @@ function updateStatusUI(data) {
       complete.textContent = '🎉 Tous les services ont répondu — tableau de bord prêt !';
       complete.style.color = 'var(--vert)';
     } else {
-      complete.textContent = `${data.submitted.length}/4 services`;
+      complete.textContent = `${data.submitted.length}/5 services`;
       complete.style.color = 'var(--text2)';
     }
   }
@@ -332,8 +332,8 @@ function renderDashboard(d, status, date) {
       <div class="status-orb orb-${globalStatut}">${globalIcons[globalStatut]}</div>
       <div class="status-info">
         <h2>${globalLabels[globalStatut]}</h2>
-        <p>${status.submitted.length}/4 services ont soumis leurs indicateurs
-          ${status.complete ? ' · <strong style="color:var(--vert)">Flash complet</strong>' : ' · <span style="color:var(--orange)">En attente : ' + status.missing.map(s => ({securite:'Sécurité',production:'Production',qualite:'Qualité',maintenance:'Maintenance'})[s]).join(', ') + '</span>'}
+        <p>${status.submitted.length}/5 services ont soumis leurs indicateurs
+          ${status.complete ? ' · <strong style="color:var(--vert)">Flash complet</strong>' : ' · <span style="color:var(--orange)">En attente : ' + status.missing.map(s => ({securite:'Sécurité',production:'Production',qualite:'Qualité',maintenance:'Maintenance',utilites:'Utilités'})[s]).join(', ') + '</span>'}
         </p>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
@@ -349,34 +349,34 @@ function renderDashboard(d, status, date) {
     <div class="section-title">⚡ Indicateurs clés</div>
     <div class="kpi-grid">
       ${prod ? `
-        <div class="kpi-card" style="--kpi-color:${prod.mft1_statut==='rouge'?'var(--rouge)':prod.mft1_statut==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">TRS MFT1</div>
-          <div class="kpi-value">${prod.mft1_trs_reel ?? '—'}<span style="font-size:16px">%</span></div>
-          <div class="kpi-unit">obj. ${prod.mft1_trs_obj ?? '—'}%</div>
-          ${prod.mft1_trs_reel && prod.mft1_trs_obj ? `<div class="kpi-delta ${prod.mft1_trs_reel >= prod.mft1_trs_obj ? 'pos':'neg'}">${prod.mft1_trs_reel >= prod.mft1_trs_obj ? '▲' : '▼'} ${Math.abs(prod.mft1_trs_reel - prod.mft1_trs_obj).toFixed(1)}%</div>` : ''}
+        <div class="kpi-card" style="--kpi-color:${prod.m1_statut==='rouge'?'var(--rouge)':prod.m1_statut==='orange'?'var(--orange)':'var(--vert)'}">
+          <div class="kpi-label">Production M1 (t)</div>
+          <div class="kpi-value">${prod.m1_prod_cumul ?? '—'}<span style="font-size:16px"> t</span></div>
+          <div class="kpi-unit">obj. ${prod.m1_prod_cible ?? '—'} t</div>
+          ${prod.m1_prod_cumul && prod.m1_prod_cible ? `<div class="kpi-delta ${+prod.m1_prod_cumul >= +prod.m1_prod_cible ? 'pos':'neg'}">${+prod.m1_prod_cumul >= +prod.m1_prod_cible ? '▲' : '▼'} ${Math.abs(+prod.m1_prod_cumul - +prod.m1_prod_cible).toFixed(1)} t</div>` : ''}
         </div>
-        <div class="kpi-card" style="--kpi-color:${prod.mft3_statut==='rouge'?'var(--rouge)':prod.mft3_statut==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">TRS MFT3</div>
-          <div class="kpi-value">${prod.mft3_trs_reel ?? '—'}<span style="font-size:16px">%</span></div>
-          <div class="kpi-unit">obj. ${prod.mft3_trs_obj ?? '—'}%</div>
-          ${prod.mft3_trs_reel && prod.mft3_trs_obj ? `<div class="kpi-delta ${prod.mft3_trs_reel >= prod.mft3_trs_obj ? 'pos':'neg'}">${prod.mft3_trs_reel >= prod.mft3_trs_obj ? '▲' : '▼'} ${Math.abs(prod.mft3_trs_reel - prod.mft3_trs_obj).toFixed(1)}%</div>` : ''}
+        <div class="kpi-card" style="--kpi-color:${prod.m3_statut==='rouge'?'var(--rouge)':prod.m3_statut==='orange'?'var(--orange)':'var(--vert)'}">
+          <div class="kpi-label">Production M3 (t)</div>
+          <div class="kpi-value">${prod.m3_prod_cumul ?? '—'}<span style="font-size:16px"> t</span></div>
+          <div class="kpi-unit">obj. ${prod.m3_prod_cible ?? '—'} t</div>
+          ${prod.m3_prod_cumul && prod.m3_prod_cible ? `<div class="kpi-delta ${+prod.m3_prod_cumul >= +prod.m3_prod_cible ? 'pos':'neg'}">${+prod.m3_prod_cumul >= +prod.m3_prod_cible ? '▲' : '▼'} ${Math.abs(+prod.m3_prod_cumul - +prod.m3_prod_cible).toFixed(1)} t</div>` : ''}
         </div>
-      ` : `<div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">TRS MFT1</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>
-           <div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">TRS MFT3</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>`}
+      ` : `<div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">Prod. M1</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>
+           <div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">Prod. M3</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>`}
 
       ${qual ? `
-        <div class="kpi-card" style="--kpi-color:${qual.mft1_resultat==='rouge'?'var(--rouge)':qual.mft1_resultat==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">Qualité FH MFT1</div>
-          <div class="kpi-value">${qual.mft1_qual_h_reel ?? '—'}<span style="font-size:16px">%</span></div>
-          <div class="kpi-unit">obj. ${qual.mft1_qual_h_obj ?? '—'}% · manques: ${qual.mft1_nb_manques ?? 0}</div>
+        <div class="kpi-card" style="--kpi-color:${qual.m1_resultat==='rouge'?'var(--rouge)':qual.m1_resultat==='orange'?'var(--orange)':'var(--vert)'}">
+          <div class="kpi-label">TC% Machine 1</div>
+          <div class="kpi-value">${qual.m1_tc_reel ?? '—'}<span style="font-size:16px">%</span></div>
+          <div class="kpi-unit">cible : ${qual.m1_tc_cible ?? '—'}</div>
         </div>
-        <div class="kpi-card" style="--kpi-color:${qual.mft3_resultat==='rouge'?'var(--rouge)':qual.mft3_resultat==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">Qualité FH MFT3</div>
-          <div class="kpi-value">${qual.mft3_qual_h_reel ?? '—'}<span style="font-size:16px">%</span></div>
-          <div class="kpi-unit">obj. ${qual.mft3_qual_h_obj ?? '—'}% · manques: ${qual.mft3_nb_manques ?? 0}</div>
+        <div class="kpi-card" style="--kpi-color:${qual.m3_resultat==='rouge'?'var(--rouge)':qual.m3_resultat==='orange'?'var(--orange)':'var(--vert)'}">
+          <div class="kpi-label">TC% Machine 3</div>
+          <div class="kpi-value">${qual.m3_tc_reel ?? '—'}<span style="font-size:16px">%</span></div>
+          <div class="kpi-unit">cible : ${qual.m3_tc_cible ?? '—'}</div>
         </div>
-      ` : `<div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">Qualité MFT1</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>
-           <div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">Qualité MFT3</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>`}
+      ` : `<div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">TC% M1</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>
+           <div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">TC% M3</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>`}
 
       <div class="kpi-card" style="--kpi-color:${impacts.length > 0 ? 'var(--rouge)' : 'var(--vert)'}">
         <div class="kpi-label">Pannes (impact)</div>
@@ -426,35 +426,43 @@ function renderDashboard(d, status, date) {
         <div class="service-panel-body">
           ${prod ? `
             <div style="margin-bottom:14px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">MFT1 ${feu(prod.mft1_statut)}</div>
-              <div class="metric-row"><span class="metric-name">Production</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.mft1_prod_reel, prod.mft1_prod_obj, 'm²')}
+              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
+                Machine 1 ${prod.m1_ref ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${prod.m1_ref})</span>` : ''} ${feu(prod.m1_statut)}
+              </div>
+              <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(prod.m1_prod_cumul, prod.m1_prod_cible, 't')}
               </span></div>
-              <div class="metric-row"><span class="metric-name">TRS</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.mft1_trs_reel, prod.mft1_trs_obj, '%')}
+              <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}
               </span></div>
-              ${prod.mft1_tsse ? `<div class="metric-row"><span class="metric-name">% TSSE</span><span class="metric-val">${prod.mft1_tsse}%</span></div>` : ''}
-              ${prod.mft1_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${prod.mft1_info}</div>` : ''}
+              ${prod.m1_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m1_phnr_j1}</strong> kg/h${prod.m1_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m1_phnr_cible}</span>` : ''}</span></div>` : ''}
+              ${prod.m1_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_arret_cumul}</span></div>` : ''}
+              ${prod.m1_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_casse_cumul}</span></div>` : ''}
+              ${prod.m1_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${prod.m1_info}</div>` : ''}
             </div>
             <div style="border-top:1px solid var(--border);padding-top:14px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">MFT3 ${feu(prod.mft3_statut)}</div>
-              <div class="metric-row"><span class="metric-name">Production</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.mft3_prod_reel, prod.mft3_prod_obj, 'm²')}
+              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
+                Machine 3 ${prod.m3_ref ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${prod.m3_ref})</span>` : ''} ${feu(prod.m3_statut)}
+              </div>
+              <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(prod.m3_prod_cumul, prod.m3_prod_cible, 't')}
               </span></div>
-              <div class="metric-row"><span class="metric-name">TRS</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.mft3_trs_reel, prod.mft3_trs_obj, '%')}
+              <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}
               </span></div>
-              ${prod.mft3_tsse ? `<div class="metric-row"><span class="metric-name">% TSSE</span><span class="metric-val">${prod.mft3_tsse}%</span></div>` : ''}
-              ${prod.mft3_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${prod.mft3_info}</div>` : ''}
+              ${prod.m3_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m3_phnr_j1}</strong> kg/h${prod.m3_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m3_phnr_cible}</span>` : ''}</span></div>` : ''}
+              ${prod.m3_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_arret_cumul}</span></div>` : ''}
+              ${prod.m3_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_casse_cumul}</span></div>` : ''}
+              ${prod.m3_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${prod.m3_info}</div>` : ''}
             </div>
-            ${(prod.gemba_chargement || prod.gemba_preparation || prod.gemba_machine || prod.gemba_finition) ? `
+            ${(prod.gemba_prep1 || prod.gemba_prep3 || prod.gemba_machine1 || prod.gemba_machine3) ? `
             <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">GEMBA</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">TOURNÉE TERRAIN</div>
               <div class="gemba-grid">
-                <div class="gemba-zone"><div class="gemba-zone-name">Chargement</div><div class="gemba-dot" style="background:var(--${prod.gemba_chargement || 'gris'})"></div></div>
-                <div class="gemba-zone"><div class="gemba-zone-name">Préparation</div><div class="gemba-dot" style="background:var(--${prod.gemba_preparation || 'gris'})"></div></div>
-                <div class="gemba-zone"><div class="gemba-zone-name">Machine</div><div class="gemba-dot" style="background:var(--${prod.gemba_machine || 'gris'})"></div></div>
-                <div class="gemba-zone"><div class="gemba-zone-name">Finition</div><div class="gemba-dot" style="background:var(--${prod.gemba_finition || 'gris'})"></div></div>
+                <div class="gemba-zone"><div class="gemba-zone-name">Prépa 1</div><div class="gemba-dot" style="background:var(--${prod.gemba_prep1 || 'gris'})"></div></div>
+                <div class="gemba-zone"><div class="gemba-zone-name">Prépa 3</div><div class="gemba-dot" style="background:var(--${prod.gemba_prep3 || 'gris'})"></div></div>
+                <div class="gemba-zone"><div class="gemba-zone-name">Machine 1</div><div class="gemba-dot" style="background:var(--${prod.gemba_machine1 || 'gris'})"></div></div>
+                <div class="gemba-zone"><div class="gemba-zone-name">Machine 3</div><div class="gemba-dot" style="background:var(--${prod.gemba_machine3 || 'gris'})"></div></div>
               </div>
             </div>` : ''}
           ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire non soumis</p></div>'}
@@ -471,25 +479,29 @@ function renderDashboard(d, status, date) {
           ${qual ? `
             <div style="margin-bottom:14px;">
               <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
-                MFT1 ${qual.mft1_semaine_iq ? `<span style="font-weight:400;color:var(--text2)">(${qual.mft1_semaine_iq})</span>` : ''} ${feu(qual.mft1_resultat)}
+                Machine 1 ${qual.m1_produit ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${qual.m1_produit})</span>` : ''} ${feu(qual.m1_resultat)}
               </div>
-              <div class="metric-row"><span class="metric-name">% h réel</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(qual.mft1_qual_h_reel, qual.mft1_qual_h_obj, '%')}
-              </span></div>
-              ${qual.mft1_qual_jour ? `<div class="metric-row"><span class="metric-name">% jour</span><span class="metric-val">${qual.mft1_qual_jour}%</span></div>` : ''}
-              <div class="metric-row"><span class="metric-name">Nb manques</span><span class="metric-val" style="color:${qual.mft1_nb_manques > 0 ? 'var(--orange)' : 'var(--vert)'}">${qual.mft1_nb_manques ?? 0}</span></div>
-              ${qual.mft1_autre_resultat ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${qual.mft1_autre_resultat}</div>` : ''}
+              ${qual.m1_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(qual.m1_tc_reel, parseFloat(qual.m1_tc_cible)||null, '%')}
+              </span></div>` : ''}
+              ${qual.m1_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(qual.m1_perco_reel, qual.m1_perco_cible, '%')}
+              </span></div>` : ''}
+              ${qual.m1_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">⭐ ${qual.m1_fait_marquant}</div>` : ''}
+              ${qual.m1_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">📌 ${qual.m1_consigne}</div>` : ''}
             </div>
             <div style="border-top:1px solid var(--border);padding-top:14px;">
               <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
-                MFT3 ${qual.mft3_semaine_iq ? `<span style="font-weight:400;color:var(--text2)">(${qual.mft3_semaine_iq})</span>` : ''} ${feu(qual.mft3_resultat)}
+                Machine 3 ${qual.m3_produit ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${qual.m3_produit})</span>` : ''} ${feu(qual.m3_resultat)}
               </div>
-              <div class="metric-row"><span class="metric-name">% h réel</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(qual.mft3_qual_h_reel, qual.mft3_qual_h_obj, '%')}
-              </span></div>
-              ${qual.mft3_qual_jour ? `<div class="metric-row"><span class="metric-name">% jour</span><span class="metric-val">${qual.mft3_qual_jour}%</span></div>` : ''}
-              <div class="metric-row"><span class="metric-name">Nb manques</span><span class="metric-val" style="color:${qual.mft3_nb_manques > 0 ? 'var(--orange)' : 'var(--vert)'}">${qual.mft3_nb_manques ?? 0}</span></div>
-              ${qual.mft3_autre_resultat ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">ℹ️ ${qual.mft3_autre_resultat}</div>` : ''}
+              ${qual.m3_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(qual.m3_tc_reel, parseFloat(qual.m3_tc_cible)||null, '%')}
+              </span></div>` : ''}
+              ${qual.m3_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
+                ${progressBar(qual.m3_perco_reel, qual.m3_perco_cible, '%')}
+              </span></div>` : ''}
+              ${qual.m3_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">⭐ ${qual.m3_fait_marquant}</div>` : ''}
+              ${qual.m3_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">📌 ${qual.m3_consigne}</div>` : ''}
             </div>
             ${qual.remontees ? `<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;font-size:13px;color:var(--text2);">🔴 <strong style="color:var(--text)">Remontées :</strong> ${qual.remontees}</div>` : ''}
           ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire non soumis</p></div>'}
@@ -581,6 +593,41 @@ function renderDashboard(d, status, date) {
       ` : `<div class="no-data" style="padding:32px"><span class="icon" style="font-size:24px">⏳</span><p>Formulaire Utilités non soumis</p></div>`}
     </div>
 
+    <!-- TENDANCES DU MOIS -->
+    <div class="section-title">📈 Tendances du mois</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;">
+      <div id="trends-month-label" style="font-size:13px;color:var(--text2);margin-bottom:16px;font-weight:600;"></div>
+      <div id="trends-loading" style="text-align:center;color:var(--text2);padding:32px;">
+        <div style="font-size:24px;margin-bottom:8px;">⏳</div><p>Chargement des tendances...</p>
+      </div>
+      <div id="trends-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:16px;">
+        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #3b82f6">
+          <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:12px;">📦 Production M1 (t)</div>
+          <div style="position:relative;height:140px;"><canvas id="chart-prod-m1"></canvas></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #10b981">
+          <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;margin-bottom:12px;">📦 Production M3 (t)</div>
+          <div style="position:relative;height:140px;"><canvas id="chart-prod-m3"></canvas></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #8b5cf6">
+          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">⚡ PHNR M1 (kg/h)</div>
+          <div style="position:relative;height:140px;"><canvas id="chart-phnr-m1"></canvas></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #8b5cf6">
+          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">⚡ PHNR M3 (kg/h)</div>
+          <div style="position:relative;height:140px;"><canvas id="chart-phnr-m3"></canvas></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #22c55e">
+          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">📈 Rendement M1 (%)</div>
+          <div style="position:relative;height:140px;"><canvas id="chart-rdt-m1"></canvas></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #22c55e">
+          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">📈 Rendement M3 (%)</div>
+          <div style="position:relative;height:140px;"><canvas id="chart-rdt-m3"></canvas></div>
+        </div>
+      </div>
+    </div>
+
     <!-- POINTS À INVESTIGUER -->
     ${points.length > 0 ? `
     <div class="section-title">🔍 Points à investiguer</div>
@@ -611,4 +658,130 @@ function renderDashboard(d, status, date) {
   `;
 
   document.getElementById('dashboard-content').innerHTML = html;
+  loadTrendCharts(date);
+}
+
+// ── TREND CHARTS ──────────────────────────────────────
+let activeCharts = {};
+
+async function loadTrendCharts(date) {
+  // Destroy existing Chart instances
+  Object.values(activeCharts).forEach(c => { try { c.destroy(); } catch(e){} });
+  activeCharts = {};
+
+  const [year, month] = date.split('-');
+  const monthNames = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  const labelEl = document.getElementById('trends-month-label');
+  const loadingEl = document.getElementById('trends-loading');
+  const gridEl = document.getElementById('trends-grid');
+  if (!labelEl) return;
+
+  labelEl.textContent = `📅 Données du mois de ${monthNames[+month]} ${year}`;
+  loadingEl.style.display = 'block';
+  gridEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`/api/monthly/${year}/${month}`);
+    const byDate = await res.json();
+    const dates = Object.keys(byDate).sort();
+
+    if (dates.length === 0) {
+      loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune donnée pour ce mois.</p>';
+      return;
+    }
+
+    const labels = dates.map(d => {
+      const dd = new Date(d + 'T12:00:00');
+      return dd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    });
+
+    const extract = (service, field) => dates.map(d => {
+      const val = byDate[d]?.[service]?.[field];
+      if (val === undefined || val === null || val === '') return null;
+      const n = parseFloat(val);
+      return isNaN(n) ? null : n;
+    });
+
+    const makeChart = (canvasId, color, dataReal, dataObj, unit) => {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Réel',
+              data: dataReal,
+              borderColor: color,
+              backgroundColor: color + '18',
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointBackgroundColor: color,
+              pointBorderColor: '#0f172a',
+              pointBorderWidth: 1.5,
+              tension: 0.3,
+              fill: true,
+              spanGaps: true,
+            },
+            {
+              label: 'Objectif',
+              data: dataObj,
+              borderColor: '#f59e0b',
+              borderDash: [5, 4],
+              borderWidth: 2,
+              pointRadius: 3,
+              pointBackgroundColor: '#f59e0b',
+              pointBorderColor: '#0f172a',
+              tension: 0.1,
+              fill: false,
+              spanGaps: true,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 16 }
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label} : ${ctx.parsed.y !== null ? ctx.parsed.y : '—'} ${unit}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#64748b', font: { size: 10 } },
+              grid: { color: 'rgba(51,65,85,.35)' }
+            },
+            y: {
+              ticks: { color: '#64748b', font: { size: 10 } },
+              grid: { color: 'rgba(51,65,85,.35)' }
+            }
+          }
+        }
+      });
+      activeCharts[canvasId] = chart;
+    };
+
+    loadingEl.style.display = 'none';
+    gridEl.style.display = 'grid';
+
+    makeChart('chart-prod-m1', '#3b82f6', extract('production','m1_prod_cumul'), extract('production','m1_prod_cible'), 't');
+    makeChart('chart-prod-m3', '#10b981', extract('production','m3_prod_cumul'), extract('production','m3_prod_cible'), 't');
+    makeChart('chart-phnr-m1', '#8b5cf6', extract('production','m1_phnr_j1'),    extract('production','m1_phnr_cible'), 'kg/h');
+    makeChart('chart-phnr-m3', '#8b5cf6', extract('production','m3_phnr_j1'),    extract('production','m3_phnr_cible'), 'kg/h');
+    makeChart('chart-rdt-m1',  '#22c55e', extract('production','m1_rdt_cumul'),  extract('production','m1_rdt_cible'),  '%');
+    makeChart('chart-rdt-m3',  '#22c55e', extract('production','m3_rdt_cumul'),  extract('production','m3_rdt_cible'),  '%');
+
+  } catch(e) {
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement des tendances.</p>';
+    console.error(e);
+  }
 }

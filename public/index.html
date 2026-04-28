@@ -150,29 +150,6 @@
         </div>
       </div>
 
-      <div class="form-section">
-        <div class="form-section-title">🎯 TEOS — Semaine en cours</div>
-        <div class="form-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Nombre de TEOS réalisés</label>
-              <input type="number" name="teos_reel" min="0" value="0" style="font-size:20px;font-weight:700;text-align:center;">
-            </div>
-            <div class="form-group">
-              <label>Objectif semaine</label>
-              <input type="number" name="teos_obj" min="0" value="0" style="font-size:20px;font-weight:700;text-align:center;color:var(--orange);">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Statut</label>
-            <div class="statut-group">
-              <button type="button" class="statut-btn" data-field="teos_statut" data-val="vert">🟢 Objectif atteint</button>
-              <button type="button" class="statut-btn" data-field="teos_statut" data-val="orange">🟠 Écart</button>
-              <button type="button" class="statut-btn" data-field="teos_statut" data-val="rouge">🔴 Non réalisé</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
 
       <div class="form-section">
@@ -204,6 +181,7 @@
 
     <form id="form-production">
 
+      <!-- Animateur + statut -->
       <div class="form-section">
         <div class="form-section-title">👤 Animateur</div>
         <div class="form-body">
@@ -224,131 +202,208 @@
         </div>
       </div>
 
-      <div class="form-section">
-        <div class="form-section-title">🏭 Machine 1</div>
-        <div class="form-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Référence en cours (ex: GW17/26-10)</label>
-              <input type="text" name="m1_ref" placeholder="Ex: GW17/26-10">
+      <!-- MACHINE 1 -->
+      <div class="form-section" style="border-color:var(--blue)">
+        <div class="form-section-title" style="background:linear-gradient(90deg,rgba(59,130,246,.15),transparent)">
+          🏭 Machine 1
+        </div>
+        <div class="form-body" style="gap:20px">
+
+          <!-- Ref + statut -->
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:14px 16px;">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Référence en cours</div>
+              <input type="text" name="m1_ref" placeholder="ex: GW17/26-10" style="background:transparent;border:none;color:var(--text);font-size:18px;font-weight:700;width:200px;outline:none;">
             </div>
-            <div class="form-group">
-              <label>Statut Machine 1</label>
+            <div style="text-align:right">
+              <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Statut</div>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="m1_statut" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="m1_statut" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="m1_statut" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="m1_statut" data-val="vert">🟢 OK</button>
+                <button type="button" class="statut-btn" data-field="m1_statut" data-val="orange">🟠 Écart</button>
+                <button type="button" class="statut-btn" data-field="m1_statut" data-val="rouge">🔴 Critique</button>
               </div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;">Indicateur</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cumul</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">J-1 5H/5H</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cible</div>
+
+          <!-- KPIs visuels -->
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+
+            <!-- Production -->
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid var(--blue)">
+              <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🏷 Production (t)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m1_prod_cumul" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m1_prod_j1" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m1_prod_cible" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+              </div>
+            </div>
+
+            <!-- PHNR -->
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
+              <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⚡ PHNR (kg/h)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m1_phnr_cumul" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m1_phnr_j1" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m1_phnr_cible" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+              </div>
+            </div>
+
+            <!-- Rendement -->
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid var(--vert)">
+              <div style="font-size:11px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">📈 Rendement (%)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m1_rdt_cumul" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m1_rdt_j1" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="text" name="m1_rdt_cible" placeholder="70/90%" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;font-weight:700;text-align:center;"></div>
+              </div>
+            </div>
+
+            <!-- Arrêts + Casse -->
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid var(--rouge)">
+              <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🛑 Arrêts & Casse</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                  <div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% Arrêt global</div>
+                  <input type="text" name="m1_arret_cumul" placeholder="ex: 5h00" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% DE CASSE</div>
+                  <input type="text" name="m1_casse_cumul" placeholder="ex: 0h35" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Vitesse + Laize -->
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #06b6d4">
+              <div style="font-size:11px;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🚀 Vitesse & Laize</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:8px;">
+                <div style="font-size:10px;color:var(--text2)">J-1 5H/5H</div>
+                <div style="font-size:10px;color:var(--orange);font-weight:700;">Cible</div>
+                <div></div>
+                <input type="number" name="m1_vitesse_j1" step="1" placeholder="m/min" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <input type="number" name="m1_vitesse_cible" step="1" placeholder="m/min" style="background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;padding-left:4px">m/min</div>
+                <input type="number" name="m1_laize_j1" step="1" placeholder="cm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <input type="number" name="m1_laize_cible" step="1" placeholder="cm" style="background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;padding-left:4px">cm laize</div>
+              </div>
+            </div>
+
+            <!-- CDC -->
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid var(--jaune)">
+              <div style="font-size:11px;font-weight:700;color:var(--jaune);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⏱ CDC</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                  <div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Réel cumul</div>
+                  <input type="text" name="m1_cdc_cumul" placeholder="ex: 4:25" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:16px;font-weight:700;text-align:center;">
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div>
+                  <input type="text" name="m1_cdc_cible" placeholder="ex: 3:00" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:16px;font-weight:700;text-align:center;">
+                </div>
+              </div>
+            </div>
+
           </div>
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;">
-            <div style="font-size:13px;color:var(--text2)">PHNR (kg/h)</div>
-            <input type="number" name="m1_phnr_cumul" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_phnr_j1" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_phnr_cible" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Production (t)</div>
-            <input type="number" name="m1_prod_cumul" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_prod_j1" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_prod_cible" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">CDC (durée)</div>
-            <input type="text" name="m1_cdc_cumul" placeholder="ex: 4:25" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m1_cdc_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m1_cdc_cible" placeholder="ex: 3:00" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">% Arrêt global</div>
-            <input type="text" name="m1_arret_cumul" placeholder="ex: 5h00" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m1_arret_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m1_arret_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">% DE CASSE</div>
-            <input type="text" name="m1_casse_cumul" placeholder="ex: 0h35" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m1_casse_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m1_casse_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Vitesse (m/min)</div>
-            <input type="number" name="m1_vitesse_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_vitesse_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_vitesse_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Laize (cm)</div>
-            <input type="number" name="m1_laize_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_laize_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_laize_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Rendement (%)</div>
-            <input type="number" name="m1_rdt_cumul" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m1_rdt_j1" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m1_rdt_cible" placeholder="ex: 70%/90%" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+
+          <!-- Événements -->
+          <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📋 Événements en cours / informations</div>
+            <textarea name="m1_info" rows="2" placeholder="Causes d'écarts, événements en cours..." style="width:100%;background:transparent;border:none;color:var(--text);font-size:13px;resize:vertical;outline:none;font-family:inherit;"></textarea>
           </div>
-          <div class="form-group" style="margin-top:12px;">
-            <label>Événements en cours / informations</label>
-            <textarea name="m1_info" rows="2" placeholder="Causes d'écarts, événements en cours..."></textarea>
-          </div>
+
         </div>
       </div>
 
-      <div class="form-section">
-        <div class="form-section-title">🏭 Machine 3</div>
-        <div class="form-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Référence en cours (ex: GW17/26-11)</label>
-              <input type="text" name="m3_ref" placeholder="Ex: GW17/26-11">
+      <!-- MACHINE 3 -->
+      <div class="form-section" style="border-color:#10b981">
+        <div class="form-section-title" style="background:linear-gradient(90deg,rgba(16,185,129,.15),transparent)">
+          🏭 Machine 3
+        </div>
+        <div class="form-body" style="gap:20px">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:14px 16px;">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Référence en cours</div>
+              <input type="text" name="m3_ref" placeholder="ex: GW17/26-11" style="background:transparent;border:none;color:var(--text);font-size:18px;font-weight:700;width:200px;outline:none;">
             </div>
-            <div class="form-group">
-              <label>Statut Machine 3</label>
+            <div style="text-align:right">
+              <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Statut</div>
               <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="m3_statut" data-val="vert">🟢</button>
-                <button type="button" class="statut-btn" data-field="m3_statut" data-val="orange">🟠</button>
-                <button type="button" class="statut-btn" data-field="m3_statut" data-val="rouge">🔴</button>
+                <button type="button" class="statut-btn" data-field="m3_statut" data-val="vert">🟢 OK</button>
+                <button type="button" class="statut-btn" data-field="m3_statut" data-val="orange">🟠 Écart</button>
+                <button type="button" class="statut-btn" data-field="m3_statut" data-val="rouge">🔴 Critique</button>
               </div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:4px;">
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;">Indicateur</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cumul</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">J-1 5H/5H</div>
-            <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;padding:6px 0;text-align:center;">Cible</div>
+
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #10b981">
+              <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🏷 Production (t)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m3_prod_cumul" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m3_prod_j1" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m3_prod_cible" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+              </div>
+            </div>
+
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
+              <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⚡ PHNR (kg/h)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m3_phnr_cumul" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m3_phnr_j1" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m3_phnr_cible" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+              </div>
+            </div>
+
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid var(--vert)">
+              <div style="font-size:11px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">📈 Rendement (%)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m3_rdt_cumul" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m3_rdt_j1" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="text" name="m3_rdt_cible" placeholder="94/104%" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;font-weight:700;text-align:center;"></div>
+              </div>
+            </div>
+
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid var(--rouge)">
+              <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🛑 Arrêts & Casse</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% Arrêt global</div><input type="text" name="m3_arret_cumul" placeholder="ex: 7h15" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% DE CASSE</div><input type="text" name="m3_casse_cumul" placeholder="ex: 3h30" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;"></div>
+              </div>
+            </div>
+
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #06b6d4">
+              <div style="font-size:11px;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🚀 Vitesse & Laize</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+                <div style="font-size:10px;color:var(--text2)">J-1 5H/5H</div>
+                <div style="font-size:10px;color:var(--orange);font-weight:700;">Cible</div>
+                <div></div>
+                <input type="number" name="m3_vitesse_j1" step="1" placeholder="m/min" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <input type="number" name="m3_vitesse_cible" step="1" placeholder="m/min" style="background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;padding-left:4px">m/min</div>
+                <input type="number" name="m3_laize_j1" step="1" placeholder="cm" style="background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <input type="number" name="m3_laize_cible" step="1" placeholder="cm" style="background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
+                <div style="font-size:11px;color:var(--text2);display:flex;align-items:center;padding-left:4px">cm laize</div>
+              </div>
+            </div>
+
+            <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid var(--jaune)">
+              <div style="font-size:11px;font-weight:700;color:var(--jaune);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⏱ CDC</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Réel cumul</div><input type="text" name="m3_cdc_cumul" placeholder="ex: 3:36" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:16px;font-weight:700;text-align:center;"></div>
+                <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="text" name="m3_cdc_cible" placeholder="ex: 3:00" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:16px;font-weight:700;text-align:center;"></div>
+              </div>
+            </div>
+
           </div>
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center;">
-            <div style="font-size:13px;color:var(--text2)">PHNR (kg/h)</div>
-            <input type="number" name="m3_phnr_cumul" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_phnr_j1" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_phnr_cible" step="1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Production (t)</div>
-            <input type="number" name="m3_prod_cumul" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_prod_j1" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_prod_cible" step="0.1" min="0" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">CDC (durée)</div>
-            <input type="text" name="m3_cdc_cumul" placeholder="ex: 3:36" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m3_cdc_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m3_cdc_cible" placeholder="ex: 3:00" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">% Arrêt global</div>
-            <input type="text" name="m3_arret_cumul" placeholder="ex: 7h15" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m3_arret_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m3_arret_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">% DE CASSE</div>
-            <input type="text" name="m3_casse_cumul" placeholder="ex: 3h30" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m3_casse_j1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m3_casse_cible" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Vitesse (m/min)</div>
-            <input type="number" name="m3_vitesse_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_vitesse_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_vitesse_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Laize (cm)</div>
-            <input type="number" name="m3_laize_cumul" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_laize_j1" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_laize_cible" step="1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <div style="font-size:13px;color:var(--text2)">Rendement (%)</div>
-            <input type="number" name="m3_rdt_cumul" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="number" name="m3_rdt_j1" step="0.1" placeholder="—" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
-            <input type="text" name="m3_rdt_cible" placeholder="ex: 94%/104%" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-size:13px;text-align:center;">
+
+          <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">📋 Événements en cours / informations</div>
+            <textarea name="m3_info" rows="2" placeholder="Causes d'écarts, événements en cours..." style="width:100%;background:transparent;border:none;color:var(--text);font-size:13px;resize:vertical;outline:none;font-family:inherit;"></textarea>
           </div>
-          <div class="form-group" style="margin-top:12px;">
-            <label>Événements en cours / informations</label>
-            <textarea name="m3_info" rows="2" placeholder="Causes d'écarts, événements en cours..."></textarea>
-          </div>
+
         </div>
       </div>
 
@@ -1074,6 +1129,7 @@
 <!-- Toast -->
 <div class="success-toast" id="toast">✅ Formulaire envoyé !</div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="/js/app.js"></script>
 </body>
 </html>
