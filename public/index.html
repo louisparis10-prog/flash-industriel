@@ -213,7 +213,7 @@
           <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:14px 16px;">
             <div>
               <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Référence en cours</div>
-              <input type="text" name="m1_ref" placeholder="ex: GW17/26-10" style="background:transparent;border:none;color:var(--text);font-size:18px;font-weight:700;width:200px;outline:none;">
+              <input type="text" name="m1_ref" placeholder="ex: Prod A" style="background:transparent;border:none;color:var(--text);font-size:18px;font-weight:700;width:200px;outline:none;">
             </div>
             <div style="text-align:right">
               <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Statut</div>
@@ -325,7 +325,7 @@
           <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:10px;padding:14px 16px;">
             <div>
               <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Référence en cours</div>
-              <input type="text" name="m3_ref" placeholder="ex: GW17/26-11" style="background:transparent;border:none;color:var(--text);font-size:18px;font-weight:700;width:200px;outline:none;">
+              <input type="text" name="m3_ref" placeholder="ex: Prod B" style="background:transparent;border:none;color:var(--text);font-size:18px;font-weight:700;width:200px;outline:none;">
             </div>
             <div style="text-align:right">
               <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Statut</div>
@@ -453,25 +453,6 @@
               </div>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Temporalité</label>
-              <select name="temporalite">
-                <option value="">Sélectionner...</option>
-                <option value="J">J — Production terminée</option>
-                <option value="J-1">J-1 — Production terminée</option>
-                <option value="en_cours">Production en cours</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Statut général</label>
-              <div class="statut-group">
-                <button type="button" class="statut-btn" data-field="statut_general" data-val="vert">🟢 Vert</button>
-                <button type="button" class="statut-btn" data-field="statut_general" data-val="orange">🟠 Orange</button>
-                <button type="button" class="statut-btn" data-field="statut_general" data-val="rouge">🔴 Rouge</button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -480,8 +461,8 @@
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
-              <label>Produit en cours (ex: GW17/26-10)</label>
-              <input type="text" name="m1_produit" placeholder="Ex: GW17/26-10">
+              <label>Produit en cours</label>
+              <input type="text" name="m1_produit" placeholder="Ex: Prod A">
             </div>
             <div class="form-group">
               <label>Résultat global Machine 1</label>
@@ -549,8 +530,8 @@
         <div class="form-body">
           <div class="form-row">
             <div class="form-group">
-              <label>Produit en cours (ex: MK4/26-03)</label>
-              <input type="text" name="m3_produit" placeholder="Ex: MK4/26-03">
+              <label>Produit en cours</label>
+              <input type="text" name="m3_produit" placeholder="Ex: Prod B">
             </div>
             <div class="form-group">
               <label>Résultat global Machine 3</label>
