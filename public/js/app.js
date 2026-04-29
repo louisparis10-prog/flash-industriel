@@ -357,6 +357,29 @@ function renderDashboard(d, status, date) {
   const [year, month] = date.split('-');
   const monthNames = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
+  // ── Helpers dashboard body ──
+  function dbProgress(label, reel, obj, unite = '') {
+    const p = pct(reel, obj);
+    if (p === null) return `<div class="db-metric"><span class="db-label">${label}</span><span class="db-val" style="color:var(--text2);font-size:13px">—</span></div>`;
+    const color = barColor(p);
+    const ecart = +reel - +obj;
+    const sign = ecart >= 0 ? '+' : '';
+    return `
+      <div class="db-metric">
+        <span class="db-label">${label}</span>
+        <span class="db-val" style="color:${color}">${Number(reel).toLocaleString('fr-FR')} ${unite}<span class="db-obj">obj. ${Number(obj).toLocaleString('fr-FR')} · <span style="color:${color}">${sign}${Number(ecart).toLocaleString('fr-FR')}</span></span></span>
+      </div>
+      <div class="db-progress"><div class="db-progress-fill" style="width:${Math.min(p,100)}%;background:${color}"></div></div>`;
+  }
+  function dbSimple(label, val, sub = '', color = 'var(--text)') {
+    if (!val) return '';
+    return `<div class="db-simple"><span class="db-simple-label">${label}</span><span class="db-simple-val" style="color:${color}">${val}${sub ? `<span style="font-size:11px;color:var(--text2);font-weight:400;margin-left:4px">${sub}</span>` : ''}</span></div>`;
+  }
+  function dbInfo(text, bg = 'var(--bg3)', color = 'var(--text2)') {
+    if (!text) return '';
+    return `<div class="db-info" style="background:${bg};color:${color};white-space:pre-line">${text}</div>`;
+  }
+
   // ── Helper : panneau accordéon ──
   function acc(id, color, name, animateur, hasData, statusHtml, bodyHtml) {
     return `
@@ -377,82 +400,125 @@ function renderDashboard(d, status, date) {
   }
 
   // ── Corps Sécurité ──
+  const secColor = +sec?.nb_evenements > 0 ? 'var(--rouge)' : 'var(--vert)';
   const secBody = sec ? `
-    ${sec.evenements ? `<div style="margin-bottom:12px;padding:10px 12px;background:#ffedd5;border-radius:8px;font-size:13px;color:#9a3412;"><strong>Événement :</strong> ${sec.evenements}</div>` : ''}
-    <div class="metric-row"><span class="metric-name">Nb événements</span><span class="metric-val" style="color:${+sec.nb_evenements>0?'var(--rouge)':'var(--vert)'}">${sec.nb_evenements ?? 0}</span></div>
-    ${sec.commentaire_general ? `<div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${sec.commentaire_general}</div>` : ''}
+    <div class="db-sec-count">
+      <div>
+        <div class="db-sec-number" style="color:${secColor}">${sec.nb_evenements ?? 0}</div>
+        <div class="db-sec-sublabel">événement(s)</div>
+      </div>
+      ${sec.evenements
+        ? `<div style="flex:1;padding:10px 14px;background:#ffedd5;border-radius:8px;font-size:13px;color:#9a3412;border-left:3px solid var(--rouge);line-height:1.5"><strong>Événement :</strong> ${sec.evenements}</div>`
+        : `<div style="flex:1;padding:10px 14px;background:rgba(34,197,94,.08);border-radius:8px;font-size:13px;color:var(--vert);">✓ Aucun incident à signaler</div>`}
+    </div>
+    ${sec.gravite && sec.gravite !== 'vert' ? dbSimple('Gravité', sec.gravite, '', sec.gravite === 'rouge' ? 'var(--rouge)' : 'var(--orange)') : ''}
+    ${sec.commentaire_general && sec.commentaire_general !== 'Aucun incident à signaler' ? dbInfo(sec.commentaire_general) : ''}
   ` : '';
 
-  // ── Corps Production (sans Tournée Terrain) ──
+  // ── Corps Production ──
   const prodBody = prod ? `
-    <div style="margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-        Machine 1 ${prod.m1_ref ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${prod.m1_ref}</span>` : ''} ${feu(prod.m1_statut)}
+    <div class="db-machines">
+      <div>
+        <div class="db-machine-header">Machine 1 ${prod.m1_ref ? `<span class="db-ref">${prod.m1_ref}</span>` : ''} ${feu(prod.m1_statut)}</div>
+        ${dbProgress('Production', prod.m1_prod_cumul, prod.m1_prod_cible, 't')}
+        ${dbProgress('Rendement', prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}
+        ${dbSimple('PHNR J-1', prod.m1_phnr_j1 ? prod.m1_phnr_j1+' kg/h' : null, prod.m1_phnr_cible ? 'obj. '+prod.m1_phnr_cible : '')}
+        ${dbSimple('Arrêts cumulés', prod.m1_arret_cumul||null, '', 'var(--rouge)')}
+        ${dbSimple('Casse', prod.m1_casse_cumul||null, '', 'var(--rouge)')}
+        ${dbSimple('CDC', prod.m1_cdc_cumul||null, prod.m1_cdc_cible ? 'obj. '+prod.m1_cdc_cible : '')}
+        ${dbInfo(prod.m1_info||null)}
       </div>
-      <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m1_prod_cumul, prod.m1_prod_cible, 't')}</span></div>
-      <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}</span></div>
-      ${prod.m1_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m1_phnr_j1}</strong> kg/h${prod.m1_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m1_phnr_cible}</span>` : ''}</span></div>` : ''}
-      ${prod.m1_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_arret_cumul}</span></div>` : ''}
-      ${prod.m1_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_casse_cumul}</span></div>` : ''}
-      ${prod.m1_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m1_info}</div>` : ''}
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:14px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-        Machine 3 ${prod.m3_ref ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${prod.m3_ref}</span>` : ''} ${feu(prod.m3_statut)}
+      <div>
+        <div class="db-machine-header">Machine 3 ${prod.m3_ref ? `<span class="db-ref">${prod.m3_ref}</span>` : ''} ${feu(prod.m3_statut)}</div>
+        ${dbProgress('Production', prod.m3_prod_cumul, prod.m3_prod_cible, 't')}
+        ${dbProgress('Rendement', prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}
+        ${dbSimple('PHNR J-1', prod.m3_phnr_j1 ? prod.m3_phnr_j1+' kg/h' : null, prod.m3_phnr_cible ? 'obj. '+prod.m3_phnr_cible : '')}
+        ${dbSimple('Arrêts cumulés', prod.m3_arret_cumul||null, '', 'var(--rouge)')}
+        ${dbSimple('Casse', prod.m3_casse_cumul||null, '', 'var(--rouge)')}
+        ${dbSimple('CDC', prod.m3_cdc_cumul||null, prod.m3_cdc_cible ? 'obj. '+prod.m3_cdc_cible : '')}
+        ${dbInfo(prod.m3_info||null)}
       </div>
-      <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m3_prod_cumul, prod.m3_prod_cible, 't')}</span></div>
-      <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}</span></div>
-      ${prod.m3_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m3_phnr_j1}</strong> kg/h${prod.m3_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m3_phnr_cible}</span>` : ''}</span></div>` : ''}
-      ${prod.m3_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_arret_cumul}</span></div>` : ''}
-      ${prod.m3_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_casse_cumul}</span></div>` : ''}
-      ${prod.m3_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m3_info}</div>` : ''}
     </div>
+    ${prod.commentaire_general ? dbInfo(prod.commentaire_general) : ''}
   ` : '';
 
   // ── Corps Qualité ──
   const qualBody = qual ? `
-    <div style="margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-        Machine 1 ${qual.m1_produit ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${qual.m1_produit}</span>` : ''} ${feu(qual.m1_resultat)}
+    <div class="db-machines">
+      <div>
+        <div class="db-machine-header">Machine 1 ${qual.m1_produit ? `<span class="db-ref">${qual.m1_produit}</span>` : ''} ${feu(qual.m1_resultat)}</div>
+        ${qual.m1_tc_reel ? dbProgress('TC %', qual.m1_tc_reel, parseFloat(qual.m1_tc_cible)||null, '%') : ''}
+        ${qual.m1_perco_reel ? dbProgress('E% Perco', qual.m1_perco_reel, qual.m1_perco_cible, '%') : ''}
+        ${qual.m1_pir && qual.m1_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m1_pir) : ''}
+        ${qual.m1_autre_resultat ? dbInfo(qual.m1_autre_resultat) : ''}
+        ${qual.m1_fait_marquant ? dbInfo(qual.m1_fait_marquant, 'rgba(251,146,60,.1)', 'var(--orange)') : ''}
+        ${qual.m1_demande_cq ? dbSimple('Demande CQ', qual.m1_demande_cq) : ''}
+        ${qual.m1_consigne ? dbInfo(qual.m1_consigne, 'rgba(59,130,246,.08)', '#2563eb') : ''}
       </div>
-      ${qual.m1_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m1_tc_reel, parseFloat(qual.m1_tc_cible)||null, '%')}</span></div>` : ''}
-      ${qual.m1_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m1_perco_reel, qual.m1_perco_cible, '%')}</span></div>` : ''}
-      ${qual.m1_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m1_fait_marquant}</div>` : ''}
-      ${qual.m1_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m1_consigne}</div>` : ''}
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:14px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-        Machine 3 ${qual.m3_produit ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${qual.m3_produit}</span>` : ''} ${feu(qual.m3_resultat)}
+      <div>
+        <div class="db-machine-header">Machine 3 ${qual.m3_produit ? `<span class="db-ref">${qual.m3_produit}</span>` : ''} ${feu(qual.m3_resultat)}</div>
+        ${qual.m3_tc_reel ? dbProgress('TC %', qual.m3_tc_reel, parseFloat(qual.m3_tc_cible)||null, '%') : ''}
+        ${qual.m3_perco_reel ? dbProgress('E% Perco', qual.m3_perco_reel, qual.m3_perco_cible, '%') : ''}
+        ${qual.m3_pir && qual.m3_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m3_pir) : ''}
+        ${qual.m3_autre_resultat ? dbInfo(qual.m3_autre_resultat) : ''}
+        ${qual.m3_fait_marquant ? dbInfo(qual.m3_fait_marquant, 'rgba(251,146,60,.1)', 'var(--orange)') : ''}
+        ${qual.m3_demande_cq ? dbSimple('Demande CQ', qual.m3_demande_cq) : ''}
+        ${qual.m3_consigne ? dbInfo(qual.m3_consigne, 'rgba(59,130,246,.08)', '#2563eb') : ''}
       </div>
-      ${qual.m3_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m3_tc_reel, parseFloat(qual.m3_tc_cible)||null, '%')}</span></div>` : ''}
-      ${qual.m3_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m3_perco_reel, qual.m3_perco_cible, '%')}</span></div>` : ''}
-      ${qual.m3_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m3_fait_marquant}</div>` : ''}
-      ${qual.m3_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m3_consigne}</div>` : ''}
     </div>
   ` : '';
 
   // ── Corps Maintenance ──
+  const zoneList = [
+    ['MT1','zone_mt1'],['MT3','zone_mt3'],
+    ['Charg. 1','zone_charg1'],['Charg. 3','zone_charg3'],
+    ['Prép. 1','zone_prep1'],['Prép. 3','zone_prep3'],
+    ['Fin. 1','zone_fin1'],['Fin. 3','zone_fin3'],
+  ];
+  const zonesDefined = zoneList.filter(([,k]) => maint && maint[k]);
+  const zoneGrid = zonesDefined.map(([label, k]) => {
+    const s = maint[k];
+    return `<div class="db-zone" style="${s!=='vert'?'border-color:var(--'+s+')':''}">
+      <span class="db-zone-label">${label}</span>
+      <span class="db-zone-dot" style="background:var(--${s})"></span>
+    </div>`;
+  }).join('');
+  const zoneAlerts = zonesDefined.filter(([,k]) => maint[k] !== 'vert').map(([label, k]) => {
+    const comment = maint[k+'_comment'];
+    return `<div class="incident-item">
+      <div class="incident-dot" style="background:var(--${maint[k]})"></div>
+      <div><div class="incident-text">${label}</div>${comment ? `<div class="incident-meta">${comment}</div>` : ''}</div>
+    </div>`;
+  }).join('');
+
   const maintBody = maint ? `
+    ${zonesDefined.length > 0 ? `
+      <div style="margin-bottom:14px;">
+        <div class="db-section-title">Zones — Niveau de confiance</div>
+        <div class="db-zones">${zoneGrid}</div>
+        ${zoneAlerts ? `<div style="margin-top:8px">${zoneAlerts}</div>` : ''}
+        ${maint.zones_commentaire ? dbInfo(maint.zones_commentaire) : ''}
+      </div>` : ''}
     ${impacts.length > 0 ? `
-      <div style="margin-bottom:12px;">
-        <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Impact performance</div>
+      <div style="margin-bottom:12px;${zonesDefined.length?'border-top:1px solid var(--border);padding-top:12px':''}">
+        <div class="db-section-title" style="color:var(--rouge)">Pannes</div>
         ${impacts.map(ev => `
           <div class="incident-item">
             <div class="incident-dot" style="background:var(--${ev.urgence})"></div>
-            <div><div class="incident-text">${ev.desc}</div><div class="incident-meta">${ev.machine} · ${ev.duree}h d'arrêt</div></div>
+            <div><div class="incident-text">${ev.desc}</div><div class="incident-meta">${ev.machine}${ev.duree && ev.duree!=='—' ? ' · '+ev.duree+'h d\'arrêt' : ''}</div></div>
           </div>`).join('')}
       </div>
-    ` : `<div style="padding:10px;background:rgba(34,197,94,.08);border-radius:8px;font-size:13px;color:var(--vert);margin-bottom:12px;">Aucune panne impactant la performance</div>`}
+    ` : `<div style="padding:9px 12px;background:rgba(34,197,94,.08);border-radius:8px;font-size:13px;color:var(--vert);margin-bottom:12px;">✓ Aucune panne</div>`}
     ${risques.length > 0 ? `
       <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px;">
-        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Risques à surveiller</div>
+        <div class="db-section-title" style="color:var(--orange)">Risques 24/48h</div>
         ${risques.map(r => `
           <div class="incident-item">
             <div class="incident-dot" style="background:var(--orange)"></div>
-            <div><div class="incident-text">${r.desc}</div><div class="incident-meta">${r.machine} · ${r.delai}</div></div>
+            <div><div class="incident-text">${r.desc}</div><div class="incident-meta">${r.machine}${r.delai && r.delai!=='—' ? ' · '+r.delai : ''}</div></div>
           </div>`).join('')}
       </div>` : ''}
-    ${maint.commentaire_general ? `<div style="padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${maint.commentaire_general}</div>` : ''}
+    ${maint.commentaire_general ? dbInfo(maint.commentaire_general) : ''}
   ` : '';
 
   // ── Corps Utilités ──
@@ -608,36 +674,6 @@ function renderDashboard(d, status, date) {
         <div class="acc-body" id="acc-body-trends" style="display:none">${trendsBody}</div>
       </div>
 
-      ${points.length > 0 ? `
-      <div class="acc-panel" id="acc-points">
-        <div class="acc-header" onclick="toggleAcc('points')">
-          <div class="acc-left">
-            <div class="dot" style="background:var(--orange)"></div>
-            <span class="acc-name">Points à investiguer</span>
-          </div>
-          <div class="acc-right">
-            <span class="feu feu-orange">${points.length} point${points.length>1?'s':''}</span>
-            <span class="acc-chevron">›</span>
-          </div>
-        </div>
-        <div class="acc-body" id="acc-body-points" style="display:none">
-          <table class="points-table">
-            <thead><tr>
-              <th>Description</th><th>Machine</th><th>Responsable</th><th>Délai</th><th>Statut</th>
-            </tr></thead>
-            <tbody>
-              ${points.map(p => `
-                <tr>
-                  <td>${p.desc}</td>
-                  <td><span style="background:var(--bg3);padding:2px 8px;border-radius:4px;font-size:12px;">${p.machine}</span></td>
-                  <td>${p.responsable}</td>
-                  <td>${p.delai}</td>
-                  <td>${feu(p.statut, p.statut==='vert'?'Soldé':p.statut==='orange'?'En cours':'En retard')}</td>
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>` : ''}
     </div>
   `;
 

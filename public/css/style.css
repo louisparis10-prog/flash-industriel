@@ -427,7 +427,7 @@ body {
 .feu-gris   { background: #f1f5f9; color: var(--gris); }
 .feu::before { content:'●'; font-size:9px; }
 
-/* Métriques ligne */
+/* Métriques ligne (legacy) */
 .metric-row {
   display: flex;
   align-items: center;
@@ -438,6 +438,98 @@ body {
 .metric-row:last-child { border-bottom: none; }
 .metric-name { font-size: 13px; color: var(--text2); }
 .metric-val  { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: var(--text); }
+
+/* Dashboard body — nouveau layout */
+.db-machines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.db-machine-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.db-ref { font-weight: 500; color: var(--text); font-size: 12px; text-transform: none; letter-spacing: 0; }
+.db-metric {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0 2px;
+}
+.db-label { font-size: 12px; color: var(--text2); font-weight: 500; white-space: nowrap; }
+.db-val { font-size: 14px; font-weight: 700; text-align: right; line-height: 1.2; }
+.db-obj { font-size: 11px; color: var(--text2); font-weight: 400; display: block; text-align: right; }
+.db-progress { height: 5px; background: var(--border); border-radius: 3px; margin-bottom: 10px; overflow: hidden; }
+.db-progress-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
+.db-info {
+  margin-top: 6px;
+  padding: 7px 10px;
+  background: var(--bg3);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+.db-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.db-simple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  gap: 12px;
+}
+.db-simple:last-child { border-bottom: none; }
+.db-simple-label { color: var(--text2); font-size: 12px; font-weight: 500; }
+.db-simple-val { font-weight: 700; text-align: right; }
+
+/* Zones maintenance — grille dashboard */
+.db-zones {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.db-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  background: var(--bg3);
+  border-radius: 8px;
+  gap: 5px;
+  border: 1px solid var(--border);
+}
+.db-zone-label { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .04em; }
+.db-zone-dot { width: 12px; height: 12px; border-radius: 50%; }
+.db-zone.alert { border-color: currentColor; }
+
+/* Sécurité — compteur événements */
+.db-sec-count {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.db-sec-number { font-size: 36px; font-weight: 800; line-height: 1; }
+.db-sec-sublabel { font-size: 11px; color: var(--text2); font-weight: 600; text-transform: uppercase; margin-top: 3px; }
 
 /* Barre de progression */
 .progress-bar {
