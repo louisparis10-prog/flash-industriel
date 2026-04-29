@@ -118,6 +118,26 @@ app.get('/api/status/:date', async (req, res) => {
   }
 });
 
+// Données par grade (référence produit) — pour les graphiques grade/comparatif
+app.get('/api/grade', async (req, res) => {
+  try {
+    const { ref } = req.query;
+    if (!ref) return res.json([]);
+    const result = await pool.query(
+      `SELECT session_date, data FROM submissions
+       WHERE service = 'production'
+       AND (data::jsonb->>'m1_ref' = $1 OR data::jsonb->>'m3_ref' = $1)
+       ORDER BY session_date ASC`,
+      [ref]
+    );
+    const rows = result.rows.map(r => ({ date: r.session_date, ...JSON.parse(r.data) }));
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

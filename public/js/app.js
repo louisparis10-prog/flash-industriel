@@ -1,6 +1,9 @@
 // ── STATE ─────────────────────────────────────────────
 let currentDate = new Date().toISOString().slice(0, 10);
 let formData = {};
+let currentM1Ref = null;
+let currentM3Ref = null;
+let currentTrendsMode = 'month';
 
 // ── INIT ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -94,6 +97,15 @@ function initForms() {
       const field = btn.dataset.field;
       btn.closest('.statut-group').querySelectorAll('.statut-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
+
+      // Commentaire conditionnel pour les zones maintenance
+      const commentEl = document.getElementById('zone-comment-' + field);
+      if (commentEl) {
+        const needComment = btn.dataset.val === 'orange' || btn.dataset.val === 'rouge';
+        commentEl.style.display = needComment ? 'block' : 'none';
+        commentEl.classList.toggle('zone-comment-visible', needComment);
+        if (!needComment) { commentEl.value = ''; commentEl.style.border = ''; }
+      }
     });
   });
 
@@ -118,6 +130,21 @@ function collectFormData(form) {
 async function submitForm(service, form) {
   const data = collectFormData(form);
   if (!currentDate) { alert('Veuillez d\'abord sélectionner une date.'); return; }
+
+  // Vérification commentaires zones obligatoires (maintenance)
+  if (service === 'maintenance') {
+    const visible = form.querySelectorAll('.zone-comment-visible');
+    for (const el of visible) {
+      if (!el.value.trim()) {
+        el.style.border = '2px solid var(--rouge)';
+        el.placeholder = 'Commentaire obligatoire pour ce statut !';
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+        return;
+      }
+      el.style.border = '';
+    }
+  }
 
   try {
     const res = await fetch(`/api/submissions/${currentDate}/${service}`, {
@@ -287,6 +314,11 @@ function renderDashboard(d, status, date) {
   const maint = d.maintenance || null;
   const util  = d.utilites    || null;
 
+  // Mémoriser les refs produit pour les graphiques grade
+  currentM1Ref = prod?.m1_ref || null;
+  currentM3Ref = prod?.m3_ref || null;
+  currentTrendsMode = 'month';
+
   // Statut global
   const statuts = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global].filter(Boolean);
   let globalStatut = 'vert';
@@ -454,8 +486,13 @@ function renderDashboard(d, status, date) {
 
   // ── Corps Tendances ──
   const trendsBody = `
-    <div id="trends-month-label" style="font-size:12px;color:var(--text2);margin-bottom:14px;font-weight:600;"></div>
-    <div id="trends-loading" style="text-align:center;color:var(--text2);padding:24px;"><p>Chargement des tendances...</p></div>
+    <div class="trend-tabs">
+      <button class="trend-tab active" id="tab-month" onclick="setTrendsMode('month')">Mois</button>
+      <button class="trend-tab" id="tab-grade" onclick="setTrendsMode('grade')">Grade actuel</button>
+      <button class="trend-tab" id="tab-comparatif" onclick="setTrendsMode('comparatif')">Comparatif grade</button>
+    </div>
+    <div id="trends-context" style="font-size:12px;color:var(--text2);margin-bottom:12px;font-weight:600;min-height:16px;"></div>
+    <div id="trends-loading" style="text-align:center;color:var(--text2);padding:24px;display:none;"><p>Chargement...</p></div>
     <div id="trends-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:14px;">
       <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #3b82f6">
         <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:10px;">Production M1 (t)</div>
@@ -558,12 +595,12 @@ function renderDashboard(d, status, date) {
         util ? feu(util.statut_global,   util.statut_global==='vert'?'OK':util.statut_global==='orange'?'Vigilance':'Critique')    : '<span class="feu feu-gris">En attente</span>',
         utilBody)}
 
-      <!-- Tendances du mois -->
+      <!-- Tendances / Grade -->
       <div class="acc-panel" id="acc-trends">
         <div class="acc-header" onclick="toggleAcc('trends')">
           <div class="acc-left">
             <div class="dot" style="background:var(--swm)"></div>
-            <span class="acc-name">Tendances du mois</span>
+            <span class="acc-name">Tendances &amp; Grade</span>
             <span class="acc-animateur">${monthNames[+month]} ${year}</span>
           </div>
           <div class="acc-right"><span class="acc-chevron">›</span></div>
@@ -625,127 +662,189 @@ function toggleAcc(id) {
   }
 }
 
-// ── TREND CHARTS ──────────────────────────────────────
+// ── CHARTS ────────────────────────────────────────────
 let activeCharts = {};
 
-async function loadTrendCharts(date) {
-  // Destroy existing Chart instances
+function createChart(canvasId, color, dataReal, dataObj, unit, labels, prevData = null) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const datasets = [];
+  datasets.push({
+    label: prevData ? 'Grade actuel' : 'Réel',
+    data: dataReal,
+    borderColor: color,
+    backgroundColor: color + '18',
+    borderWidth: 2.5,
+    pointRadius: 4,
+    pointBackgroundColor: color,
+    pointBorderColor: '#fff',
+    pointBorderWidth: 1.5,
+    tension: 0.3,
+    fill: !prevData,
+    spanGaps: true,
+  });
+  if (prevData) {
+    datasets.push({ label: 'Grade précédent', data: prevData, borderColor: '#94a3b8', borderDash: [6,4], borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#94a3b8', tension: 0.3, fill: false, spanGaps: true });
+  } else if (dataObj) {
+    datasets.push({ label: 'Objectif', data: dataObj, borderColor: '#f59e0b', borderDash: [5,4], borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#f59e0b', tension: 0.1, fill: false, spanGaps: true });
+  }
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 16 } },
+        tooltip: { callbacks: { label: c => `${c.dataset.label} : ${c.parsed.y ?? '—'} ${unit}` } }
+      },
+      scales: {
+        x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(51,65,85,.3)' } },
+        y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: 'rgba(51,65,85,.3)' } }
+      }
+    }
+  });
+  activeCharts[canvasId] = chart;
+}
+
+function resetChartArea() {
   Object.values(activeCharts).forEach(c => { try { c.destroy(); } catch(e){} });
   activeCharts = {};
+  const loadingEl = document.getElementById('trends-loading');
+  const gridEl    = document.getElementById('trends-grid');
+  if (loadingEl) { loadingEl.innerHTML = '<p>Chargement...</p>'; loadingEl.style.display = 'block'; }
+  if (gridEl)    gridEl.style.display = 'none';
+}
+
+function groupIntoRuns(rows) {
+  if (!rows.length) return [];
+  const runs = []; let current = [rows[0]];
+  for (let i = 1; i < rows.length; i++) {
+    const diff = (new Date(rows[i].date+'T12:00:00') - new Date(rows[i-1].date+'T12:00:00')) / 86400000;
+    if (diff <= 4) { current.push(rows[i]); } else { runs.push(current); current = [rows[i]]; }
+  }
+  runs.push(current);
+  return runs;
+}
+
+function pad(arr, len) { return [...arr, ...Array(Math.max(0, len - arr.length)).fill(null)]; }
+function extractField(run, field) { return run.map(r => { const v = parseFloat(r[field]); return isNaN(v) ? null : v; }); }
+
+function setTrendsMode(mode) {
+  currentTrendsMode = mode;
+  ['month','grade','comparatif'].forEach(m => document.getElementById('tab-'+m)?.classList.toggle('active', m === mode));
+  resetChartArea();
+  const date = document.getElementById('dash-date-picker').value;
+  if (mode === 'month')      loadTrendCharts(date);
+  else if (mode === 'grade') loadGradeCharts(date);
+  else                        loadComparativeCharts(date);
+}
+
+async function loadTrendCharts(date) {
+  resetChartArea();
+  const [year, month] = date.split('-');
+  const monthNames = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const contextEl = document.getElementById('trends-context');
+  const loadingEl = document.getElementById('trends-loading');
+  const gridEl    = document.getElementById('trends-grid');
+  if (!gridEl) return;
+  if (contextEl) contextEl.textContent = `Données du mois de ${monthNames[+month]} ${year}`;
 
   const [year, month] = date.split('-');
   const monthNames = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-
-  const labelEl = document.getElementById('trends-month-label');
-  const loadingEl = document.getElementById('trends-loading');
-  const gridEl = document.getElementById('trends-grid');
-  if (!labelEl) return;
-
-  labelEl.textContent = `Données du mois de ${monthNames[+month]} ${year}`;
-  loadingEl.style.display = 'block';
-  gridEl.style.display = 'none';
 
   try {
     const res = await fetch(`/api/monthly/${year}/${month}`);
     const byDate = await res.json();
     const dates = Object.keys(byDate).sort();
+    if (!dates.length) { if (loadingEl) loadingEl.innerHTML = '<p>Aucune donnée pour ce mois.</p>'; return; }
+    const labels = dates.map(d => new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}));
+    const extract = (svc, fld) => dates.map(d => { const v = byDate[d]?.[svc]?.[fld]; const n = parseFloat(v); return isNaN(n)?null:n; });
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (gridEl) gridEl.style.display = 'grid';
+    createChart('chart-prod-m1','#3b82f6',extract('production','m1_prod_cumul'),extract('production','m1_prod_cible'),'t',labels);
+    createChart('chart-prod-m3','#10b981',extract('production','m3_prod_cumul'),extract('production','m3_prod_cible'),'t',labels);
+    createChart('chart-phnr-m1','#8b5cf6',extract('production','m1_phnr_j1'),extract('production','m1_phnr_cible'),'kg/h',labels);
+    createChart('chart-phnr-m3','#8b5cf6',extract('production','m3_phnr_j1'),extract('production','m3_phnr_cible'),'kg/h',labels);
+    createChart('chart-rdt-m1','#22c55e',extract('production','m1_rdt_cumul'),extract('production','m1_rdt_cible'),'%',labels);
+    createChart('chart-rdt-m3','#22c55e',extract('production','m3_rdt_cumul'),extract('production','m3_rdt_cible'),'%',labels);
+  } catch(e) {
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement.</p>';
+    console.error(e);
+  }
+}
 
-    if (dates.length === 0) {
-      loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune donnée pour ce mois.</p>';
+async function loadGradeCharts(date) {
+  const contextEl = document.getElementById('trends-context');
+  const loadingEl = document.getElementById('trends-loading');
+  const gridEl    = document.getElementById('trends-grid');
+  if (!gridEl) return;
+  if (!currentM1Ref && !currentM3Ref) {
+    if (contextEl) contextEl.textContent = '';
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune référence produit pour cette date.<br>Remplissez d\'abord le formulaire Production.</p>';
+    return;
+  }
+  try {
+    const m1Rows = currentM1Ref ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM1Ref)}`).then(r=>r.json()) : [];
+    const m3Rows = (currentM3Ref && currentM3Ref !== currentM1Ref) ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM3Ref)}`).then(r=>r.json()) : m1Rows;
+    const m1Run = groupIntoRuns(m1Rows.filter(r=>r.m1_ref===currentM1Ref)).at(-1) || [];
+    const m3Run = groupIntoRuns(m3Rows.filter(r=>r.m3_ref===currentM3Ref)).at(-1) || [];
+    const maxLen = Math.max(m1Run.length, m3Run.length, 1);
+    const labels = Array.from({length:maxLen},(_,i)=>`J${i+1}`);
+    const startDate = m1Run[0]?.date || m3Run[0]?.date || date;
+    const startLabel = new Date(startDate+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+    const refLabel = [currentM1Ref, currentM3Ref!==currentM1Ref?currentM3Ref:null].filter(Boolean).join(' / ');
+    if (contextEl) contextEl.textContent = `Grade "${refLabel}" — depuis le ${startLabel} · J${Math.max(m1Run.length,m3Run.length)}`;
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (gridEl) gridEl.style.display = 'grid';
+    createChart('chart-prod-m1','#3b82f6',pad(extractField(m1Run,'m1_prod_cumul'),maxLen),pad(extractField(m1Run,'m1_prod_cible'),maxLen),'t',labels);
+    createChart('chart-prod-m3','#10b981',pad(extractField(m3Run,'m3_prod_cumul'),maxLen),pad(extractField(m3Run,'m3_prod_cible'),maxLen),'t',labels);
+    createChart('chart-phnr-m1','#8b5cf6',pad(extractField(m1Run,'m1_phnr_j1'),maxLen),pad(extractField(m1Run,'m1_phnr_cible'),maxLen),'kg/h',labels);
+    createChart('chart-phnr-m3','#8b5cf6',pad(extractField(m3Run,'m3_phnr_j1'),maxLen),pad(extractField(m3Run,'m3_phnr_cible'),maxLen),'kg/h',labels);
+    createChart('chart-rdt-m1','#22c55e',pad(extractField(m1Run,'m1_rdt_cumul'),maxLen),pad(extractField(m1Run,'m1_rdt_cible'),maxLen),'%',labels);
+    createChart('chart-rdt-m3','#22c55e',pad(extractField(m3Run,'m3_rdt_cumul'),maxLen),pad(extractField(m3Run,'m3_rdt_cible'),maxLen),'%',labels);
+  } catch(e) {
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement du grade.</p>';
+    console.error(e);
+  }
+}
+
+async function loadComparativeCharts(date) {
+  const contextEl = document.getElementById('trends-context');
+  const loadingEl = document.getElementById('trends-loading');
+  const gridEl    = document.getElementById('trends-grid');
+  if (!gridEl) return;
+  if (!currentM1Ref && !currentM3Ref) {
+    if (contextEl) contextEl.textContent = '';
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune référence produit pour cette date.</p>';
+    return;
+  }
+  try {
+    const m1Rows = currentM1Ref ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM1Ref)}`).then(r=>r.json()) : [];
+    const m3Rows = (currentM3Ref && currentM3Ref !== currentM1Ref) ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM3Ref)}`).then(r=>r.json()) : m1Rows;
+    const m1Runs = groupIntoRuns(m1Rows.filter(r=>r.m1_ref===currentM1Ref));
+    const m3Runs = groupIntoRuns(m3Rows.filter(r=>r.m3_ref===currentM3Ref));
+    const m1Cur=m1Runs.at(-1)||[], m1Prev=m1Runs.at(-2)||[];
+    const m3Cur=m3Runs.at(-1)||[], m3Prev=m3Runs.at(-2)||[];
+    if (!m1Prev.length && !m3Prev.length) {
+      if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2);line-height:1.7">Aucun grade précédent pour cette référence.<br>Le comparatif nécessite au moins <strong>2 passages</strong> sur ce produit.</p>';
       return;
     }
-
-    const labels = dates.map(d => {
-      const dd = new Date(d + 'T12:00:00');
-      return dd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    });
-
-    const extract = (service, field) => dates.map(d => {
-      const val = byDate[d]?.[service]?.[field];
-      if (val === undefined || val === null || val === '') return null;
-      const n = parseFloat(val);
-      return isNaN(n) ? null : n;
-    });
-
-    const makeChart = (canvasId, color, dataReal, dataObj, unit) => {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Réel',
-              data: dataReal,
-              borderColor: color,
-              backgroundColor: color + '18',
-              borderWidth: 2.5,
-              pointRadius: 4,
-              pointBackgroundColor: color,
-              pointBorderColor: '#0f172a',
-              pointBorderWidth: 1.5,
-              tension: 0.3,
-              fill: true,
-              spanGaps: true,
-            },
-            {
-              label: 'Objectif',
-              data: dataObj,
-              borderColor: '#f59e0b',
-              borderDash: [5, 4],
-              borderWidth: 2,
-              pointRadius: 3,
-              pointBackgroundColor: '#f59e0b',
-              pointBorderColor: '#0f172a',
-              tension: 0.1,
-              fill: false,
-              spanGaps: true,
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true,
-              labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 16 }
-            },
-            tooltip: {
-              callbacks: {
-                label: ctx => `${ctx.dataset.label} : ${ctx.parsed.y !== null ? ctx.parsed.y : '—'} ${unit}`
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: { color: '#64748b', font: { size: 10 } },
-              grid: { color: 'rgba(51,65,85,.35)' }
-            },
-            y: {
-              ticks: { color: '#64748b', font: { size: 10 } },
-              grid: { color: 'rgba(51,65,85,.35)' }
-            }
-          }
-        }
-      });
-      activeCharts[canvasId] = chart;
-    };
-
-    loadingEl.style.display = 'none';
-    gridEl.style.display = 'grid';
-
-    makeChart('chart-prod-m1', '#3b82f6', extract('production','m1_prod_cumul'), extract('production','m1_prod_cible'), 't');
-    makeChart('chart-prod-m3', '#10b981', extract('production','m3_prod_cumul'), extract('production','m3_prod_cible'), 't');
-    makeChart('chart-phnr-m1', '#8b5cf6', extract('production','m1_phnr_j1'),    extract('production','m1_phnr_cible'), 'kg/h');
-    makeChart('chart-phnr-m3', '#8b5cf6', extract('production','m3_phnr_j1'),    extract('production','m3_phnr_cible'), 'kg/h');
-    makeChart('chart-rdt-m1',  '#22c55e', extract('production','m1_rdt_cumul'),  extract('production','m1_rdt_cible'),  '%');
-    makeChart('chart-rdt-m3',  '#22c55e', extract('production','m3_rdt_cumul'),  extract('production','m3_rdt_cible'),  '%');
-
+    const maxLen = Math.max(m1Cur.length,m1Prev.length,m3Cur.length,m3Prev.length,1);
+    const labels = Array.from({length:maxLen},(_,i)=>`J${i+1}`);
+    const fmtD = run => run[0]?.date ? new Date(run[0].date+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) : '—';
+    if (contextEl) contextEl.textContent = `Comparatif : grade actuel (dép. ${fmtD(m1Cur)}) vs grade précédent (dép. ${fmtD(m1Prev)})`;
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (gridEl) gridEl.style.display = 'grid';
+    createChart('chart-prod-m1','#3b82f6',pad(extractField(m1Cur,'m1_prod_cumul'),maxLen),null,'t',labels,pad(extractField(m1Prev,'m1_prod_cumul'),maxLen));
+    createChart('chart-prod-m3','#10b981',pad(extractField(m3Cur,'m3_prod_cumul'),maxLen),null,'t',labels,pad(extractField(m3Prev,'m3_prod_cumul'),maxLen));
+    createChart('chart-phnr-m1','#8b5cf6',pad(extractField(m1Cur,'m1_phnr_j1'),maxLen),null,'kg/h',labels,pad(extractField(m1Prev,'m1_phnr_j1'),maxLen));
+    createChart('chart-phnr-m3','#8b5cf6',pad(extractField(m3Cur,'m3_phnr_j1'),maxLen),null,'kg/h',labels,pad(extractField(m3Prev,'m3_phnr_j1'),maxLen));
+    createChart('chart-rdt-m1','#22c55e',pad(extractField(m1Cur,'m1_rdt_cumul'),maxLen),null,'%',labels,pad(extractField(m1Prev,'m1_rdt_cumul'),maxLen));
+    createChart('chart-rdt-m3','#22c55e',pad(extractField(m3Cur,'m3_rdt_cumul'),maxLen),null,'%',labels,pad(extractField(m3Prev,'m3_rdt_cumul'),maxLen));
   } catch(e) {
-    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement des tendances.</p>';
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement du comparatif.</p>';
     console.error(e);
   }
 }

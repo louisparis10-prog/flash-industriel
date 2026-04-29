@@ -657,6 +657,30 @@ body {
 }
 .acc-left .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
+/* Trend tabs */
+.trend-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.trend-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.trend-tab:hover { background: var(--bg3); color: var(--text1); }
+.trend-tab.active {
+  background: var(--swm);
+  color: #fff;
+  border-color: var(--swm);
+}
+
 /* Pulse */
 .pulse {
   display: inline-block;
