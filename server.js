@@ -138,6 +138,19 @@ app.get('/api/grade', async (req, res) => {
   }
 });
 
+// Tous les jours de production (pour comparatif inter-grades)
+app.get('/api/all-grades', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT session_date, data FROM submissions WHERE service = 'production' ORDER BY session_date ASC`
+    );
+    const rows = result.rows.map(r => ({ date: r.session_date, ...JSON.parse(r.data) }));
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

@@ -872,101 +872,85 @@ async function loadGradeCharts(date) {
   }
 }
 
+// Groupe les runs d'une machine par changement de référence OU par gap de jours
+function groupRunsByMachine(rows, refField) {
+  if (!rows.length) return [];
+  const runs = [];
+  let current = [rows[0]];
+  let currentRef = rows[0][refField];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const ref = row[refField];
+    const gap = (new Date(row.date+'T12:00:00') - new Date(rows[i-1].date+'T12:00:00')) / 86400000;
+    if (ref === currentRef && gap <= 4) {
+      current.push(row);
+    } else {
+      if (current.length && currentRef) runs.push({ ref: currentRef, days: current });
+      current = [row];
+      currentRef = ref;
+    }
+  }
+  if (current.length && currentRef) runs.push({ ref: currentRef, days: current });
+  return runs;
+}
+
 async function loadComparativeCharts(date) {
   const contextEl = document.getElementById('trends-context');
   const loadingEl = document.getElementById('trends-loading');
   const gridEl    = document.getElementById('trends-grid');
   if (!gridEl) return;
-  if (!currentM1Ref && !currentM3Ref) {
-    if (contextEl) contextEl.textContent = '';
-    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune référence produit pour cette date.</p>';
-    return;
-  }
+
   try {
-    const m1Rows = currentM1Ref ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM1Ref)}`).then(r=>r.json()) : [];
-    const m3Rows = (currentM3Ref && currentM3Ref !== currentM1Ref) ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM3Ref)}`).then(r=>r.json()) : m1Rows;
-    const m1Runs = groupIntoRuns(m1Rows.filter(r=>r.m1_ref===currentM1Ref));
-    const m3Runs = groupIntoRuns(m3Rows.filter(r=>r.m3_ref===currentM3Ref));
-    const m1Cur=m1Runs.at(-1)||[], m1Prev=m1Runs.at(-2)||[];
-    const m3Cur=m3Runs.at(-1)||[], m3Prev=m3Runs.at(-2)||[];
-    if (!m1Prev.length && !m3Prev.length) {
-      // Pas d'historique → basculer sur comparatif M1 vs M3
-      await loadM1vsM3Charts(date);
+    // Fetch tous les jours de production (toutes références confondues)
+    const allRows = await fetch('/api/all-grades').then(r => r.json());
+    if (!allRows.length) {
+      if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune donnée de production.</p>';
       return;
     }
-    const maxLen = Math.max(m1Cur.length,m1Prev.length,m3Cur.length,m3Prev.length,1);
+
+    const m1Runs = groupRunsByMachine(allRows.filter(r => r.m1_ref), 'm1_ref');
+    const m3Runs = groupRunsByMachine(allRows.filter(r => r.m3_ref), 'm3_ref');
+
+    const m1Cur  = m1Runs.at(-1);
+    const m1Prev = m1Runs.at(-2);
+    const m3Cur  = m3Runs.at(-1);
+    const m3Prev = m3Runs.at(-2);
+
+    if (!m1Prev && !m3Prev) {
+      if (loadingEl) loadingEl.innerHTML = `
+        <div style="line-height:1.8;font-size:13px;color:var(--text2)">
+          <strong style="color:var(--text)">Premier grade enregistré</strong><br>
+          Le comparatif sera disponible dès le 2ème grade.<br>
+          Continuez à saisir vos données quotidiennes — la comparaison se fera automatiquement.
+        </div>`;
+      return;
+    }
+
+    const fmtD = run => run?.days[0]?.date
+      ? new Date(run.days[0].date+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})
+      : '—';
+    const maxLen = Math.max(
+      m1Cur?.days.length||0, m1Prev?.days.length||0,
+      m3Cur?.days.length||0, m3Prev?.days.length||0, 1
+    );
     const labels = Array.from({length:maxLen},(_,i)=>`J${i+1}`);
-    const fmtD = run => run[0]?.date ? new Date(run[0].date+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) : '—';
-    if (contextEl) contextEl.textContent = `Comparatif historique — grade actuel (dép. ${fmtD(m1Cur)}) vs grade précédent (dép. ${fmtD(m1Prev)})`;
+
+    if (contextEl) contextEl.textContent =
+      `Grade actuel (dép. ${fmtD(m1Cur)}) vs Grade précédent (dép. ${fmtD(m1Prev)})`;
     if (loadingEl) loadingEl.style.display = 'none';
     if (gridEl) gridEl.style.display = 'grid';
-    createChart('chart-prod-m1','#3b82f6',pad(extractField(m1Cur,'m1_prod_cumul'),maxLen),null,'t',labels,pad(extractField(m1Prev,'m1_prod_cumul'),maxLen));
-    createChart('chart-prod-m3','#10b981',pad(extractField(m3Cur,'m3_prod_cumul'),maxLen),null,'t',labels,pad(extractField(m3Prev,'m3_prod_cumul'),maxLen));
-    createChart('chart-phnr-m1','#8b5cf6',pad(extractField(m1Cur,'m1_phnr_j1'),maxLen),null,'kg/h',labels,pad(extractField(m1Prev,'m1_phnr_j1'),maxLen));
-    createChart('chart-phnr-m3','#8b5cf6',pad(extractField(m3Cur,'m3_phnr_j1'),maxLen),null,'kg/h',labels,pad(extractField(m3Prev,'m3_phnr_j1'),maxLen));
-    createChart('chart-rdt-m1','#22c55e',pad(extractField(m1Cur,'m1_rdt_cumul'),maxLen),null,'%',labels,pad(extractField(m1Prev,'m1_rdt_cumul'),maxLen));
-    createChart('chart-rdt-m3','#22c55e',pad(extractField(m3Cur,'m3_rdt_cumul'),maxLen),null,'%',labels,pad(extractField(m3Prev,'m3_rdt_cumul'),maxLen));
+
+    const m1C = m1Cur?.days||[], m1P = m1Prev?.days||[];
+    const m3C = m3Cur?.days||[], m3P = m3Prev?.days||[];
+
+    createChart('chart-prod-m1','#3b82f6',pad(extractField(m1C,'m1_prod_cumul'),maxLen),null,'t',labels,pad(extractField(m1P,'m1_prod_cumul'),maxLen));
+    createChart('chart-prod-m3','#10b981',pad(extractField(m3C,'m3_prod_cumul'),maxLen),null,'t',labels,pad(extractField(m3P,'m3_prod_cumul'),maxLen));
+    createChart('chart-phnr-m1','#8b5cf6',pad(extractField(m1C,'m1_phnr_j1'),maxLen),null,'kg/h',labels,pad(extractField(m1P,'m1_phnr_j1'),maxLen));
+    createChart('chart-phnr-m3','#8b5cf6',pad(extractField(m3C,'m3_phnr_j1'),maxLen),null,'kg/h',labels,pad(extractField(m3P,'m3_phnr_j1'),maxLen));
+    createChart('chart-rdt-m1','#22c55e',pad(extractField(m1C,'m1_rdt_cumul'),maxLen),null,'%',labels,pad(extractField(m1P,'m1_rdt_cumul'),maxLen));
+    createChart('chart-rdt-m3','#22c55e',pad(extractField(m3C,'m3_rdt_cumul'),maxLen),null,'%',labels,pad(extractField(m3P,'m3_rdt_cumul'),maxLen));
   } catch(e) {
     if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement du comparatif.</p>';
-    console.error(e);
-  }
-}
-
-// ── Comparatif M1 vs M3 (même grade, machines différentes) ──
-async function loadM1vsM3Charts(date) {
-  const contextEl = document.getElementById('trends-context');
-  const loadingEl = document.getElementById('trends-loading');
-  const gridEl    = document.getElementById('trends-grid');
-  if (!gridEl) return;
-
-  if (!currentM1Ref && !currentM3Ref) {
-    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune référence produit pour cette date.</p>';
-    return;
-  }
-  try {
-    const m1Rows = currentM1Ref ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM1Ref)}`).then(r=>r.json()) : [];
-    const m3Rows = (currentM3Ref && currentM3Ref !== currentM1Ref)
-      ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM3Ref)}`).then(r=>r.json())
-      : m1Rows;
-
-    const m1Run = groupIntoRuns(m1Rows.filter(r=>r.m1_ref===currentM1Ref)).at(-1) || [];
-    const m3Run = groupIntoRuns(m3Rows.filter(r=>r.m3_ref===currentM3Ref)).at(-1) || [];
-    const maxLen = Math.max(m1Run.length, m3Run.length, 1);
-    const labels = Array.from({length:maxLen},(_,i)=>`J${i+1}`);
-
-    const startDate = m1Run[0]?.date || m3Run[0]?.date || date;
-    const startLabel = new Date(startDate+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
-    if (contextEl) contextEl.textContent = `Comparatif Machine 1 vs Machine 3 — depuis le ${startLabel}`;
-
-    // Passer en grille 3 charts pleine largeur (Production, Rendement, PHNR)
-    gridEl.innerHTML = `
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #3b82f6;grid-column:span 2">
-        <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:10px;">Production (t) — M1 <span style="color:#10b981">vs M3</span></div>
-        <div style="position:relative;height:150px;"><canvas id="chart-cmp-prod"></canvas></div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e;grid-column:span 2">
-        <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement (%) — M1 <span style="color:#10b981">vs M3</span></div>
-        <div style="position:relative;height:150px;"><canvas id="chart-cmp-rdt"></canvas></div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6;grid-column:span 2">
-        <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR (kg/h) — M1 <span style="color:#10b981">vs M3</span></div>
-        <div style="position:relative;height:150px;"><canvas id="chart-cmp-phnr"></canvas></div>
-      </div>`;
-    if (loadingEl) loadingEl.style.display = 'none';
-    if (gridEl) gridEl.style.display = 'grid';
-
-    const m3Line = { label: 'Machine 3', color: '#10b981' };
-    createChart('chart-cmp-prod','#3b82f6',
-      pad(extractField(m1Run,'m1_prod_cumul'),maxLen), null, 't', labels, null,
-      { ...m3Line, data: pad(extractField(m3Run,'m3_prod_cumul'),maxLen) });
-    createChart('chart-cmp-rdt','#3b82f6',
-      pad(extractField(m1Run,'m1_rdt_cumul'),maxLen), null, '%', labels, null,
-      { ...m3Line, data: pad(extractField(m3Run,'m3_rdt_cumul'),maxLen) });
-    createChart('chart-cmp-phnr','#3b82f6',
-      pad(extractField(m1Run,'m1_phnr_j1'),maxLen), null, 'kg/h', labels, null,
-      { ...m3Line, data: pad(extractField(m3Run,'m3_phnr_j1'),maxLen) });
-  } catch(e) {
-    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement.</p>';
     console.error(e);
   }
 }
