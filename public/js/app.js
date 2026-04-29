@@ -419,7 +419,7 @@ function renderDashboard(d, status, date) {
   const prodBody = prod ? `
     <div class="db-machines">
       <div>
-        <div class="db-machine-header">Machine 1 ${prod.m1_ref ? `<span class="db-ref">${prod.m1_ref}</span>` : ''} ${feu(prod.m1_statut)}</div>
+        <div class="db-machine-header">Machine 1 ${feu(prod.m1_statut)}</div>
         ${dbProgress('Production', prod.m1_prod_cumul, prod.m1_prod_cible, 't')}
         ${String(prod.m1_rdt_cible||'').includes('/') ? dbSimple('Rendement', prod.m1_rdt_cumul != null ? prod.m1_rdt_cumul+'%' : null, 'cible '+prod.m1_rdt_cible) : dbProgress('Rendement', prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}
         ${dbSimple('PHNR J-1', prod.m1_phnr_j1 ? prod.m1_phnr_j1+' kg/h' : null, prod.m1_phnr_cible ? 'obj. '+prod.m1_phnr_cible : '')}
@@ -429,7 +429,7 @@ function renderDashboard(d, status, date) {
         ${dbInfo(prod.m1_info||null)}
       </div>
       <div>
-        <div class="db-machine-header">Machine 3 ${prod.m3_ref ? `<span class="db-ref">${prod.m3_ref}</span>` : ''} ${feu(prod.m3_statut)}</div>
+        <div class="db-machine-header">Machine 3 ${feu(prod.m3_statut)}</div>
         ${dbProgress('Production', prod.m3_prod_cumul, prod.m3_prod_cible, 't')}
         ${String(prod.m3_rdt_cible||'').includes('/') ? dbSimple('Rendement', prod.m3_rdt_cumul != null ? prod.m3_rdt_cumul+'%' : null, 'cible '+prod.m3_rdt_cible) : dbProgress('Rendement', prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}
         ${dbSimple('PHNR J-1', prod.m3_phnr_j1 ? prod.m3_phnr_j1+' kg/h' : null, prod.m3_phnr_cible ? 'obj. '+prod.m3_phnr_cible : '')}
@@ -446,7 +446,7 @@ function renderDashboard(d, status, date) {
   const qualBody = qual ? `
     <div class="db-machines">
       <div>
-        <div class="db-machine-header">Machine 1 ${qual.m1_produit ? `<span class="db-ref">${qual.m1_produit}</span>` : ''} ${feu(qual.m1_resultat)}</div>
+        <div class="db-machine-header">Machine 1 ${feu(qual.m1_resultat)}</div>
         ${qual.m1_tc_reel ? dbProgress('TC %', qual.m1_tc_reel, parseFloat(qual.m1_tc_cible)||null, '%') : ''}
         ${qual.m1_perco_reel ? dbProgress('E% Perco', qual.m1_perco_reel, qual.m1_perco_cible, '%') : ''}
         ${qual.m1_pir && qual.m1_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m1_pir) : ''}
@@ -456,7 +456,7 @@ function renderDashboard(d, status, date) {
         ${qual.m1_consigne ? dbInfo(qual.m1_consigne, 'rgba(59,130,246,.08)', '#2563eb') : ''}
       </div>
       <div>
-        <div class="db-machine-header">Machine 3 ${qual.m3_produit ? `<span class="db-ref">${qual.m3_produit}</span>` : ''} ${feu(qual.m3_resultat)}</div>
+        <div class="db-machine-header">Machine 3 ${feu(qual.m3_resultat)}</div>
         ${qual.m3_tc_reel ? dbProgress('TC %', qual.m3_tc_reel, parseFloat(qual.m3_tc_cible)||null, '%') : ''}
         ${qual.m3_perco_reel ? dbProgress('E% Perco', qual.m3_perco_reel, qual.m3_perco_cible, '%') : ''}
         ${qual.m3_pir && qual.m3_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m3_pir) : ''}
@@ -560,30 +560,7 @@ function renderDashboard(d, status, date) {
     <div id="trends-context" style="font-size:12px;color:var(--text2);margin-bottom:12px;font-weight:600;min-height:16px;"></div>
     <div id="trends-loading" style="text-align:center;color:var(--text2);padding:24px;display:none;"><p>Chargement...</p></div>
     <div id="trends-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:14px;">
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #3b82f6">
-        <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:10px;">Production M1 (t)</div>
-        <div style="position:relative;height:130px;"><canvas id="chart-prod-m1"></canvas></div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #10b981">
-        <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;margin-bottom:10px;">Production M3 (t)</div>
-        <div style="position:relative;height:130px;"><canvas id="chart-prod-m3"></canvas></div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
-        <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR M1 (kg/h)</div>
-        <div style="position:relative;height:130px;"><canvas id="chart-phnr-m1"></canvas></div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
-        <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR M3 (kg/h)</div>
-        <div style="position:relative;height:130px;"><canvas id="chart-phnr-m3"></canvas></div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e">
-        <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement M1 (%)</div>
-        <div style="position:relative;height:130px;"><canvas id="chart-rdt-m1"></canvas></div>
-      </div>
-      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e">
-        <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement M3 (%)</div>
-        <div style="position:relative;height:130px;"><canvas id="chart-rdt-m3"></canvas></div>
-      </div>
+      ${standardChartsHTML()}
     </div>
   `;
 
@@ -701,26 +678,72 @@ function toggleAcc(id) {
 // ── CHARTS ────────────────────────────────────────────
 let activeCharts = {};
 
-function createChart(canvasId, color, dataReal, dataObj, unit, labels, prevData = null) {
+// HTML des 6 graphiques standard (partagé entre renderDashboard et resetChartArea)
+function standardChartsHTML() {
+  return `
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #3b82f6">
+      <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:10px;">Production M1 (t)</div>
+      <div style="position:relative;height:130px;"><canvas id="chart-prod-m1"></canvas></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #10b981">
+      <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;margin-bottom:10px;">Production M3 (t)</div>
+      <div style="position:relative;height:130px;"><canvas id="chart-prod-m3"></canvas></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
+      <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR M1 (kg/h)</div>
+      <div style="position:relative;height:130px;"><canvas id="chart-phnr-m1"></canvas></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
+      <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR M3 (kg/h)</div>
+      <div style="position:relative;height:130px;"><canvas id="chart-phnr-m3"></canvas></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e">
+      <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement M1 (%)</div>
+      <div style="position:relative;height:130px;"><canvas id="chart-rdt-m1"></canvas></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e">
+      <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement M3 (%)</div>
+      <div style="position:relative;height:130px;"><canvas id="chart-rdt-m3"></canvas></div>
+    </div>`;
+}
+
+// secondLine = { label, color, data } pour overlay M1 vs M3
+function createChart(canvasId, color, dataReal, dataObj, unit, labels, prevData = null, secondLine = null) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const datasets = [];
+  const firstLabel = secondLine ? 'Machine 1' : (prevData ? 'Grade actuel' : 'Réel');
   datasets.push({
-    label: prevData ? 'Grade actuel' : 'Réel',
+    label: firstLabel,
     data: dataReal,
     borderColor: color,
-    backgroundColor: color + '18',
+    backgroundColor: secondLine ? 'transparent' : color + '18',
     borderWidth: 2.5,
     pointRadius: 4,
     pointBackgroundColor: color,
     pointBorderColor: '#fff',
     pointBorderWidth: 1.5,
     tension: 0.3,
-    fill: !prevData,
+    fill: !prevData && !secondLine,
     spanGaps: true,
   });
-  if (prevData) {
+  if (secondLine) {
+    datasets.push({
+      label: secondLine.label || 'Machine 3',
+      data: secondLine.data,
+      borderColor: secondLine.color,
+      backgroundColor: 'transparent',
+      borderWidth: 2.5,
+      pointRadius: 4,
+      pointBackgroundColor: secondLine.color,
+      pointBorderColor: '#fff',
+      pointBorderWidth: 1.5,
+      tension: 0.3,
+      fill: false,
+      spanGaps: true,
+    });
+  } else if (prevData) {
     datasets.push({ label: 'Grade précédent', data: prevData, borderColor: '#94a3b8', borderDash: [6,4], borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#94a3b8', tension: 0.3, fill: false, spanGaps: true });
   } else if (dataObj) {
     datasets.push({ label: 'Objectif', data: dataObj, borderColor: '#f59e0b', borderDash: [5,4], borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#f59e0b', tension: 0.1, fill: false, spanGaps: true });
@@ -750,7 +773,14 @@ function resetChartArea() {
   const loadingEl = document.getElementById('trends-loading');
   const gridEl    = document.getElementById('trends-grid');
   if (loadingEl) { loadingEl.innerHTML = '<p>Chargement...</p>'; loadingEl.style.display = 'block'; }
-  if (gridEl)    gridEl.style.display = 'none';
+  if (gridEl) {
+    gridEl.style.display = 'none';
+    gridEl.style.gridTemplateColumns = 'repeat(2,1fr)';
+    // Restaurer les 6 canvas si on était en mode comparatif M1 vs M3
+    if (!document.getElementById('chart-prod-m1')) {
+      gridEl.innerHTML = standardChartsHTML();
+    }
+  }
 }
 
 function groupIntoRuns(rows) {
@@ -827,8 +857,7 @@ async function loadGradeCharts(date) {
     const labels = Array.from({length:maxLen},(_,i)=>`J${i+1}`);
     const startDate = m1Run[0]?.date || m3Run[0]?.date || date;
     const startLabel = new Date(startDate+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
-    const refLabel = [currentM1Ref, currentM3Ref!==currentM1Ref?currentM3Ref:null].filter(Boolean).join(' / ');
-    if (contextEl) contextEl.textContent = `Grade "${refLabel}" — depuis le ${startLabel} · J${Math.max(m1Run.length,m3Run.length)}`;
+    if (contextEl) contextEl.textContent = `Grade actuel — depuis le ${startLabel} · J${Math.max(m1Run.length,m3Run.length)}`;
     if (loadingEl) loadingEl.style.display = 'none';
     if (gridEl) gridEl.style.display = 'grid';
     createChart('chart-prod-m1','#3b82f6',pad(extractField(m1Run,'m1_prod_cumul'),maxLen),pad(extractField(m1Run,'m1_prod_cible'),maxLen),'t',labels);
@@ -861,13 +890,14 @@ async function loadComparativeCharts(date) {
     const m1Cur=m1Runs.at(-1)||[], m1Prev=m1Runs.at(-2)||[];
     const m3Cur=m3Runs.at(-1)||[], m3Prev=m3Runs.at(-2)||[];
     if (!m1Prev.length && !m3Prev.length) {
-      if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2);line-height:1.7">Aucun grade précédent pour cette référence.<br>Le comparatif nécessite au moins <strong>2 passages</strong> sur ce produit.</p>';
+      // Pas d'historique → basculer sur comparatif M1 vs M3
+      await loadM1vsM3Charts(date);
       return;
     }
     const maxLen = Math.max(m1Cur.length,m1Prev.length,m3Cur.length,m3Prev.length,1);
     const labels = Array.from({length:maxLen},(_,i)=>`J${i+1}`);
     const fmtD = run => run[0]?.date ? new Date(run[0].date+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) : '—';
-    if (contextEl) contextEl.textContent = `Comparatif : grade actuel (dép. ${fmtD(m1Cur)}) vs grade précédent (dép. ${fmtD(m1Prev)})`;
+    if (contextEl) contextEl.textContent = `Comparatif historique — grade actuel (dép. ${fmtD(m1Cur)}) vs grade précédent (dép. ${fmtD(m1Prev)})`;
     if (loadingEl) loadingEl.style.display = 'none';
     if (gridEl) gridEl.style.display = 'grid';
     createChart('chart-prod-m1','#3b82f6',pad(extractField(m1Cur,'m1_prod_cumul'),maxLen),null,'t',labels,pad(extractField(m1Prev,'m1_prod_cumul'),maxLen));
@@ -878,6 +908,65 @@ async function loadComparativeCharts(date) {
     createChart('chart-rdt-m3','#22c55e',pad(extractField(m3Cur,'m3_rdt_cumul'),maxLen),null,'%',labels,pad(extractField(m3Prev,'m3_rdt_cumul'),maxLen));
   } catch(e) {
     if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement du comparatif.</p>';
+    console.error(e);
+  }
+}
+
+// ── Comparatif M1 vs M3 (même grade, machines différentes) ──
+async function loadM1vsM3Charts(date) {
+  const contextEl = document.getElementById('trends-context');
+  const loadingEl = document.getElementById('trends-loading');
+  const gridEl    = document.getElementById('trends-grid');
+  if (!gridEl) return;
+
+  if (!currentM1Ref && !currentM3Ref) {
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--text2)">Aucune référence produit pour cette date.</p>';
+    return;
+  }
+  try {
+    const m1Rows = currentM1Ref ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM1Ref)}`).then(r=>r.json()) : [];
+    const m3Rows = (currentM3Ref && currentM3Ref !== currentM1Ref)
+      ? await fetch(`/api/grade?ref=${encodeURIComponent(currentM3Ref)}`).then(r=>r.json())
+      : m1Rows;
+
+    const m1Run = groupIntoRuns(m1Rows.filter(r=>r.m1_ref===currentM1Ref)).at(-1) || [];
+    const m3Run = groupIntoRuns(m3Rows.filter(r=>r.m3_ref===currentM3Ref)).at(-1) || [];
+    const maxLen = Math.max(m1Run.length, m3Run.length, 1);
+    const labels = Array.from({length:maxLen},(_,i)=>`J${i+1}`);
+
+    const startDate = m1Run[0]?.date || m3Run[0]?.date || date;
+    const startLabel = new Date(startDate+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+    if (contextEl) contextEl.textContent = `Comparatif Machine 1 vs Machine 3 — depuis le ${startLabel}`;
+
+    // Passer en grille 3 charts pleine largeur (Production, Rendement, PHNR)
+    gridEl.innerHTML = `
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #3b82f6;grid-column:span 2">
+        <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:10px;">Production (t) — M1 <span style="color:#10b981">vs M3</span></div>
+        <div style="position:relative;height:150px;"><canvas id="chart-cmp-prod"></canvas></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e;grid-column:span 2">
+        <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement (%) — M1 <span style="color:#10b981">vs M3</span></div>
+        <div style="position:relative;height:150px;"><canvas id="chart-cmp-rdt"></canvas></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6;grid-column:span 2">
+        <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR (kg/h) — M1 <span style="color:#10b981">vs M3</span></div>
+        <div style="position:relative;height:150px;"><canvas id="chart-cmp-phnr"></canvas></div>
+      </div>`;
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (gridEl) gridEl.style.display = 'grid';
+
+    const m3Line = { label: 'Machine 3', color: '#10b981' };
+    createChart('chart-cmp-prod','#3b82f6',
+      pad(extractField(m1Run,'m1_prod_cumul'),maxLen), null, 't', labels, null,
+      { ...m3Line, data: pad(extractField(m3Run,'m3_prod_cumul'),maxLen) });
+    createChart('chart-cmp-rdt','#3b82f6',
+      pad(extractField(m1Run,'m1_rdt_cumul'),maxLen), null, '%', labels, null,
+      { ...m3Line, data: pad(extractField(m3Run,'m3_rdt_cumul'),maxLen) });
+    createChart('chart-cmp-phnr','#3b82f6',
+      pad(extractField(m1Run,'m1_phnr_j1'),maxLen), null, 'kg/h', labels, null,
+      { ...m3Line, data: pad(extractField(m3Run,'m3_phnr_j1'),maxLen) });
+  } catch(e) {
+    if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement.</p>';
     console.error(e);
   }
 }
