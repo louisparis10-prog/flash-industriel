@@ -751,9 +751,6 @@ async function loadTrendCharts(date) {
   if (!gridEl) return;
   if (contextEl) contextEl.textContent = `Données du mois de ${monthNames[+month]} ${year}`;
 
-  const [year, month] = date.split('-');
-  const monthNames = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-
   try {
     const res = await fetch(`/api/monthly/${year}/${month}`);
     const byDate = await res.json();
