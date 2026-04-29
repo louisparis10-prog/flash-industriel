@@ -421,7 +421,7 @@ function renderDashboard(d, status, date) {
       <div>
         <div class="db-machine-header">Machine 1 ${prod.m1_ref ? `<span class="db-ref">${prod.m1_ref}</span>` : ''} ${feu(prod.m1_statut)}</div>
         ${dbProgress('Production', prod.m1_prod_cumul, prod.m1_prod_cible, 't')}
-        ${dbProgress('Rendement', prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}
+        ${String(prod.m1_rdt_cible||'').includes('/') ? dbSimple('Rendement', prod.m1_rdt_cumul != null ? prod.m1_rdt_cumul+'%' : null, 'cible '+prod.m1_rdt_cible) : dbProgress('Rendement', prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}
         ${dbSimple('PHNR J-1', prod.m1_phnr_j1 ? prod.m1_phnr_j1+' kg/h' : null, prod.m1_phnr_cible ? 'obj. '+prod.m1_phnr_cible : '')}
         ${dbSimple('Arrêts cumulés', prod.m1_arret_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('Casse', prod.m1_casse_cumul||null, '', 'var(--rouge)')}
@@ -431,7 +431,7 @@ function renderDashboard(d, status, date) {
       <div>
         <div class="db-machine-header">Machine 3 ${prod.m3_ref ? `<span class="db-ref">${prod.m3_ref}</span>` : ''} ${feu(prod.m3_statut)}</div>
         ${dbProgress('Production', prod.m3_prod_cumul, prod.m3_prod_cible, 't')}
-        ${dbProgress('Rendement', prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}
+        ${String(prod.m3_rdt_cible||'').includes('/') ? dbSimple('Rendement', prod.m3_rdt_cumul != null ? prod.m3_rdt_cumul+'%' : null, 'cible '+prod.m3_rdt_cible) : dbProgress('Rendement', prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}
         ${dbSimple('PHNR J-1', prod.m3_phnr_j1 ? prod.m3_phnr_j1+' kg/h' : null, prod.m3_phnr_cible ? 'obj. '+prod.m3_phnr_cible : '')}
         ${dbSimple('Arrêts cumulés', prod.m3_arret_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('Casse', prod.m3_casse_cumul||null, '', 'var(--rouge)')}
