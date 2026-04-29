@@ -232,6 +232,7 @@ async function loadDashboard() {
   const date = document.getElementById('dash-date-picker').value;
   if (!date) return;
   currentDate = date;
+  trendsLoaded = false;
   updateHeaderDate();
 
   const [submissionsRes, statusRes] = await Promise.all([
@@ -280,385 +281,348 @@ function progressBar(reel, obj, unite = '') {
 }
 
 function renderDashboard(d, status, date) {
-  const sec = d.securite || null;
-  const prod = d.production || null;
-  const qual = d.qualite || null;
+  const sec   = d.securite    || null;
+  const prod  = d.production  || null;
+  const qual  = d.qualite     || null;
   const maint = d.maintenance || null;
-  const util = d.utilites || null;
+  const util  = d.utilites    || null;
 
-  // Calcul statut global
-  const statuts = [
-    sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global
-  ].filter(Boolean);
+  // Statut global
+  const statuts = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global].filter(Boolean);
   let globalStatut = 'vert';
   if (statuts.includes('rouge')) globalStatut = 'rouge';
   else if (statuts.includes('orange')) globalStatut = 'orange';
-
   const globalLabels = { vert: 'Situation normale', orange: 'Points de vigilance', rouge: 'Situation critique' };
-  const globalIcons = { vert: '✅', orange: '⚠️', rouge: '🚨' };
+  const svcNames = { securite:'Sécurité', production:'Production', qualite:'Qualité', maintenance:'Maintenance', utilites:'Utilités' };
 
-  // Points à investiguer (maintenance)
+  // Points à investiguer
   const points = [];
   if (maint) {
     for (let i = 0; i < 10; i++) {
       const desc = maint[`point_${i}_desc`];
-      if (desc) points.push({
-        desc,
-        machine: maint[`point_${i}_machine`] || '—',
-        responsable: maint[`point_${i}_responsable`] || '—',
-        delai: maint[`point_${i}_delai`] || '—',
-        statut: maint[`point_${i}_statut`] || 'orange'
-      });
+      if (desc) points.push({ desc, machine: maint[`point_${i}_machine`]||'—', responsable: maint[`point_${i}_responsable`]||'—', delai: maint[`point_${i}_delai`]||'—', statut: maint[`point_${i}_statut`]||'orange' });
     }
   }
 
-  // Incidents maintenance
+  // Impacts maintenance
   const impacts = [];
   if (maint) {
     for (let i = 0; i < 10; i++) {
       const desc = maint[`impact_${i}_desc`];
-      if (desc) impacts.push({
-        desc,
-        machine: maint[`impact_${i}_machine`] || '—',
-        duree: maint[`impact_${i}_duree`] || '—',
-        urgence: maint[`impact_${i}_urgence`] || 'rouge'
-      });
+      if (desc) impacts.push({ desc, machine: maint[`impact_${i}_machine`]||'—', duree: maint[`impact_${i}_duree`]||'—', urgence: maint[`impact_${i}_urgence`]||'rouge' });
     }
   }
 
-  const html = `
-    <!-- Statut global -->
-    <div class="global-status">
-      <div class="status-orb orb-${globalStatut}">${globalIcons[globalStatut]}</div>
-      <div class="status-info">
-        <h2>${globalLabels[globalStatut]}</h2>
-        <p>${status.submitted.length}/5 services ont soumis leurs indicateurs
-          ${status.complete ? ' · <strong style="color:var(--vert)">Flash complet</strong>' : ' · <span style="color:var(--orange)">En attente : ' + status.missing.map(s => ({securite:'Sécurité',production:'Production',qualite:'Qualité',maintenance:'Maintenance',utilites:'Utilités'})[s]).join(', ') + '</span>'}
-        </p>
+  // Risques maintenance
+  const risques = [];
+  if (maint) {
+    for (let i = 0; i < 10; i++) {
+      const desc = maint[`risque_${i}_desc`];
+      if (desc) risques.push({ desc, machine: maint[`risque_${i}_machine`]||'—', delai: maint[`risque_${i}_delai`]||'—' });
+    }
+  }
+
+  const [year, month] = date.split('-');
+  const monthNames = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  // ── Helper : panneau accordéon ──
+  function acc(id, color, name, animateur, hasData, statusHtml, bodyHtml) {
+    return `
+      <div class="acc-panel ${hasData ? '' : 'acc-missing'}" id="acc-${id}">
+        <div class="acc-header" ${hasData ? `onclick="toggleAcc('${id}')"` : ''}>
+          <div class="acc-left">
+            <div class="dot" style="background:${color}"></div>
+            <span class="acc-name">${name}</span>
+            ${animateur ? `<span class="acc-animateur">${animateur}</span>` : ''}
+          </div>
+          <div class="acc-right">
+            ${statusHtml}
+            ${hasData ? '<span class="acc-chevron">›</span>' : ''}
+          </div>
+        </div>
+        ${hasData ? `<div class="acc-body" id="acc-body-${id}" style="display:none">${bodyHtml}</div>` : ''}
+      </div>`;
+  }
+
+  // ── Corps Sécurité ──
+  const secBody = sec ? `
+    ${sec.evenements ? `<div style="margin-bottom:12px;padding:10px 12px;background:#ffedd5;border-radius:8px;font-size:13px;color:#9a3412;"><strong>Événement :</strong> ${sec.evenements}</div>` : ''}
+    <div class="metric-row"><span class="metric-name">Nb événements</span><span class="metric-val" style="color:${+sec.nb_evenements>0?'var(--rouge)':'var(--vert)'}">${sec.nb_evenements ?? 0}</span></div>
+    ${sec.commentaire_general ? `<div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${sec.commentaire_general}</div>` : ''}
+  ` : '';
+
+  // ── Corps Production (sans Tournée Terrain) ──
+  const prodBody = prod ? `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+        Machine 1 ${prod.m1_ref ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${prod.m1_ref}</span>` : ''} ${feu(prod.m1_statut)}
       </div>
-      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
-        ${['securite','production','qualite','maintenance','utilites'].map(s => {
-          const ok = status.submitted.includes(s);
-          const names = {securite:'Sécurité',production:'Production',qualite:'Qualité',maintenance:'Maintenance',utilites:'Utilités'};
-          return `<span class="feu ${ok?'feu-vert':'feu-gris'}">${names[s]}</span>`;
-        }).join('')}
-      </div>
+      <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m1_prod_cumul, prod.m1_prod_cible, 't')}</span></div>
+      <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}</span></div>
+      ${prod.m1_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m1_phnr_j1}</strong> kg/h${prod.m1_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m1_phnr_cible}</span>` : ''}</span></div>` : ''}
+      ${prod.m1_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_arret_cumul}</span></div>` : ''}
+      ${prod.m1_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_casse_cumul}</span></div>` : ''}
+      ${prod.m1_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m1_info}</div>` : ''}
     </div>
-
-    <!-- KPIs rapides -->
-    <div class="section-title">Indicateurs clés</div>
-    <div class="kpi-grid">
-      ${prod ? `
-        <div class="kpi-card" style="--kpi-color:${prod.m1_statut==='rouge'?'var(--rouge)':prod.m1_statut==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">Production M1 (t)</div>
-          <div class="kpi-value">${prod.m1_prod_cumul ?? '—'}<span style="font-size:16px"> t</span></div>
-          <div class="kpi-unit">obj. ${prod.m1_prod_cible ?? '—'} t</div>
-          ${prod.m1_prod_cumul && prod.m1_prod_cible ? `<div class="kpi-delta ${+prod.m1_prod_cumul >= +prod.m1_prod_cible ? 'pos':'neg'}">${+prod.m1_prod_cumul >= +prod.m1_prod_cible ? '▲' : '▼'} ${Math.abs(+prod.m1_prod_cumul - +prod.m1_prod_cible).toFixed(1)} t</div>` : ''}
-        </div>
-        <div class="kpi-card" style="--kpi-color:${prod.m3_statut==='rouge'?'var(--rouge)':prod.m3_statut==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">Production M3 (t)</div>
-          <div class="kpi-value">${prod.m3_prod_cumul ?? '—'}<span style="font-size:16px"> t</span></div>
-          <div class="kpi-unit">obj. ${prod.m3_prod_cible ?? '—'} t</div>
-          ${prod.m3_prod_cumul && prod.m3_prod_cible ? `<div class="kpi-delta ${+prod.m3_prod_cumul >= +prod.m3_prod_cible ? 'pos':'neg'}">${+prod.m3_prod_cumul >= +prod.m3_prod_cible ? '▲' : '▼'} ${Math.abs(+prod.m3_prod_cumul - +prod.m3_prod_cible).toFixed(1)} t</div>` : ''}
-        </div>
-      ` : `<div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">Prod. M1</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>
-           <div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">Prod. M3</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>`}
-
-      ${qual ? `
-        <div class="kpi-card" style="--kpi-color:${qual.m1_resultat==='rouge'?'var(--rouge)':qual.m1_resultat==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">TC% Machine 1</div>
-          <div class="kpi-value">${qual.m1_tc_reel ?? '—'}<span style="font-size:16px">%</span></div>
-          <div class="kpi-unit">cible : ${qual.m1_tc_cible ?? '—'}</div>
-        </div>
-        <div class="kpi-card" style="--kpi-color:${qual.m3_resultat==='rouge'?'var(--rouge)':qual.m3_resultat==='orange'?'var(--orange)':'var(--vert)'}">
-          <div class="kpi-label">TC% Machine 3</div>
-          <div class="kpi-value">${qual.m3_tc_reel ?? '—'}<span style="font-size:16px">%</span></div>
-          <div class="kpi-unit">cible : ${qual.m3_tc_cible ?? '—'}</div>
-        </div>
-      ` : `<div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">TC% M1</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>
-           <div class="kpi-card" style="--kpi-color:var(--gris)"><div class="kpi-label">TC% M3</div><div class="kpi-value small" style="color:var(--gris)">En attente</div></div>`}
-
-      <div class="kpi-card" style="--kpi-color:${impacts.length > 0 ? 'var(--rouge)' : 'var(--vert)'}">
-        <div class="kpi-label">Pannes (impact)</div>
-        <div class="kpi-value" style="color:${impacts.length > 0 ? 'var(--rouge)' : 'var(--vert)'}">${maint ? impacts.length : '—'}</div>
-        <div class="kpi-unit">événements maintenance</div>
+    <div style="border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+        Machine 3 ${prod.m3_ref ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${prod.m3_ref}</span>` : ''} ${feu(prod.m3_statut)}
       </div>
-      <div class="kpi-card" style="--kpi-color:${sec?.nb_evenements > 0 ? 'var(--orange)' : 'var(--vert)'}">
-        <div class="kpi-label">Incidents sécu</div>
-        <div class="kpi-value" style="color:${sec?.nb_evenements > 0 ? 'var(--orange)' : 'var(--vert)'}">${sec ? (sec.nb_evenements ?? 0) : '—'}</div>
-        <div class="kpi-unit">événements du jour</div>
-      </div>
+      <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m3_prod_cumul, prod.m3_prod_cible, 't')}</span></div>
+      <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}</span></div>
+      ${prod.m3_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m3_phnr_j1}</strong> kg/h${prod.m3_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m3_phnr_cible}</span>` : ''}</span></div>` : ''}
+      ${prod.m3_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_arret_cumul}</span></div>` : ''}
+      ${prod.m3_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_casse_cumul}</span></div>` : ''}
+      ${prod.m3_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m3_info}</div>` : ''}
     </div>
+  ` : '';
 
-    <!-- Panels services -->
-    <div class="section-title">Détail par service</div>
-    <div class="services-grid">
-
-      <!-- SÉCURITÉ -->
-      <div class="service-panel" style="--accent:var(--securite)">
-        <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--securite)"></div>Sécurité</div>
-          ${sec ? feu(sec.couleur_globale, sec.couleur_globale === 'vert' ? 'OK' : sec.couleur_globale === 'orange' ? 'Vigilance' : 'Critique') : '<span class="feu feu-gris">En attente</span>'}
-        </div>
-        <div class="service-panel-body">
-          ${sec ? `
-            <div class="metric-row"><span class="metric-name">Qualification</span><span class="metric-val">${feu(sec.qualification)}</span></div>
-            <div class="metric-row"><span class="metric-name">Zone déchets</span><span class="metric-val">${feu(sec.zone_dechets)}</span></div>
-            <div class="metric-row"><span class="metric-name">Protection incendie</span><span class="metric-val">${feu(sec.protection_incendie)}</span></div>
-            <div class="metric-row"><span class="metric-name">Utilités / NTOL</span><span class="metric-val">${feu(sec.utilites)}</span></div>
-            <div class="metric-row"><span class="metric-name">Biomasse</span><span class="metric-val">${feu(sec.biomasse)}</span></div>
-            <div class="metric-row"><span class="metric-name">Gaz</span><span class="metric-val">${feu(sec.gaz)}</span></div>
-            <div class="metric-row"><span class="metric-name">Fioul</span><span class="metric-val">${feu(sec.fioul)}</span></div>
-            <div class="metric-row"><span class="metric-name">Air comprimé</span><span class="metric-val">${feu(sec.air_comprime)}</span></div>
-            <div class="metric-row"><span class="metric-name">Énergie</span><span class="metric-val">${feu(sec.efficacite_energetique)}</span></div>
-            ${sec.evenements ? `<div style="margin-top:12px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);"><strong style="color:var(--text)">⚠️ Événements :</strong> ${sec.evenements}</div>` : ''}
-            ${sec.commentaire_general ? `<div style="margin-top:8px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${sec.commentaire_general}</div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
-        </div>
+  // ── Corps Qualité ──
+  const qualBody = qual ? `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+        Machine 1 ${qual.m1_produit ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${qual.m1_produit}</span>` : ''} ${feu(qual.m1_resultat)}
       </div>
-
-      <!-- PRODUCTION -->
-      <div class="service-panel" style="--accent:var(--production)">
-        <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--production)"></div>Production</div>
-          ${prod ? feu(prod.statut_global, prod.statut_global === 'vert' ? 'OK' : prod.statut_global === 'orange' ? 'Écart' : 'Critique') : '<span class="feu feu-gris">En attente</span>'}
-        </div>
-        <div class="service-panel-body">
-          ${prod ? `
-            <div style="margin-bottom:14px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
-                Machine 1 ${prod.m1_ref ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${prod.m1_ref})</span>` : ''} ${feu(prod.m1_statut)}
-              </div>
-              <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.m1_prod_cumul, prod.m1_prod_cible, 't')}
-              </span></div>
-              <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.m1_rdt_cumul, parseFloat(prod.m1_rdt_cible)||null, '%')}
-              </span></div>
-              ${prod.m1_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m1_phnr_j1}</strong> kg/h${prod.m1_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m1_phnr_cible}</span>` : ''}</span></div>` : ''}
-              ${prod.m1_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_arret_cumul}</span></div>` : ''}
-              ${prod.m1_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m1_casse_cumul}</span></div>` : ''}
-              ${prod.m1_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m1_info}</div>` : ''}
-            </div>
-            <div style="border-top:1px solid var(--border);padding-top:14px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
-                Machine 3 ${prod.m3_ref ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${prod.m3_ref})</span>` : ''} ${feu(prod.m3_statut)}
-              </div>
-              <div class="metric-row"><span class="metric-name">Production (t)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.m3_prod_cumul, prod.m3_prod_cible, 't')}
-              </span></div>
-              <div class="metric-row"><span class="metric-name">Rendement (%)</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(prod.m3_rdt_cumul, parseFloat(prod.m3_rdt_cible)||null, '%')}
-              </span></div>
-              ${prod.m3_phnr_j1 ? `<div class="metric-row"><span class="metric-name">PHNR J-1</span><span class="metric-val"><strong>${prod.m3_phnr_j1}</strong> kg/h${prod.m3_phnr_cible ? ` <span style="color:var(--orange);font-size:11px;">/ obj. ${prod.m3_phnr_cible}</span>` : ''}</span></div>` : ''}
-              ${prod.m3_arret_cumul ? `<div class="metric-row"><span class="metric-name">Arrêts</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_arret_cumul}</span></div>` : ''}
-              ${prod.m3_casse_cumul ? `<div class="metric-row"><span class="metric-name">Casse</span><span class="metric-val" style="color:var(--rouge)">${prod.m3_casse_cumul}</span></div>` : ''}
-              ${prod.m3_info ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${prod.m3_info}</div>` : ''}
-            </div>
-            ${(prod.gemba_prep1 || prod.gemba_prep3 || prod.gemba_machine1 || prod.gemba_machine3) ? `
-            <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">TOURNÉE TERRAIN</div>
-              <div class="gemba-grid">
-                <div class="gemba-zone"><div class="gemba-zone-name">Prépa 1</div><div class="gemba-dot" style="background:var(--${prod.gemba_prep1 || 'gris'})"></div></div>
-                <div class="gemba-zone"><div class="gemba-zone-name">Prépa 3</div><div class="gemba-dot" style="background:var(--${prod.gemba_prep3 || 'gris'})"></div></div>
-                <div class="gemba-zone"><div class="gemba-zone-name">Machine 1</div><div class="gemba-dot" style="background:var(--${prod.gemba_machine1 || 'gris'})"></div></div>
-                <div class="gemba-zone"><div class="gemba-zone-name">Machine 3</div><div class="gemba-dot" style="background:var(--${prod.gemba_machine3 || 'gris'})"></div></div>
-              </div>
-            </div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
-        </div>
-      </div>
-
-      <!-- QUALITÉ -->
-      <div class="service-panel" style="--accent:var(--qualite)">
-        <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--qualite)"></div>Qualité</div>
-          ${qual ? feu(qual.statut_global, qual.statut_global === 'vert' ? 'OK' : qual.statut_global === 'orange' ? 'Écart' : 'Critique') : '<span class="feu feu-gris">En attente</span>'}
-        </div>
-        <div class="service-panel-body">
-          ${qual ? `
-            <div style="margin-bottom:14px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
-                Machine 1 ${qual.m1_produit ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${qual.m1_produit})</span>` : ''} ${feu(qual.m1_resultat)}
-              </div>
-              ${qual.m1_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(qual.m1_tc_reel, parseFloat(qual.m1_tc_cible)||null, '%')}
-              </span></div>` : ''}
-              ${qual.m1_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(qual.m1_perco_reel, qual.m1_perco_cible, '%')}
-              </span></div>` : ''}
-              ${qual.m1_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m1_fait_marquant}</div>` : ''}
-              ${qual.m1_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m1_consigne}</div>` : ''}
-            </div>
-            <div style="border-top:1px solid var(--border);padding-top:14px;">
-              <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
-                Machine 3 ${qual.m3_produit ? `<span style="font-weight:400;color:var(--text);font-size:13px;">(${qual.m3_produit})</span>` : ''} ${feu(qual.m3_resultat)}
-              </div>
-              ${qual.m3_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(qual.m3_tc_reel, parseFloat(qual.m3_tc_cible)||null, '%')}
-              </span></div>` : ''}
-              ${qual.m3_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">
-                ${progressBar(qual.m3_perco_reel, qual.m3_perco_cible, '%')}
-              </span></div>` : ''}
-              ${qual.m3_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m3_fait_marquant}</div>` : ''}
-              ${qual.m3_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m3_consigne}</div>` : ''}
-            </div>
-            ${qual.remontees ? `<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;font-size:13px;color:var(--text2);"><strong style="color:var(--text)">Remontées :</strong> ${qual.remontees}</div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
-        </div>
-      </div>
-
-      <!-- MAINTENANCE -->
-      <div class="service-panel" style="--accent:var(--maintenance)">
-        <div class="service-panel-header">
-          <div class="service-name"><div class="dot" style="background:var(--maintenance)"></div>Maintenance</div>
-          ${maint ? feu(maint.statut_global, maint.statut_global === 'vert' ? 'OK' : maint.statut_global === 'orange' ? 'Risque' : 'Impact') : '<span class="feu feu-gris">En attente</span>'}
-        </div>
-        <div class="service-panel-body">
-          ${maint ? `
-            ${impacts.length > 0 ? `
-              <div style="margin-bottom:12px;">
-                <div style="font-size:12px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Impact performance</div>
-                ${impacts.map(ev => `
-                  <div class="incident-item">
-                    <div class="incident-dot" style="background:var(--${ev.urgence})"></div>
-                    <div>
-                      <div class="incident-text">${ev.desc}</div>
-                      <div class="incident-meta">${ev.machine} · ${ev.duree}h d'arrêt</div>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            ` : `<div style="padding:10px;background:rgba(34,197,94,.08);border-radius:8px;font-size:13px;color:var(--vert);margin-bottom:12px;">Aucune panne impactant la performance</div>`}
-            ${(() => {
-              const risques = [];
-              for (let i = 0; i < 10; i++) {
-                const desc = maint[`risque_${i}_desc`];
-                if (desc) risques.push({ desc, machine: maint[`risque_${i}_machine`] || '—', delai: maint[`risque_${i}_delai`] || '—' });
-              }
-              return risques.length > 0 ? `
-                <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px;">
-                  <div style="font-size:12px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Risques à surveiller</div>
-                  ${risques.map(r => `
-                    <div class="incident-item">
-                      <div class="incident-dot" style="background:var(--orange)"></div>
-                      <div>
-                        <div class="incident-text">${r.desc}</div>
-                        <div class="incident-meta">${r.machine} · ${r.delai}</div>
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>` : '';
-            })()}
-            ${maint.commentaire_general ? `<div style="padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${maint.commentaire_general}</div>` : ''}
-          ` : '<div class="no-data" style="padding:24px"><span class="icon" style="font-size:24px"></span><p>Formulaire non soumis</p></div>'}
-        </div>
-      </div>
+      ${qual.m1_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m1_tc_reel, parseFloat(qual.m1_tc_cible)||null, '%')}</span></div>` : ''}
+      ${qual.m1_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m1_perco_reel, qual.m1_perco_cible, '%')}</span></div>` : ''}
+      ${qual.m1_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m1_fait_marquant}</div>` : ''}
+      ${qual.m1_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m1_consigne}</div>` : ''}
     </div>
-
-    <!-- UTILITÉS -->
-    <div class="section-title">Utilités</div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;">
-      ${util ? `
-      <div style="display:grid;grid-template-columns:180px 100px 1fr 120px;gap:0;">
-        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Indicateur</div>
-        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);text-align:center;">Statut</div>
-        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Événements / Informations</div>
-        <div style="padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Délai</div>
-        ${[
-          ['Clarification', 'clarification'],
-          ['Zone déchets', 'zone_dechets'],
-          ['Protection incendie', 'incendie'],
-          ['STEP (1)', 'step1'],
-          ['STEP (2)', 'step2'],
-          ['Chaufferies — Biomasse', 'biomasse'],
-          ['Gaz', 'gaz'],
-          ['Dalkia', 'dalkia'],
-          ['Air Comprimé', 'air'],
-          ['Climatisation / cond.', 'clim'],
-          ['Effacement Énergétique', 'effacement'],
-        ].map(([label, key]) => {
-          const statut = util[key + '_statut'];
-          const info = util[key + '_info'] || '—';
-          const delai = util[key + '_delai'] || '';
-          return `
-            <div style="padding:10px 14px;font-size:13px;font-weight:${label.includes('—')||label==='Gaz'||label==='Dalkia'?'400':'600'};color:${label.includes('—')||label==='Gaz'||label==='Dalkia'?'var(--text2)':'var(--text)'};border-bottom:1px solid rgba(51,65,85,.3);padding-left:${label==='Gaz'||label==='Dalkia'?'28px':'14px'};">${label.replace('Chaufferies — ','Chaufferies — ')}</div>
-            <div style="padding:10px 14px;text-align:center;border-bottom:1px solid rgba(51,65,85,.3);">${statut ? `<span class="feu feu-${statut}"></span>` : '<span class="feu feu-gris"></span>'}</div>
-            <div style="padding:10px 14px;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(51,65,85,.3);">${info}</div>
-            <div style="padding:10px 14px;font-size:12px;color:var(--text2);border-bottom:1px solid rgba(51,65,85,.3);">${delai}</div>
-          `;
-        }).join('')}
+    <div style="border-top:1px solid var(--border);padding-top:14px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+        Machine 3 ${qual.m3_produit ? `<span style="font-weight:400;color:var(--text);font-size:12px;">${qual.m3_produit}</span>` : ''} ${feu(qual.m3_resultat)}
       </div>
-      ${util.commentaire_general ? `<div style="padding:12px 16px;font-size:13px;color:var(--text2);border-top:1px solid var(--border);">${util.commentaire_general}</div>` : ''}
-      ` : `<div class="no-data" style="padding:32px"><span class="icon" style="font-size:24px"></span><p>Formulaire Utilités non soumis</p></div>`}
+      ${qual.m3_tc_reel ? `<div class="metric-row"><span class="metric-name">TC %</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m3_tc_reel, parseFloat(qual.m3_tc_cible)||null, '%')}</span></div>` : ''}
+      ${qual.m3_perco_reel ? `<div class="metric-row"><span class="metric-name">E% Perco</span><span class="metric-val" style="flex-direction:column;align-items:flex-end">${progressBar(qual.m3_perco_reel, qual.m3_perco_cible, '%')}</span></div>` : ''}
+      ${qual.m3_fait_marquant ? `<div style="margin-top:8px;padding:8px;background:var(--bg3);border-radius:6px;font-size:12px;color:var(--text2);">${qual.m3_fait_marquant}</div>` : ''}
+      ${qual.m3_consigne ? `<div style="margin-top:4px;padding:8px;background:rgba(59,130,246,.08);border-radius:6px;font-size:12px;color:var(--blue);">${qual.m3_consigne}</div>` : ''}
     </div>
+  ` : '';
 
-    <!-- TENDANCES DU MOIS -->
-    <div class="section-title">Tendances du mois</div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;">
-      <div id="trends-month-label" style="font-size:13px;color:var(--text2);margin-bottom:16px;font-weight:600;"></div>
-      <div id="trends-loading" style="text-align:center;color:var(--text2);padding:32px;">
-        <div style="font-size:24px;margin-bottom:8px;"></div><p>Chargement des tendances...</p>
+  // ── Corps Maintenance ──
+  const maintBody = maint ? `
+    ${impacts.length > 0 ? `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Impact performance</div>
+        ${impacts.map(ev => `
+          <div class="incident-item">
+            <div class="incident-dot" style="background:var(--${ev.urgence})"></div>
+            <div><div class="incident-text">${ev.desc}</div><div class="incident-meta">${ev.machine} · ${ev.duree}h d'arrêt</div></div>
+          </div>`).join('')}
       </div>
-      <div id="trends-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:16px;">
-        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #3b82f6">
-          <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:12px;">Production M1 (t)</div>
-          <div style="position:relative;height:140px;"><canvas id="chart-prod-m1"></canvas></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #10b981">
-          <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;margin-bottom:12px;">Production M3 (t)</div>
-          <div style="position:relative;height:140px;"><canvas id="chart-prod-m3"></canvas></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #8b5cf6">
-          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">PHNR M1 (kg/h)</div>
-          <div style="position:relative;height:140px;"><canvas id="chart-phnr-m1"></canvas></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #8b5cf6">
-          <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:12px;">PHNR M3 (kg/h)</div>
-          <div style="position:relative;height:140px;"><canvas id="chart-phnr-m3"></canvas></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #22c55e">
-          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">Rendement M1 (%)</div>
-          <div style="position:relative;height:140px;"><canvas id="chart-rdt-m1"></canvas></div>
-        </div>
-        <div style="background:var(--bg3);border-radius:10px;padding:16px;border-left:3px solid #22c55e">
-          <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:12px;">Rendement M3 (%)</div>
-          <div style="position:relative;height:140px;"><canvas id="chart-rdt-m3"></canvas></div>
-        </div>
-      </div>
-    </div>
+    ` : `<div style="padding:10px;background:rgba(34,197,94,.08);border-radius:8px;font-size:13px;color:var(--vert);margin-bottom:12px;">Aucune panne impactant la performance</div>`}
+    ${risques.length > 0 ? `
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px;">
+        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Risques à surveiller</div>
+        ${risques.map(r => `
+          <div class="incident-item">
+            <div class="incident-dot" style="background:var(--orange)"></div>
+            <div><div class="incident-text">${r.desc}</div><div class="incident-meta">${r.machine} · ${r.delai}</div></div>
+          </div>`).join('')}
+      </div>` : ''}
+    ${maint.commentaire_general ? `<div style="padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${maint.commentaire_general}</div>` : ''}
+  ` : '';
 
-    <!-- POINTS À INVESTIGUER -->
-    ${points.length > 0 ? `
-    <div class="section-title">Points à investiguer</div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;">
-      <table class="points-table">
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th>Machine / Zone</th>
-            <th>Responsable</th>
-            <th>Délai</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
+  // ── Corps Utilités ──
+  const utilRows = [
+    ['Clarification','clarification'], ['Zone déchets','zone_dechets'],
+    ['Protection incendie','incendie'], ['STEP (1)','step1'], ['STEP (2)','step2'],
+    ['Biomasse','biomasse'], ['Gaz','gaz'], ['Dalkia','dalkia'],
+    ['Air Comprimé','air'], ['Climatisation','clim'], ['Effacement Énergétique','effacement'],
+  ].filter(([,k]) => util && util[k+'_statut']);
+
+  const utilBody = util ? `
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr>
+          <th style="text-align:left;padding:8px 12px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Indicateur</th>
+          <th style="padding:8px 12px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);text-align:center;">Statut</th>
+          <th style="text-align:left;padding:8px 12px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Information</th>
+        </tr></thead>
         <tbody>
-          ${points.map(p => `
+          ${utilRows.map(([label, k]) => `
             <tr>
-              <td>${p.desc}</td>
-              <td><span style="background:var(--bg3);padding:2px 8px;border-radius:4px;font-size:12px;">${p.machine}</span></td>
-              <td>${p.responsable}</td>
-              <td>${p.delai}</td>
-              <td>${feu(p.statut, p.statut === 'vert' ? 'Soldé' : p.statut === 'orange' ? 'En cours' : 'En retard')}</td>
-            </tr>
-          `).join('')}
+              <td style="padding:8px 12px;font-size:13px;border-bottom:1px solid var(--border);">${label}</td>
+              <td style="padding:8px 12px;text-align:center;border-bottom:1px solid var(--border);">${util[k+'_statut'] ? `<span class="feu feu-${util[k+'_statut']}"></span>` : ''}</td>
+              <td style="padding:8px 12px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);">${util[k+'_info'] || '—'}</td>
+            </tr>`).join('')}
         </tbody>
       </table>
-    </div>` : ''}
+    </div>
+    ${util.commentaire_general ? `<div style="margin-top:8px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--text2);">${util.commentaire_general}</div>` : ''}
+  ` : '';
+
+  // ── Corps Tendances ──
+  const trendsBody = `
+    <div id="trends-month-label" style="font-size:12px;color:var(--text2);margin-bottom:14px;font-weight:600;"></div>
+    <div id="trends-loading" style="text-align:center;color:var(--text2);padding:24px;"><p>Chargement des tendances...</p></div>
+    <div id="trends-grid" style="display:none;grid-template-columns:repeat(2,1fr);gap:14px;">
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #3b82f6">
+        <div style="font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:10px;">Production M1 (t)</div>
+        <div style="position:relative;height:130px;"><canvas id="chart-prod-m1"></canvas></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #10b981">
+        <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;margin-bottom:10px;">Production M3 (t)</div>
+        <div style="position:relative;height:130px;"><canvas id="chart-prod-m3"></canvas></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
+        <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR M1 (kg/h)</div>
+        <div style="position:relative;height:130px;"><canvas id="chart-phnr-m1"></canvas></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #8b5cf6">
+        <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;margin-bottom:10px;">PHNR M3 (kg/h)</div>
+        <div style="position:relative;height:130px;"><canvas id="chart-phnr-m3"></canvas></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e">
+        <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement M1 (%)</div>
+        <div style="position:relative;height:130px;"><canvas id="chart-rdt-m1"></canvas></div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;border-left:3px solid #22c55e">
+        <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:10px;">Rendement M3 (%)</div>
+        <div style="position:relative;height:130px;"><canvas id="chart-rdt-m3"></canvas></div>
+      </div>
+    </div>
+  `;
+
+  const html = `
+    <!-- Statut global compact -->
+    <div class="global-status-compact gsc-${globalStatut}">
+      <div class="gsc-indicator"></div>
+      <div>
+        <div class="gsc-label">${globalLabels[globalStatut]}</div>
+        <div class="gsc-sub">${status.submitted.length}/5 services${status.complete
+          ? ' · <strong style="color:var(--vert)">Flash complet</strong>'
+          : ' · En attente : ' + status.missing.map(s => svcNames[s]).join(', ')}</div>
+      </div>
+      <div class="gsc-feux">
+        ${['securite','production','qualite','maintenance','utilites'].map(s => {
+          const ok = status.submitted.includes(s);
+          return `<span class="feu ${ok?'feu-vert':'feu-gris'}" style="font-size:11px">${svcNames[s]}</span>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- KPIs compacts -->
+    <div class="kpi-grid-compact">
+      <div class="kpi-card-sm" style="--kpi-color:${prod?.m1_statut==='rouge'?'var(--rouge)':prod?.m1_statut==='orange'?'var(--orange)':'var(--vert)'}">
+        <div class="kpi-label">Prod. M1</div>
+        <div class="kpi-value">${prod?.m1_prod_cumul ?? '—'}<span style="font-size:12px"> t</span></div>
+        <div class="kpi-unit">obj. ${prod?.m1_prod_cible ?? '—'} t</div>
+      </div>
+      <div class="kpi-card-sm" style="--kpi-color:${prod?.m3_statut==='rouge'?'var(--rouge)':prod?.m3_statut==='orange'?'var(--orange)':'var(--vert)'}">
+        <div class="kpi-label">Prod. M3</div>
+        <div class="kpi-value">${prod?.m3_prod_cumul ?? '—'}<span style="font-size:12px"> t</span></div>
+        <div class="kpi-unit">obj. ${prod?.m3_prod_cible ?? '—'} t</div>
+      </div>
+      <div class="kpi-card-sm" style="--kpi-color:${parseFloat(prod?.m1_rdt_cumul)>=75?'var(--vert)':parseFloat(prod?.m1_rdt_cumul)>=60?'var(--orange)':'var(--rouge)'}">
+        <div class="kpi-label">Rdt M1</div>
+        <div class="kpi-value">${prod?.m1_rdt_cumul ?? '—'}<span style="font-size:12px">%</span></div>
+        <div class="kpi-unit">cible ${prod?.m1_rdt_cible ?? '—'}</div>
+      </div>
+      <div class="kpi-card-sm" style="--kpi-color:${parseFloat(prod?.m3_rdt_cumul)>=90?'var(--vert)':parseFloat(prod?.m3_rdt_cumul)>=83?'var(--orange)':'var(--rouge)'}">
+        <div class="kpi-label">Rdt M3</div>
+        <div class="kpi-value">${prod?.m3_rdt_cumul ?? '—'}<span style="font-size:12px">%</span></div>
+        <div class="kpi-unit">cible ${prod?.m3_rdt_cible ?? '—'}</div>
+      </div>
+      <div class="kpi-card-sm" style="--kpi-color:${impacts.length>0?'var(--rouge)':'var(--vert)'}">
+        <div class="kpi-label">Pannes</div>
+        <div class="kpi-value" style="color:${impacts.length>0?'var(--rouge)':'var(--vert)'}">${maint?impacts.length:'—'}</div>
+        <div class="kpi-unit">impact prod.</div>
+      </div>
+      <div class="kpi-card-sm" style="--kpi-color:${+sec?.nb_evenements>0?'var(--orange)':'var(--vert)'}">
+        <div class="kpi-label">Sécu</div>
+        <div class="kpi-value" style="color:${+sec?.nb_evenements>0?'var(--orange)':'var(--vert)'}">${sec?(sec.nb_evenements??0):'—'}</div>
+        <div class="kpi-unit">incident(s)</div>
+      </div>
+    </div>
+
+    <!-- Accordéon services -->
+    <div class="acc-stack">
+      ${acc('securite',   'var(--securite)',   'Sécurité',    sec?.animateur||'',  !!sec,
+        sec  ? feu(sec.couleur_globale,  sec.couleur_globale==='vert'?'OK':sec.couleur_globale==='orange'?'Vigilance':'Critique')  : '<span class="feu feu-gris">En attente</span>',
+        secBody)}
+
+      ${acc('production', 'var(--production)', 'Production',  prod?.animateur||'', !!prod,
+        prod ? feu(prod.statut_global,   prod.statut_global==='vert'?'OK':prod.statut_global==='orange'?'Écart':'Critique')        : '<span class="feu feu-gris">En attente</span>',
+        prodBody)}
+
+      ${acc('qualite',    'var(--qualite)',    'Qualité',     qual?.animateur||'', !!qual,
+        qual ? feu(qual.statut_global,   qual.statut_global==='vert'?'OK':qual.statut_global==='orange'?'Écart':'Critique')        : '<span class="feu feu-gris">En attente</span>',
+        qualBody)}
+
+      ${acc('maintenance','var(--maintenance)','Maintenance', maint?.animateur||'',!!maint,
+        maint? feu(maint.statut_global,  maint.statut_global==='vert'?'OK':maint.statut_global==='orange'?'Risque':'Impact')       : '<span class="feu feu-gris">En attente</span>',
+        maintBody)}
+
+      ${acc('utilites',   '#0ea5e9',           'Utilités',    util?.animateur||'', !!util,
+        util ? feu(util.statut_global,   util.statut_global==='vert'?'OK':util.statut_global==='orange'?'Vigilance':'Critique')    : '<span class="feu feu-gris">En attente</span>',
+        utilBody)}
+
+      <!-- Tendances du mois -->
+      <div class="acc-panel" id="acc-trends">
+        <div class="acc-header" onclick="toggleAcc('trends')">
+          <div class="acc-left">
+            <div class="dot" style="background:var(--swm)"></div>
+            <span class="acc-name">Tendances du mois</span>
+            <span class="acc-animateur">${monthNames[+month]} ${year}</span>
+          </div>
+          <div class="acc-right"><span class="acc-chevron">›</span></div>
+        </div>
+        <div class="acc-body" id="acc-body-trends" style="display:none">${trendsBody}</div>
+      </div>
+
+      ${points.length > 0 ? `
+      <div class="acc-panel" id="acc-points">
+        <div class="acc-header" onclick="toggleAcc('points')">
+          <div class="acc-left">
+            <div class="dot" style="background:var(--orange)"></div>
+            <span class="acc-name">Points à investiguer</span>
+          </div>
+          <div class="acc-right">
+            <span class="feu feu-orange">${points.length} point${points.length>1?'s':''}</span>
+            <span class="acc-chevron">›</span>
+          </div>
+        </div>
+        <div class="acc-body" id="acc-body-points" style="display:none">
+          <table class="points-table">
+            <thead><tr>
+              <th>Description</th><th>Machine</th><th>Responsable</th><th>Délai</th><th>Statut</th>
+            </tr></thead>
+            <tbody>
+              ${points.map(p => `
+                <tr>
+                  <td>${p.desc}</td>
+                  <td><span style="background:var(--bg3);padding:2px 8px;border-radius:4px;font-size:12px;">${p.machine}</span></td>
+                  <td>${p.responsable}</td>
+                  <td>${p.delai}</td>
+                  <td>${feu(p.statut, p.statut==='vert'?'Soldé':p.statut==='orange'?'En cours':'En retard')}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>` : ''}
+    </div>
   `;
 
   document.getElementById('dashboard-content').innerHTML = html;
-  loadTrendCharts(date);
+}
+
+// ── ACCORDION TOGGLE ──────────────────────────────────
+let trendsLoaded = false;
+
+function toggleAcc(id) {
+  const body  = document.getElementById('acc-body-' + id);
+  const panel = document.getElementById('acc-' + id);
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  panel?.classList.toggle('open', !isOpen);
+
+  // Charger les graphiques au premier clic
+  if (id === 'trends' && !isOpen && !trendsLoaded) {
+    trendsLoaded = true;
+    loadTrendCharts(document.getElementById('dash-date-picker').value);
+  }
 }
 
 // ── TREND CHARTS ──────────────────────────────────────
