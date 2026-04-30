@@ -322,13 +322,18 @@ function renderDashboard(d, status, date) {
   const maint = d.maintenance || null;
   const util  = d.utilites    || null;
 
+  // Statut global Utilités dérivé des zones individuelles
+  const utilZoneKeys = ['clarification_statut','zone_dechets_statut','incendie_statut','step1_statut','step2_statut','biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
+  const utilZoneVals = util ? utilZoneKeys.map(k => util[k]).filter(Boolean) : [];
+  const utilStatutGlobal = util?.statut_global || (utilZoneVals.includes('rouge') ? 'rouge' : utilZoneVals.includes('orange') ? 'orange' : utilZoneVals.length > 0 ? 'vert' : null);
+
   // Mémoriser les refs produit pour les graphiques grade
   currentM1Ref = prod?.m1_ref || null;
   currentM3Ref = prod?.m3_ref || null;
   currentTrendsMode = 'month';
 
   // Statut global
-  const statuts = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global, util?.statut_global].filter(Boolean);
+  const statuts = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global, utilStatutGlobal].filter(Boolean);
   let globalStatut = 'vert';
   if (statuts.includes('rouge')) globalStatut = 'rouge';
   else if (statuts.includes('orange')) globalStatut = 'orange';
@@ -656,7 +661,7 @@ function renderDashboard(d, status, date) {
         maintBody)}
 
       ${acc('utilites',   '#0ea5e9',           'Utilités',    util?.animateur||'', !!util,
-        util ? feu(util.statut_global,   util.statut_global==='vert'?'OK':util.statut_global==='orange'?'Vigilance':'Critique')    : '<span class="feu feu-gris">En attente</span>',
+        util ? feu(utilStatutGlobal, utilStatutGlobal==='vert'?'OK':utilStatutGlobal==='orange'?'Vigilance':'Critique')            : '<span class="feu feu-gris">En attente</span>',
         utilBody)}
 
       <!-- Tendances / Grade -->
