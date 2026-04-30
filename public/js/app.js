@@ -91,6 +91,7 @@ function updateStatusUI(data) {
 function initForms() {
   // Statut buttons
   document.querySelectorAll('.statut-btn').forEach(btn => {
+    btn.dataset.init = '1'; // marquer pour éviter les double-listeners dans addEvent()
     btn.addEventListener('click', () => {
       const field = btn.dataset.field;
       btn.closest('.statut-group').querySelectorAll('.statut-btn').forEach(b => b.classList.remove('selected'));
@@ -288,10 +289,21 @@ function feu(val, label = '') {
   return `<span class="feu feu-${val}">${label || val}</span>`;
 }
 
+// Gère les décimales françaises (virgule) et les ranges (→, /)
+function parseFr(val) {
+  if (val === null || val === undefined) return NaN;
+  const s = String(val).replace(',', '.').split(/[→/]/)[0].trim();
+  return parseFloat(s);
+}
+
 function pct(reel, obj) {
-  const r = parseFloat(reel), o = parseFloat(obj);
+  const r = parseFr(reel), o = parseFr(obj);
   if (isNaN(r) || isNaN(o) || o === 0) return null;
   return Math.round((r / o) * 100);
+}
+
+function isRange(val) {
+  return val != null && /[→/,]/.test(String(val)) && isNaN(parseFloat(String(val).replace(',','.')));
 }
 
 function barColor(pct) {
@@ -456,12 +468,13 @@ function renderDashboard(d, status, date) {
   ` : '';
 
   // ── Corps Qualité ──
+  const tcRange = v => v != null && /[→,]/.test(String(v)) && String(v).includes('→');
   const qualBody = qual ? `
     <div class="db-machines">
       <div>
         <div class="db-machine-header">Machine 1 ${feu(qual.m1_resultat)}</div>
-        ${qual.m1_tc_reel ? dbProgress('TC %', qual.m1_tc_reel, parseFloat(qual.m1_tc_cible)||null, '%') : ''}
-        ${qual.m1_perco_reel ? dbProgress('E% Perco', qual.m1_perco_reel, qual.m1_perco_cible, '%') : ''}
+        ${qual.m1_tc_reel != null ? (tcRange(qual.m1_tc_cible) ? dbSimple('TC %', qual.m1_tc_reel+'%', 'cible '+qual.m1_tc_cible) : dbProgress('TC %', parseFr(qual.m1_tc_reel), parseFr(qual.m1_tc_cible)||null, '%')) : ''}
+        ${qual.m1_perco_reel != null ? dbProgress('E% Perco', parseFr(qual.m1_perco_reel), parseFr(qual.m1_perco_cible)||null, '%') : ''}
         ${qual.m1_pir && qual.m1_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m1_pir) : ''}
         ${qual.m1_autre_resultat ? dbInfo(qual.m1_autre_resultat) : ''}
         ${qual.m1_fait_marquant ? dbInfo(qual.m1_fait_marquant, 'rgba(251,146,60,.1)', 'var(--orange)') : ''}
@@ -470,8 +483,8 @@ function renderDashboard(d, status, date) {
       </div>
       <div>
         <div class="db-machine-header">Machine 3 ${feu(qual.m3_resultat)}</div>
-        ${qual.m3_tc_reel ? dbProgress('TC %', qual.m3_tc_reel, parseFloat(qual.m3_tc_cible)||null, '%') : ''}
-        ${qual.m3_perco_reel ? dbProgress('E% Perco', qual.m3_perco_reel, qual.m3_perco_cible, '%') : ''}
+        ${qual.m3_tc_reel != null ? (tcRange(qual.m3_tc_cible) ? dbSimple('TC %', qual.m3_tc_reel+'%', 'cible '+qual.m3_tc_cible) : dbProgress('TC %', parseFr(qual.m3_tc_reel), parseFr(qual.m3_tc_cible)||null, '%')) : ''}
+        ${qual.m3_perco_reel != null ? dbProgress('E% Perco', parseFr(qual.m3_perco_reel), parseFr(qual.m3_perco_cible)||null, '%') : ''}
         ${qual.m3_pir && qual.m3_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m3_pir) : ''}
         ${qual.m3_autre_resultat ? dbInfo(qual.m3_autre_resultat) : ''}
         ${qual.m3_fait_marquant ? dbInfo(qual.m3_fait_marquant, 'rgba(251,146,60,.1)', 'var(--orange)') : ''}
@@ -856,8 +869,10 @@ async function loadTrendCharts(date) {
     createChart('chart-prod-m3','#10b981',extract('production','m3_prod_cumul'),extract('production','m3_prod_cible'),'t',labels);
     createChart('chart-phnr-m1','#8b5cf6',extract('production','m1_phnr_j1'),extract('production','m1_phnr_cible'),'kg/h',labels);
     createChart('chart-phnr-m3','#8b5cf6',extract('production','m3_phnr_j1'),extract('production','m3_phnr_cible'),'kg/h',labels);
-    createChart('chart-rdt-m1','#22c55e',extract('production','m1_rdt_cumul'),extract('production','m1_rdt_cible'),'%',labels);
-    createChart('chart-rdt-m3','#22c55e',extract('production','m3_rdt_cumul'),extract('production','m3_rdt_cible'),'%',labels);
+    const rdtCibleM1 = dates.some(d => String(byDate[d]?.production?.m1_rdt_cible||'').includes('/')) ? null : extract('production','m1_rdt_cible');
+    const rdtCibleM3 = dates.some(d => String(byDate[d]?.production?.m3_rdt_cible||'').includes('/')) ? null : extract('production','m3_rdt_cible');
+    createChart('chart-rdt-m1','#22c55e',extract('production','m1_rdt_cumul'),rdtCibleM1,'%',labels);
+    createChart('chart-rdt-m3','#22c55e',extract('production','m3_rdt_cumul'),rdtCibleM3,'%',labels);
   } catch(e) {
     if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement.</p>';
     console.error(e);
