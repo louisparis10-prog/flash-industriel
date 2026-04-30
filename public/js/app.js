@@ -34,7 +34,74 @@ function showPage(name) {
     document.getElementById('dash-date-picker').value = currentDate;
     loadDashboard();
   }
+  // Pré-remplir le formulaire avec les données déjà soumises
+  const services = ['securite','production','qualite','maintenance','utilites'];
+  if (services.includes(name)) {
+    const form = document.getElementById('form-' + name);
+    if (form) loadFormData(name, form);
+  }
   window.scrollTo(0, 0);
+}
+
+// ── PRÉ-REMPLISSAGE DES FORMULAIRES ───────────────────
+async function loadFormData(service, form) {
+  if (!currentDate) return;
+  try {
+    const res = await fetch('/api/submissions/' + currentDate);
+    const allData = await res.json();
+    const saved = allData[service];
+    if (!saved) return;
+
+    // Pour maintenance : recréer les événements dynamiques si nécessaire
+    if (service === 'maintenance') {
+      // Réinitialiser les compteurs et supprimer les éléments dynamiques existants
+      ['impact','risque','point'].forEach(type => {
+        const containerId = type === 'point' ? 'points-container' : 'events-' + type + '-container';
+        const container = document.getElementById(containerId);
+        if (container) container.querySelectorAll('.event-item').forEach((el, i) => { if (i > 0) el.remove(); });
+        eventCounts[type] = 1;
+      });
+      // Recréer les événements sauvegardés (index 1+)
+      for (let i = 1; i < 10; i++) {
+        if (saved['impact_' + i + '_desc']) addEvent('impact'); else break;
+      }
+      for (let i = 1; i < 10; i++) {
+        if (saved['risque_' + i + '_desc']) addEvent('risque'); else break;
+      }
+      for (let i = 1; i < 10; i++) {
+        if (saved['point_' + i + '_desc']) addEvent('point'); else break;
+      }
+    }
+
+    // Remplir tous les champs texte, textarea, select
+    form.querySelectorAll('[name]').forEach(el => {
+      const val = saved[el.name];
+      if (val !== undefined && val !== null) el.value = val;
+    });
+
+    // Sélectionner les boutons statut
+    form.querySelectorAll('.statut-group').forEach(group => {
+      const firstBtn = group.querySelector('.statut-btn');
+      if (!firstBtn) return;
+      const field = firstBtn.dataset.field;
+      const val = saved[field];
+      if (!val) return;
+      group.querySelectorAll('.statut-btn').forEach(b => b.classList.remove('selected'));
+      const match = group.querySelector(`.statut-btn[data-val="${val}"]`);
+      if (match) match.classList.add('selected');
+    });
+
+    // Afficher les commentaires de zone si statut orange/rouge
+    form.querySelectorAll('.statut-btn.selected').forEach(btn => {
+      if (btn.dataset.val === 'orange' || btn.dataset.val === 'rouge') {
+        const commentEl = document.getElementById('zone-comment-' + btn.dataset.field);
+        if (commentEl) { commentEl.style.display = 'block'; commentEl.classList.add('zone-comment-visible'); }
+      }
+    });
+
+  } catch(e) {
+    console.error('loadFormData error:', e);
+  }
 }
 
 // ── DATE ──────────────────────────────────────────────
