@@ -589,15 +589,15 @@ function renderDashboard(d, status, date) {
         <div class="kpi-value">${prod?.m1_prod_cumul ?? '—'}<span style="font-size:12px"> t</span></div>
         <div class="kpi-unit">obj. ${prod?.m1_prod_cible ?? '—'} t</div>
       </div>
-      <div class="kpi-card-sm" style="--kpi-color:${prod?.m3_statut==='rouge'?'var(--rouge)':prod?.m3_statut==='orange'?'var(--orange)':'var(--vert)'}">
-        <div class="kpi-label">Prod. M3</div>
-        <div class="kpi-value">${prod?.m3_prod_cumul ?? '—'}<span style="font-size:12px"> t</span></div>
-        <div class="kpi-unit">obj. ${prod?.m3_prod_cible ?? '—'} t</div>
-      </div>
       <div class="kpi-card-sm" style="--kpi-color:${parseFloat(prod?.m1_rdt_cumul)>=75?'var(--vert)':parseFloat(prod?.m1_rdt_cumul)>=60?'var(--orange)':'var(--rouge)'}">
         <div class="kpi-label">Rdt M1</div>
         <div class="kpi-value">${prod?.m1_rdt_cumul ?? '—'}<span style="font-size:12px">%</span></div>
         <div class="kpi-unit">cible ${prod?.m1_rdt_cible ?? '—'}</div>
+      </div>
+      <div class="kpi-card-sm" style="--kpi-color:${prod?.m3_statut==='rouge'?'var(--rouge)':prod?.m3_statut==='orange'?'var(--orange)':'var(--vert)'}">
+        <div class="kpi-label">Prod. M3</div>
+        <div class="kpi-value">${prod?.m3_prod_cumul ?? '—'}<span style="font-size:12px"> t</span></div>
+        <div class="kpi-unit">obj. ${prod?.m3_prod_cible ?? '—'} t</div>
       </div>
       <div class="kpi-card-sm" style="--kpi-color:${parseFloat(prod?.m3_rdt_cumul)>=90?'var(--vert)':parseFloat(prod?.m3_rdt_cumul)>=83?'var(--orange)':'var(--rouge)'}">
         <div class="kpi-label">Rdt M3</div>
