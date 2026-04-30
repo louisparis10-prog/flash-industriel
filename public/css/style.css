@@ -780,7 +780,7 @@ body {
 .acc-left  { display: flex; align-items: center; gap: 10px; }
 .acc-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
 .acc-name  { font-weight: 700; font-size: 14px; color: var(--text); }
-.acc-animateur { font-size: 12px; color: var(--text2); font-weight: 400; }
+.acc-animateur { font-size: 12px; color: var(--text2); font-weight: 400; min-width: 130px; }
 .acc-chevron {
   width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
