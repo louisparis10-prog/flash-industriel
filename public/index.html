@@ -16,13 +16,13 @@
     <span>FLASH</span> INDUSTRIEL
   </div>
   <nav class="header-nav">
-    <button class="nav-btn active" onclick="showPage('home')">Accueil</button>
-    <button class="nav-btn" onclick="showPage('securite')" style="--accent:var(--securite)">Sécurité</button>
-    <button class="nav-btn" onclick="showPage('production')" style="--accent:var(--production)">Production</button>
-    <button class="nav-btn" onclick="showPage('qualite')" style="--accent:var(--qualite)">Qualité</button>
-    <button class="nav-btn" onclick="showPage('maintenance')" style="--accent:var(--maintenance)">Maintenance</button>
-    <button class="nav-btn" onclick="showPage('utilites')" style="--accent:#06b6d4">Utilités</button>
-    <button class="nav-btn" onclick="showPage('dashboard')">Tableau de bord</button>
+    <button class="nav-btn active" data-page="home" onclick="showPage('home')">Accueil</button>
+    <button class="nav-btn" data-page="securite" onclick="showPage('securite')" style="--accent:var(--securite)">Sécurité</button>
+    <button class="nav-btn" data-page="production" onclick="showPage('production')" style="--accent:var(--production)">Production</button>
+    <button class="nav-btn" data-page="qualite" onclick="showPage('qualite')" style="--accent:var(--qualite)">Qualité</button>
+    <button class="nav-btn" data-page="maintenance" onclick="showPage('maintenance')" style="--accent:var(--maintenance)">Maintenance</button>
+    <button class="nav-btn" data-page="utilites" onclick="showPage('utilites')" style="--accent:#06b6d4">Utilités</button>
+    <button class="nav-btn" data-page="dashboard" onclick="showPage('dashboard')">Tableau de bord</button>
   </nav>
   <div class="header-date" id="header-date">—</div>
 </header>

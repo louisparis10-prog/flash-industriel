@@ -28,9 +28,7 @@ function showPage(name) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => {
-    if (b.textContent.toLowerCase().includes(name) || (name === 'home' && b.textContent.includes('Accueil'))) {
-      b.classList.add('active');
-    }
+    if (b.dataset.page === name) b.classList.add('active');
   });
   if (name === 'dashboard') {
     document.getElementById('dash-date-picker').value = currentDate;
@@ -262,18 +260,27 @@ async function loadDashboard() {
   trendsLoaded = false;
   updateHeaderDate();
 
-  const [submissionsRes, statusRes] = await Promise.all([
-    fetch('/api/submissions/' + date),
-    fetch('/api/status/' + date)
-  ]);
-  const submissions = await submissionsRes.json();
-  const status = await statusRes.json();
+  try {
+    const [submissionsRes, statusRes] = await Promise.all([
+      fetch('/api/submissions/' + date),
+      fetch('/api/status/' + date)
+    ]);
+    const submissions = await submissionsRes.json();
+    const status = await statusRes.json();
 
-  const d = new Date(date + 'T12:00:00');
-  document.getElementById('dash-date-label').textContent =
-    d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const d = new Date(date + 'T12:00:00');
+    document.getElementById('dash-date-label').textContent =
+      d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  renderDashboard(submissions, status, date);
+    renderDashboard(submissions, status, date);
+  } catch (e) {
+    document.getElementById('dashboard-content').innerHTML =
+      `<div style="text-align:center;padding:60px 20px;color:var(--rouge)">
+        <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+        <div style="font-weight:700;margin-bottom:6px">Erreur de chargement</div>
+        <div style="font-size:13px;color:var(--text2)">${e.message}</div>
+      </div>`;
+  }
 }
 
 function feu(val, label = '') {
@@ -282,8 +289,9 @@ function feu(val, label = '') {
 }
 
 function pct(reel, obj) {
-  if (!reel || !obj || obj == 0) return null;
-  return Math.round((reel / obj) * 100);
+  const r = parseFloat(reel), o = parseFloat(obj);
+  if (isNaN(r) || isNaN(o) || o === 0) return null;
+  return Math.round((r / o) * 100);
 }
 
 function barColor(pct) {
@@ -320,7 +328,7 @@ function renderDashboard(d, status, date) {
   currentTrendsMode = 'month';
 
   // Statut global
-  const statuts = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global].filter(Boolean);
+  const statuts = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global, util?.statut_global].filter(Boolean);
   let globalStatut = 'vert';
   if (statuts.includes('rouge')) globalStatut = 'rouge';
   else if (statuts.includes('orange')) globalStatut = 'orange';
@@ -372,11 +380,11 @@ function renderDashboard(d, status, date) {
       <div class="db-progress"><div class="db-progress-fill" style="width:${Math.min(p,100)}%;background:${color}"></div></div>`;
   }
   function dbSimple(label, val, sub = '', color = 'var(--text)') {
-    if (!val) return '';
+    if (val === null || val === undefined || val === '') return '';
     return `<div class="db-simple"><span class="db-simple-label">${label}</span><span class="db-simple-val" style="color:${color}">${val}${sub ? `<span style="font-size:11px;color:var(--text2);font-weight:400;margin-left:4px">${sub}</span>` : ''}</span></div>`;
   }
   function dbInfo(text, bg = 'var(--bg3)', color = 'var(--text2)') {
-    if (!text) return '';
+    if (text === null || text === undefined || text === '') return '';
     return `<div class="db-info" style="background:${bg};color:${color};white-space:pre-line">${text}</div>`;
   }
 

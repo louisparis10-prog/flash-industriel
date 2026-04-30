@@ -69,6 +69,7 @@ app.post('/api/submissions/:date/:service', async (req, res) => {
   const { date, service } = req.params;
   const services = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
   if (!services.includes(service)) return res.status(400).json({ error: 'service invalide' });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'format de date invalide' });
 
   try {
     await pool.query('INSERT INTO flash_sessions (date) VALUES ($1) ON CONFLICT (date) DO NOTHING', [date]);
@@ -86,6 +87,8 @@ app.post('/api/submissions/:date/:service', async (req, res) => {
 // Données mensuelles pour les graphiques tendances
 app.get('/api/monthly/:year/:month', async (req, res) => {
   const { year, month } = req.params;
+  if (!/^\d{4}$/.test(year) || !/^\d{1,2}$/.test(month) || +month < 1 || +month > 12)
+    return res.status(400).json({ error: 'paramètres invalides' });
   const prefix = `${year}-${month.padStart(2, '0')}%`;
   try {
     const result = await pool.query(
