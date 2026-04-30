@@ -335,7 +335,7 @@ function renderDashboard(d, status, date) {
   const util  = d.utilites    || null;
 
   // Statut global Utilités dérivé des zones individuelles
-  const utilZoneKeys = ['clarification_statut','zone_dechets_statut','incendie_statut','step1_statut','step2_statut','biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
+  const utilZoneKeys = ['clarification_statut','zone_dechets_statut','incendie_statut','step1_statut','biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
   const utilZoneVals = util ? utilZoneKeys.map(k => util[k]).filter(Boolean) : [];
   const utilStatutGlobal = util?.statut_global || (utilZoneVals.includes('rouge') ? 'rouge' : utilZoneVals.includes('orange') ? 'orange' : utilZoneVals.length > 0 ? 'vert' : null);
 
@@ -550,7 +550,7 @@ function renderDashboard(d, status, date) {
   // ── Corps Utilités ──
   const utilRows = [
     ['Clarification','clarification'], ['Zone déchets','zone_dechets'],
-    ['Protection incendie','incendie'], ['STEP (1)','step1'], ['STEP (2)','step2'],
+    ['Protection incendie','incendie'], ['STEP','step1'],
     ['Biomasse','biomasse'], ['Gaz','gaz'], ['Dalkia','dalkia'],
     ['Air Comprimé','air'], ['Climatisation','clim'], ['Effacement Énergétique','effacement'],
   ].filter(([,k]) => util && util[k+'_statut']);
