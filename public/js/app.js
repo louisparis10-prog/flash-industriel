@@ -388,7 +388,7 @@ function renderDashboard(d, status, date) {
           <div class="acc-left">
             <div class="dot" style="background:${color}"></div>
             <span class="acc-name">${name}</span>
-            ${animateur ? `<span class="acc-animateur">${animateur}</span>` : ''}
+            <span class="acc-animateur">${animateur}</span>
             ${statusHtml}
           </div>
           <div class="acc-right">
@@ -644,7 +644,7 @@ function renderDashboard(d, status, date) {
         qualBody)}
 
       ${acc('maintenance','var(--maintenance)','Maintenance', maint?.animateur||'',!!maint,
-        maint? feu(maint.statut_global,  maint.statut_global==='vert'?'OK':maint.statut_global==='orange'?'Risque':'Impact')       : '<span class="feu feu-gris">En attente</span>',
+        maint? feu(maint.statut_global||'rouge', maint.statut_global==='vert'?'OK':maint.statut_global==='orange'?'Risque':'Impact') : '<span class="feu feu-gris">En attente</span>',
         maintBody)}
 
       ${acc('utilites',   '#0ea5e9',           'Utilités',    util?.animateur||'', !!util,
