@@ -389,9 +389,9 @@ function renderDashboard(d, status, date) {
             <div class="dot" style="background:${color}"></div>
             <span class="acc-name">${name}</span>
             ${animateur ? `<span class="acc-animateur">${animateur}</span>` : ''}
+            ${statusHtml}
           </div>
           <div class="acc-right">
-            ${statusHtml}
             ${hasData ? '<span class="acc-chevron">›</span>' : ''}
           </div>
         </div>
