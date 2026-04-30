@@ -777,7 +777,7 @@ body {
 .acc-header:hover { background: var(--bg3); }
 .acc-panel.open > .acc-header { background: var(--bg3); border-bottom: 1px solid var(--border); }
 .acc-panel.acc-missing > .acc-header { cursor: default; opacity: .65; }
-.acc-left  { display: grid; grid-template-columns: 14px 120px 155px auto; align-items: center; justify-items: start; gap: 10px; flex: 1; min-width: 0; }
+.acc-left  { display: grid; grid-template-columns: 14px 145px 155px auto; align-items: center; justify-items: start; gap: 16px; flex: 1; min-width: 0; }
 .acc-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
 .acc-name  { font-weight: 700; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .acc-animateur { font-size: 12px; color: var(--text2); font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
