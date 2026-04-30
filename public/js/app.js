@@ -869,10 +869,9 @@ async function loadTrendCharts(date) {
     createChart('chart-prod-m3','#10b981',extract('production','m3_prod_cumul'),extract('production','m3_prod_cible'),'t',labels);
     createChart('chart-phnr-m1','#8b5cf6',extract('production','m1_phnr_j1'),extract('production','m1_phnr_cible'),'kg/h',labels);
     createChart('chart-phnr-m3','#8b5cf6',extract('production','m3_phnr_j1'),extract('production','m3_phnr_cible'),'kg/h',labels);
-    const rdtCibleM1 = dates.some(d => String(byDate[d]?.production?.m1_rdt_cible||'').includes('/')) ? null : extract('production','m1_rdt_cible');
-    const rdtCibleM3 = dates.some(d => String(byDate[d]?.production?.m3_rdt_cible||'').includes('/')) ? null : extract('production','m3_rdt_cible');
-    createChart('chart-rdt-m1','#22c55e',extract('production','m1_rdt_cumul'),rdtCibleM1,'%',labels);
-    createChart('chart-rdt-m3','#22c55e',extract('production','m3_rdt_cumul'),rdtCibleM3,'%',labels);
+    const extractCible = (svc, fld) => dates.map(d => { const v = byDate[d]?.[svc]?.[fld]; const n = parseFr(v); return isNaN(n) ? null : n; });
+    createChart('chart-rdt-m1','#22c55e',extract('production','m1_rdt_cumul'),extractCible('production','m1_rdt_cible'),'%',labels);
+    createChart('chart-rdt-m3','#22c55e',extract('production','m3_rdt_cumul'),extractCible('production','m3_rdt_cible'),'%',labels);
   } catch(e) {
     if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--rouge)">Erreur de chargement.</p>';
     console.error(e);
