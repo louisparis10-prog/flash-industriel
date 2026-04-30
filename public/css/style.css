@@ -263,6 +263,10 @@ body {
 
 /* Statut feux tricolores */
 .statut-group { display: flex; gap: 8px; }
+
+/* Boutons compacts dans le tableau Utilités */
+.util-indicators .statut-group { gap: 6px; justify-content: flex-start; }
+.util-indicators .statut-btn   { flex: none; width: 34px; height: 34px; padding: 0; font-size: 16px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 .statut-btn {
   flex: 1;
   padding: 10px 8px;
