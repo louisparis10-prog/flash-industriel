@@ -1061,3 +1061,247 @@ async function loadComparativeCharts(date) {
     console.error(e);
   }
 }
+
+// ── IMPRESSION RAPPORT ────────────────────────────────
+async function printReport() {
+  const date = document.getElementById('dash-date-picker').value || currentDate;
+  if (!date) { alert('Aucune date sélectionnée.'); return; }
+
+  const res = await fetch('/api/submissions/' + date);
+  const d = await res.json();
+  const sec   = d.securite    || null;
+  const prod  = d.production  || null;
+  const qual  = d.qualite     || null;
+  const maint = d.maintenance || null;
+  const util  = d.utilites    || null;
+
+  const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Statut global
+  const utilZK = ['clarification_statut','zone_dechets_statut','incendie_statut','step1_statut','biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
+  const utilZV = util ? utilZK.map(k=>util[k]).filter(Boolean) : [];
+  const utilSt = util?.statut_global || (utilZV.includes('rouge')?'rouge':utilZV.includes('orange')?'orange':utilZV.length?'vert':null);
+  const allSt  = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global, utilSt].filter(Boolean);
+  const gSt    = allSt.includes('rouge')?'rouge':allSt.includes('orange')?'orange':'vert';
+  const gLabel = { vert:'Situation normale', orange:'Points de vigilance', rouge:'Situation critique' };
+  const gColor = { vert:'#16a34a', orange:'#ea580c', rouge:'#dc2626' };
+
+  // Helpers
+  const dot = s => `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${s==='rouge'?'#dc2626':s==='orange'?'#ea580c':'#16a34a'};margin-right:5px;"></span>`;
+  const badge = (s, label) => `<span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${s==='rouge'?'#fee2e2':s==='orange'?'#ffedd5':'#dcfce7'};color:${s==='rouge'?'#991b1b':s==='orange'?'#9a3412':'#166534'};">${dot(s)}${label}</span>`;
+  const row  = (label, val, sub='') => val!=null&&val!==''?`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px;"><span style="color:#64748b;">${label}</span><span style="font-weight:600;">${val}${sub?` <span style="font-weight:400;color:#94a3b8;font-size:11px;">${sub}</span>`:''}</span></div>`:'';
+  const info = (text, color='#64748b', bg='#f8fafc') => text?`<div style="margin:6px 0;padding:8px 10px;background:${bg};border-radius:6px;font-size:12px;color:${color};line-height:1.5;">${text}</div>`:'';
+  const sect = (title, color='#1e293b') => `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${color};margin:10px 0 5px;">${title}</div>`;
+  const svcHeader = (name, animateur, statut, label) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:14px;font-weight:700;color:#0f172a;">${name}${animateur?` <span style="font-size:11px;font-weight:400;color:#94a3b8;margin-left:6px;">${animateur}</span>`:''}  </div>
+      ${statut?badge(statut,label):''}
+    </div>`;
+
+  // Construire impacts/risques maintenance
+  const impacts=[]; const risques=[];
+  if (maint) {
+    for(let i=0;i<10;i++){const desc=maint[`impact_${i}_desc`];if(desc)impacts.push({desc,machine:maint[`impact_${i}_machine`]||'',duree:maint[`impact_${i}_duree`]||''});}
+    for(let i=0;i<10;i++){const desc=maint[`risque_${i}_desc`];if(desc)risques.push({desc,machine:maint[`risque_${i}_machine`]||'',delai:maint[`risque_${i}_delai`]||''});}
+  }
+
+  // Zones utilités
+  const utilRows = [
+    ['Clarification','clarification'],['Zone déchets','zone_dechets'],['Protection incendie','incendie'],
+    ['STEP','step1'],['Biomasse','biomasse'],['Gaz','gaz'],['Dalkia','dalkia'],
+    ['Air Comprimé','air'],['Climatisation','clim'],['Effacement','effacement'],
+  ].filter(([,k])=>util&&util[k+'_statut']);
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Flash Industriel — ${dateLabel}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Helvetica Neue',Arial,sans-serif; font-size:13px; color:#1e293b; background:#fff; }
+  @page { size:A4; margin:15mm 15mm 15mm 15mm; }
+  @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+  .page-header { border-bottom:3px solid #0f2c6b; padding-bottom:10px; margin-bottom:16px; display:flex; align-items:flex-start; justify-content:space-between; }
+  .logo { font-size:18px; font-weight:800; color:#0f2c6b; letter-spacing:-.5px; }
+  .logo span { color:#3b82f6; }
+  .header-right { text-align:right; font-size:11px; color:#64748b; }
+  .global-status { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; margin-bottom:16px; background:${gSt==='rouge'?'#fef2f2':gSt==='orange'?'#fff7ed':'#f0fdf4'}; border-left:4px solid ${gColor[gSt]}; }
+  .global-dot { width:12px; height:12px; border-radius:50%; background:${gColor[gSt]}; flex-shrink:0; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:16px; }
+  .kpi-card { border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; }
+  .kpi-card-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#94a3b8; margin-bottom:3px; }
+  .kpi-card-value { font-size:18px; font-weight:800; color:#0f172a; line-height:1; }
+  .kpi-card-sub { font-size:10px; color:#94a3b8; margin-top:2px; }
+  .services { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .service-card { border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; break-inside:avoid; }
+  .service-card.full { grid-column:span 2; }
+  .divider { border:none; border-top:1px solid #f1f5f9; margin:8px 0; }
+  .machine-col { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .footer { margin-top:20px; padding-top:8px; border-top:1px solid #e2e8f0; font-size:10px; color:#94a3b8; display:flex; justify-content:space-between; }
+</style></head><body>
+
+<div class="page-header">
+  <div>
+    <div class="logo"><span>FLASH</span> INDUSTRIEL</div>
+    <div style="font-size:12px;color:#64748b;margin-top:2px;">Rapport quotidien d'animation</div>
+  </div>
+  <div class="header-right">
+    <div style="font-weight:700;font-size:13px;color:#0f172a;">${dateLabel.charAt(0).toUpperCase()+dateLabel.slice(1)}</div>
+    <div>Généré le ${new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}</div>
+  </div>
+</div>
+
+<div class="global-status">
+  <div class="global-dot"></div>
+  <div><strong>${gLabel[gSt]}</strong>${gSt!=='vert'?' — Voir détails ci-dessous':''}</div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card" style="border-top:3px solid ${prod?.m1_statut==='rouge'?'#dc2626':prod?.m1_statut==='orange'?'#ea580c':'#16a34a'};">
+    <div class="kpi-card-label">Prod. M1</div>
+    <div class="kpi-card-value">${prod?.m1_prod_cumul??'—'}<span style="font-size:11px;font-weight:400;"> t</span></div>
+    <div class="kpi-card-sub">obj. ${prod?.m1_prod_cible??'—'} t</div>
+  </div>
+  <div class="kpi-card" style="border-top:3px solid ${parseFr(prod?.m1_rdt_cumul)>=75?'#16a34a':parseFr(prod?.m1_rdt_cumul)>=60?'#ea580c':'#dc2626'};">
+    <div class="kpi-card-label">Rdt M1</div>
+    <div class="kpi-card-value">${prod?.m1_rdt_cumul??'—'}<span style="font-size:11px;font-weight:400;">%</span></div>
+    <div class="kpi-card-sub">cible ${prod?.m1_rdt_cible??'—'}</div>
+  </div>
+  <div class="kpi-card" style="border-top:3px solid ${prod?.m3_statut==='rouge'?'#dc2626':prod?.m3_statut==='orange'?'#ea580c':'#16a34a'};">
+    <div class="kpi-card-label">Prod. M3</div>
+    <div class="kpi-card-value">${prod?.m3_prod_cumul??'—'}<span style="font-size:11px;font-weight:400;"> t</span></div>
+    <div class="kpi-card-sub">obj. ${prod?.m3_prod_cible??'—'} t</div>
+  </div>
+  <div class="kpi-card" style="border-top:3px solid ${parseFr(prod?.m3_rdt_cumul)>=90?'#16a34a':parseFr(prod?.m3_rdt_cumul)>=83?'#ea580c':'#dc2626'};">
+    <div class="kpi-card-label">Rdt M3</div>
+    <div class="kpi-card-value">${prod?.m3_rdt_cumul??'—'}<span style="font-size:11px;font-weight:400;">%</span></div>
+    <div class="kpi-card-sub">cible ${prod?.m3_rdt_cible??'—'}</div>
+  </div>
+  <div class="kpi-card" style="border-top:3px solid ${impacts.length>0?'#dc2626':'#16a34a'};">
+    <div class="kpi-card-label">Pannes</div>
+    <div class="kpi-card-value" style="color:${impacts.length>0?'#dc2626':'#16a34a'}">${maint?impacts.length:'—'}</div>
+    <div class="kpi-card-sub">impact prod.</div>
+  </div>
+  <div class="kpi-card" style="border-top:3px solid ${+sec?.nb_evenements>0?'#ea580c':'#16a34a'};">
+    <div class="kpi-card-label">Sécu</div>
+    <div class="kpi-card-value" style="color:${+sec?.nb_evenements>0?'#ea580c':'#16a34a'}">${sec?(sec.nb_evenements??0):'—'}</div>
+    <div class="kpi-card-sub">incident(s)</div>
+  </div>
+</div>
+
+<!-- Services -->
+<div class="services">
+
+  <!-- Sécurité -->
+  <div class="service-card">
+    ${svcHeader('Sécurité', sec?.animateur, sec?.couleur_globale, sec?.couleur_globale==='vert'?'OK':sec?.couleur_globale==='orange'?'Vigilance':'Critique')}
+    ${sec ? `
+      ${row('Événements', sec.nb_evenements??0, 'incident(s)')}
+      ${sec.evenements ? info(sec.evenements,'#9a3412','#fff7ed') : info('✓ Aucun incident à signaler','#166534','#f0fdf4')}
+      ${sec.gravite&&sec.gravite!=='vert' ? row('Gravité', sec.gravite) : ''}
+      ${sec.commentaire_general&&sec.commentaire_general!=='Aucun incident à signaler' ? info(sec.commentaire_general) : ''}
+    ` : '<p style="color:#94a3b8;font-size:12px;">Non renseigné</p>'}
+  </div>
+
+  <!-- Maintenance -->
+  <div class="service-card">
+    ${svcHeader('Maintenance', maint?.animateur, impacts.length>0?'rouge':risques.length>0?'orange':'vert', impacts.length>0?'Impact':risques.length>0?'Risque':'OK')}
+    ${maint ? `
+      ${impacts.length>0 ? sect('Pannes','#dc2626')+impacts.map(e=>`<div style="padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px;"><strong>${e.desc}</strong><span style="color:#94a3b8;margin-left:6px;">${e.machine}${e.duree?' · '+e.duree+'h':''}</span></div>`).join('') : info('✓ Aucune panne','#166534','#f0fdf4')}
+      ${risques.length>0 ? sect('Risques 24/48h','#ea580c')+risques.map(r=>`<div style="padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px;"><strong>${r.desc}</strong><span style="color:#94a3b8;margin-left:6px;">${r.machine}${r.delai?' · '+r.delai:''}</span></div>`).join('') : ''}
+      ${maint.commentaire_general ? info(maint.commentaire_general) : ''}
+    ` : '<p style="color:#94a3b8;font-size:12px;">Non renseigné</p>'}
+  </div>
+
+  <!-- Production -->
+  <div class="service-card full">
+    ${svcHeader('Production', prod?.animateur, prod?.statut_global, prod?.statut_global==='vert'?'OK':prod?.statut_global==='orange'?'Écart':'Critique')}
+    ${prod ? `<div class="machine-col">
+      <div>
+        ${sect('Machine 1')}
+        ${row('Production cumul', prod.m1_prod_cumul, 't — obj. '+(prod.m1_prod_cible||'—')+' t')}
+        ${row('Rendement cumul', prod.m1_rdt_cumul, '% — cible '+(prod.m1_rdt_cible||'—'))}
+        ${row('PHNR J-1', prod.m1_phnr_j1, prod.m1_phnr_cible?'kg/h — obj. '+prod.m1_phnr_cible:'kg/h')}
+        ${row('Arrêts cumulés', prod.m1_arret_cumul||null)}
+        ${row('Casse', prod.m1_casse_cumul||null)}
+        ${row('CDC', prod.m1_cdc_cumul||null, prod.m1_cdc_cible?'obj. '+prod.m1_cdc_cible:'')}
+        ${prod.m1_info ? info(prod.m1_info) : ''}
+      </div>
+      <div>
+        ${sect('Machine 3')}
+        ${row('Production cumul', prod.m3_prod_cumul, 't — obj. '+(prod.m3_prod_cible||'—')+' t')}
+        ${row('Rendement cumul', prod.m3_rdt_cumul, '% — cible '+(prod.m3_rdt_cible||'—'))}
+        ${row('PHNR J-1', prod.m3_phnr_j1, prod.m3_phnr_cible?'kg/h — obj. '+prod.m3_phnr_cible:'kg/h')}
+        ${row('Arrêts cumulés', prod.m3_arret_cumul||null)}
+        ${row('Casse', prod.m3_casse_cumul||null)}
+        ${row('CDC', prod.m3_cdc_cumul||null, prod.m3_cdc_cible?'obj. '+prod.m3_cdc_cible:'')}
+        ${prod.m3_info ? info(prod.m3_info) : ''}
+      </div>
+    </div>
+    ${prod.commentaire_general ? info(prod.commentaire_general) : ''}
+    ` : '<p style="color:#94a3b8;font-size:12px;">Non renseigné</p>'}
+  </div>
+
+  <!-- Qualité -->
+  <div class="service-card full">
+    ${svcHeader('Qualité', qual?.animateur, qual?.statut_global, qual?.statut_global==='vert'?'OK':qual?.statut_global==='orange'?'Écart':'Critique')}
+    ${qual ? `<div class="machine-col">
+      <div>
+        ${sect('Machine 1')}
+        ${row('TC %', qual.m1_tc_reel, qual.m1_tc_cible?'— cible '+qual.m1_tc_cible:'')}
+        ${row('E% Perco', qual.m1_perco_reel, qual.m1_perco_cible?'— obj. '+qual.m1_perco_cible:'')}
+        ${qual.m1_pir&&qual.m1_pir!=='Non Applicable'?row('PIR',qual.m1_pir):''}
+        ${qual.m1_autre_resultat ? info(qual.m1_autre_resultat) : ''}
+        ${qual.m1_demande_cq ? row('Demande CQ', qual.m1_demande_cq) : ''}
+        ${qual.m1_consigne ? info(qual.m1_consigne, '#1d4ed8', '#eff6ff') : ''}
+      </div>
+      <div>
+        ${sect('Machine 3')}
+        ${row('TC %', qual.m3_tc_reel, qual.m3_tc_cible?'— cible '+qual.m3_tc_cible:'')}
+        ${row('E% Perco', qual.m3_perco_reel, qual.m3_perco_cible?'— obj. '+qual.m3_perco_cible:'')}
+        ${qual.m3_pir&&qual.m3_pir!=='Non Applicable'?row('PIR',qual.m3_pir):''}
+        ${qual.m3_autre_resultat ? info(qual.m3_autre_resultat) : ''}
+        ${qual.m3_demande_cq ? row('Demande CQ', qual.m3_demande_cq) : ''}
+        ${qual.m3_consigne ? info(qual.m3_consigne, '#1d4ed8', '#eff6ff') : ''}
+      </div>
+    </div>` : '<p style="color:#94a3b8;font-size:12px;">Non renseigné</p>'}
+  </div>
+
+  <!-- Utilités -->
+  <div class="service-card full">
+    ${svcHeader('Utilités', util?.animateur, utilSt, utilSt==='vert'?'OK':utilSt==='orange'?'Vigilance':'Critique')}
+    ${util ? `
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="border-bottom:2px solid #e2e8f0;">
+          <th style="text-align:left;padding:4px 8px 6px;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;">Indicateur</th>
+          <th style="text-align:center;padding:4px 8px 6px;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;width:80px;">Statut</th>
+          <th style="text-align:left;padding:4px 8px 6px;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;">Informations</th>
+          <th style="text-align:left;padding:4px 8px 6px;font-size:10px;font-weight:700;text-transform:uppercase;color:#94a3b8;width:90px;">Délai</th>
+        </tr></thead>
+        <tbody>
+          ${utilRows.map(([label,k])=>`<tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:5px 8px;font-weight:600;">${label}</td>
+            <td style="padding:5px 8px;text-align:center;">${dot(util[k+'_statut']||'vert')}</td>
+            <td style="padding:5px 8px;color:#475569;">${util[k+'_info']||'—'}</td>
+            <td style="padding:5px 8px;color:#94a3b8;">${util[k+'_delai']||'—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      ${util.commentaire_general ? info(util.commentaire_general) : ''}
+    ` : '<p style="color:#94a3b8;font-size:12px;">Non renseigné</p>'}
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>Flash Industriel — Rapport confidentiel</span>
+  <span>${dateLabel.charAt(0).toUpperCase()+dateLabel.slice(1)}</span>
+</div>
+
+<script>window.onload = () => { window.print(); }</script>
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
