@@ -522,7 +522,7 @@ function renderDashboard(d, status, date) {
         ${dbSimple('Arrêts cumulés', prod.m1_arret_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('Casse', prod.m1_casse_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('CDC', prod.m1_cdc_cumul||null, prod.m1_cdc_cible ? 'obj. '+prod.m1_cdc_cible : '')}
-        ${dbNote('Notes & consignes', prod.m1_info||null)}
+        ${dbNote('Événements en cours / Informations', prod.m1_info||null)}
       </div>
       <div>
         <div class="db-machine-header">Machine 3 ${feu(prod.m3_statut)}</div>
@@ -532,7 +532,7 @@ function renderDashboard(d, status, date) {
         ${dbSimple('Arrêts cumulés', prod.m3_arret_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('Casse', prod.m3_casse_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('CDC', prod.m3_cdc_cumul||null, prod.m3_cdc_cible ? 'obj. '+prod.m3_cdc_cible : '')}
-        ${dbNote('Notes & consignes', prod.m3_info||null)}
+        ${dbNote('Événements en cours / Informations', prod.m3_info||null)}
       </div>
     </div>
     ${prod.commentaire_general ? dbNote('Commentaire général', prod.commentaire_general) : ''}
