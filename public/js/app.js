@@ -469,7 +469,11 @@ function renderDashboard(d, status, date) {
   }
   function dbInfo(text, bg = 'var(--bg3)', color = 'var(--text2)') {
     if (text === null || text === undefined || text === '') return '';
-    return `<div class="db-info" style="background:${bg};color:${color};white-space:pre-line">${text}</div>`;
+    return `<div class="db-info" style="background:${bg};color:${color}">${text}</div>`;
+  }
+  function dbNote(label, text, color = 'var(--text)') {
+    if (text === null || text === undefined || text === '') return '';
+    return `<div class="db-note"><div class="db-note-label">${label}</div><div class="db-note-body" style="color:${color}">${text}</div></div>`;
   }
 
   // ── Helper : panneau accordéon ──
@@ -518,7 +522,7 @@ function renderDashboard(d, status, date) {
         ${dbSimple('Arrêts cumulés', prod.m1_arret_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('Casse', prod.m1_casse_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('CDC', prod.m1_cdc_cumul||null, prod.m1_cdc_cible ? 'obj. '+prod.m1_cdc_cible : '')}
-        ${dbInfo(prod.m1_info||null)}
+        ${dbNote('Notes & consignes', prod.m1_info||null)}
       </div>
       <div>
         <div class="db-machine-header">Machine 3 ${feu(prod.m3_statut)}</div>
@@ -528,10 +532,10 @@ function renderDashboard(d, status, date) {
         ${dbSimple('Arrêts cumulés', prod.m3_arret_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('Casse', prod.m3_casse_cumul||null, '', 'var(--rouge)')}
         ${dbSimple('CDC', prod.m3_cdc_cumul||null, prod.m3_cdc_cible ? 'obj. '+prod.m3_cdc_cible : '')}
-        ${dbInfo(prod.m3_info||null)}
+        ${dbNote('Notes & consignes', prod.m3_info||null)}
       </div>
     </div>
-    ${prod.commentaire_general ? dbInfo(prod.commentaire_general) : ''}
+    ${prod.commentaire_general ? dbNote('Commentaire général', prod.commentaire_general) : ''}
   ` : '';
 
   // ── Corps Qualité ──
@@ -543,20 +547,20 @@ function renderDashboard(d, status, date) {
         ${qual.m1_tc_reel != null ? (tcRange(qual.m1_tc_cible) ? dbSimple('TC %', qual.m1_tc_reel+'%', 'cible '+qual.m1_tc_cible) : dbProgress('TC %', parseFr(qual.m1_tc_reel), parseFr(qual.m1_tc_cible)||null, '%')) : ''}
         ${qual.m1_perco_reel != null ? dbProgress('E% Perco', parseFr(qual.m1_perco_reel), parseFr(qual.m1_perco_cible)||null, '%') : ''}
         ${qual.m1_pir && qual.m1_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m1_pir) : ''}
-        ${qual.m1_autre_resultat ? dbInfo(qual.m1_autre_resultat) : ''}
-        ${qual.m1_fait_marquant ? dbInfo(qual.m1_fait_marquant, 'rgba(251,146,60,.1)', 'var(--orange)') : ''}
+        ${qual.m1_autre_resultat ? dbNote('Résultats', qual.m1_autre_resultat) : ''}
+        ${qual.m1_fait_marquant ? dbNote('Fait marquant', qual.m1_fait_marquant, 'var(--orange)') : ''}
         ${qual.m1_demande_cq ? dbSimple('Demande CQ', qual.m1_demande_cq) : ''}
-        ${qual.m1_consigne ? dbInfo(qual.m1_consigne, 'rgba(59,130,246,.08)', '#2563eb') : ''}
+        ${qual.m1_consigne ? dbNote('Consigne', qual.m1_consigne, '#2563eb') : ''}
       </div>
       <div>
         <div class="db-machine-header">Machine 3 ${feu(qual.m3_resultat)}</div>
         ${qual.m3_tc_reel != null ? (tcRange(qual.m3_tc_cible) ? dbSimple('TC %', qual.m3_tc_reel+'%', 'cible '+qual.m3_tc_cible) : dbProgress('TC %', parseFr(qual.m3_tc_reel), parseFr(qual.m3_tc_cible)||null, '%')) : ''}
         ${qual.m3_perco_reel != null ? dbProgress('E% Perco', parseFr(qual.m3_perco_reel), parseFr(qual.m3_perco_cible)||null, '%') : ''}
         ${qual.m3_pir && qual.m3_pir !== 'Non Applicable' ? dbSimple('PIR', qual.m3_pir) : ''}
-        ${qual.m3_autre_resultat ? dbInfo(qual.m3_autre_resultat) : ''}
-        ${qual.m3_fait_marquant ? dbInfo(qual.m3_fait_marquant, 'rgba(251,146,60,.1)', 'var(--orange)') : ''}
+        ${qual.m3_autre_resultat ? dbNote('Résultats', qual.m3_autre_resultat) : ''}
+        ${qual.m3_fait_marquant ? dbNote('Fait marquant', qual.m3_fait_marquant, 'var(--orange)') : ''}
         ${qual.m3_demande_cq ? dbSimple('Demande CQ', qual.m3_demande_cq) : ''}
-        ${qual.m3_consigne ? dbInfo(qual.m3_consigne, 'rgba(59,130,246,.08)', '#2563eb') : ''}
+        ${qual.m3_consigne ? dbNote('Consigne', qual.m3_consigne, '#2563eb') : ''}
       </div>
     </div>
   ` : '';
@@ -611,7 +615,23 @@ function renderDashboard(d, status, date) {
             <div><div class="incident-text">${r.desc}</div><div class="incident-meta">${r.machine}${r.delai && r.delai!=='—' ? ' · '+r.delai : ''}</div></div>
           </div>`).join('')}
       </div>` : ''}
-    ${maint.commentaire_general ? dbInfo(maint.commentaire_general) : ''}
+    ${points.length > 0 ? `
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px;">
+        <div class="db-section-title">Points à investiguer (${points.length})</div>
+        ${points.map(p => `
+          <div class="db-point-item">
+            <div class="db-point-dot" style="background:var(--${p.statut})"></div>
+            <div class="db-point-body">
+              <div class="db-point-desc">${p.desc}</div>
+              <div class="db-point-meta">
+                ${p.machine !== '—' ? `<span>${p.machine}</span>` : ''}
+                ${p.responsable !== '—' ? `<span>${p.responsable}</span>` : ''}
+                ${p.delai !== '—' ? `<span>↻ ${p.delai}</span>` : ''}
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>` : ''}
+    ${maint.commentaire_general ? dbNote('Commentaire général', maint.commentaire_general) : ''}
   ` : '';
 
   // ── Corps Utilités ──

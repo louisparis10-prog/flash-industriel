@@ -491,21 +491,22 @@ body {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  padding: 5px 0 2px;
+  padding: 8px 0 3px;
 }
 .db-label { font-size: 12px; color: var(--text2); font-weight: 500; white-space: nowrap; }
 .db-val { font-size: 14px; font-weight: 700; text-align: right; line-height: 1.3; }
 .db-obj { font-size: 11px; color: var(--text2); font-weight: 400; display: block; text-align: right; margin-top: 1px; }
-.db-progress { height: 5px; background: var(--border); border-radius: 3px; margin: 4px 0 12px; overflow: hidden; }
+.db-progress { height: 5px; background: var(--border); border-radius: 3px; margin: 4px 0 16px; overflow: hidden; }
 .db-progress-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
 .db-info {
-  margin-top: 6px;
-  padding: 7px 10px;
+  margin-top: 10px;
+  padding: 10px 14px;
   background: var(--bg3);
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: 8px;
+  border-left: 3px solid var(--border);
+  font-size: 13px;
   color: var(--text2);
-  line-height: 1.5;
+  line-height: 1.65;
 }
 .db-section-title {
   font-size: 11px;
@@ -513,13 +514,13 @@ body {
   text-transform: uppercase;
   letter-spacing: .06em;
   color: var(--text2);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .db-simple {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
+  padding: 9px 0;
   border-bottom: 1px solid var(--border);
   font-size: 13px;
   gap: 12px;
@@ -527,6 +528,57 @@ body {
 .db-simple:last-child { border-bottom: none; }
 .db-simple-label { color: var(--text2); font-size: 12px; font-weight: 500; }
 .db-simple-val { font-weight: 700; text-align: right; }
+
+/* Bloc note labellisé (consignes, infos machine) */
+.db-note {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.db-note-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text2);
+  padding: 5px 12px 4px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+}
+.db-note-body {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* Points à investiguer — maintenance */
+.db-point-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.db-point-item:last-child { border-bottom: none; }
+.db-point-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.db-point-body { flex: 1; min-width: 0; }
+.db-point-desc { font-size: 13px; color: var(--text); line-height: 1.5; }
+.db-point-meta {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.db-point-meta span {
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--bg3);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
 
 /* Zones maintenance — grille dashboard */
 .db-zones {
