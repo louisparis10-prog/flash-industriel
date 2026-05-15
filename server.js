@@ -141,6 +141,35 @@ app.get('/api/grade', async (req, res) => {
   }
 });
 
+// Recherche globale — plein texte sur toutes les soumissions
+app.get('/api/search', async (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 2) return res.json([]);
+  try {
+    // Convertir format date DD/MM/YYYY ou DD/MM en YYYY-MM-DD pour la recherche
+    let dateQ = q;
+    const dmY = q.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/);
+    if (dmY) {
+      const y = dmY[3] || new Date().getFullYear();
+      dateQ = `${y}-${dmY[2].padStart(2,'0')}-${dmY[1].padStart(2,'0')}`;
+    }
+    const result = await pool.query(
+      `SELECT session_date, service, data FROM submissions
+       WHERE data ILIKE $1 OR session_date ILIKE $2
+       ORDER BY session_date DESC, service
+       LIMIT 80`,
+      ['%' + q + '%', '%' + dateQ + '%']
+    );
+    res.json(result.rows.map(r => ({
+      date: r.session_date,
+      service: r.service,
+      data: JSON.parse(r.data)
+    })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Récap CDF — derniers N jours de production avec sécurité & maintenance
 app.get('/api/recap', async (req, res) => {
   const days = Math.min(parseInt(req.query.days) || 30, 60);

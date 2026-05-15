@@ -24,6 +24,15 @@
     <button class="nav-btn" data-page="utilites" onclick="showPage('utilites')" style="--accent:#06b6d4">Utilités</button>
     <button class="nav-btn" data-page="dashboard" onclick="showPage('dashboard')">Tableau de bord</button>
   </nav>
+  <div class="header-search">
+    <div class="header-search-wrap">
+      <svg class="search-icon" viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.7"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <input type="search" id="global-search" autocomplete="off" spellcheck="false"
+        placeholder="Date, grade, animateur, mot-clé…">
+      <button id="search-clear" class="search-clear-btn" onclick="clearSearch()" style="display:none">✕</button>
+    </div>
+    <div id="search-results" class="search-results"></div>
+  </div>
   <div class="header-date" id="header-date">—</div>
 </header>
 

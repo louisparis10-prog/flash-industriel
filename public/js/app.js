@@ -807,6 +807,119 @@ function renderDashboard(d, status, date) {
 // ── ACCORDION TOGGLE ──────────────────────────────────
 let trendsLoaded = false;
 
+// ── RECHERCHE GLOBALE ─────────────────────────────────
+const svcLabels = { securite:'Sécurité', production:'Production', qualite:'Qualité', maintenance:'Maintenance', utilites:'Utilités' };
+const svcColors = { securite:'var(--securite)', production:'var(--production)', qualite:'var(--qualite)', maintenance:'var(--maintenance)', utilites:'#0ea5e9' };
+
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function extractSnippets(data, q) {
+  const results = [];
+  const lq = q.toLowerCase();
+  // Champs exclus (non pertinents pour l'affichage)
+  const skip = new Set(['animateur','statut_global','m1_statut','m3_statut','m1_ref','m3_ref','m1_produit','m3_produit','couleur_globale','gravite']);
+  Object.entries(data).forEach(([key, val]) => {
+    if (skip.has(key)) return;
+    const str = String(val ?? '');
+    if (str.length < 3 || !str.toLowerCase().includes(lq)) return;
+    const idx = str.toLowerCase().indexOf(lq);
+    const s = Math.max(0, idx - 60);
+    const e = Math.min(str.length, idx + q.length + 60);
+    const raw = (s > 0 ? '…' : '') + str.slice(s, e) + (e < str.length ? '…' : '');
+    results.push(raw.replace(new RegExp(escapeRegex(q), 'gi'), m => `<mark class="sh">${m}</mark>`));
+    if (results.length >= 2) return;
+  });
+  return results;
+}
+
+let _searchTimer = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('global-search');
+  const clearBtn = document.getElementById('search-clear');
+
+  input.addEventListener('input', function() {
+    clearBtn.style.display = this.value ? 'flex' : 'none';
+    clearTimeout(_searchTimer);
+    const q = this.value.trim();
+    if (q.length < 2) { closeSearch(); return; }
+    _searchTimer = setTimeout(() => runSearch(q), 380);
+  });
+
+  input.addEventListener('focus', function() {
+    if (this.value.trim().length >= 2) document.getElementById('search-results').classList.add('open');
+  });
+
+  // Fermer en cliquant à l'extérieur
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.header-search')) closeSearch();
+  });
+});
+
+function clearSearch() {
+  const input = document.getElementById('global-search');
+  input.value = '';
+  document.getElementById('search-clear').style.display = 'none';
+  closeSearch();
+  input.focus();
+}
+
+function closeSearch() {
+  document.getElementById('search-results')?.classList.remove('open');
+}
+
+async function runSearch(q) {
+  const panel = document.getElementById('search-results');
+  panel.innerHTML = `<div class="sr-loading">Recherche de "<strong>${q}</strong>"…</div>`;
+  panel.classList.add('open');
+  try {
+    const res  = await fetch('/api/search?q=' + encodeURIComponent(q));
+    const data = await res.json();
+
+    if (!data.length) {
+      panel.innerHTML = `<div class="sr-empty">Aucun résultat pour "<strong>${q}</strong>"</div>`;
+      return;
+    }
+
+    // Grouper par date
+    const byDate = {};
+    data.forEach(r => { (byDate[r.date] = byDate[r.date] || []).push(r); });
+
+    const total = data.length;
+    let html = `<div class="sr-header">${total} résultat${total>1?'s':''} · <em>${q}</em></div>`;
+
+    Object.entries(byDate).forEach(([date, items]) => {
+      html += `<div class="sr-group">
+        <div class="sr-date" onclick="selectSearchDate('${date}')">${formatDateLabel(date)}</div>`;
+      items.forEach(item => {
+        const snippets = extractSnippets(item.data, q);
+        const col = svcColors[item.service] || 'var(--text2)';
+        html += `<div class="sr-item" onclick="selectSearchDate('${item.date}')">
+          <span class="sr-badge" style="background:${col}20;color:${col}">${svcLabels[item.service]||item.service}</span>
+          ${snippets.length
+            ? snippets.map(s => `<div class="sr-snippet">${s}</div>`).join('')
+            : `<div class="sr-snippet" style="color:var(--text2);font-style:italic">Correspondance dans les données</div>`}
+        </div>`;
+      });
+      html += '</div>';
+    });
+
+    panel.innerHTML = html;
+  } catch(e) {
+    panel.innerHTML = '<div class="sr-empty" style="color:var(--rouge)">Erreur de connexion.</div>';
+  }
+}
+
+function selectSearchDate(date) {
+  closeSearch();
+  const input = document.getElementById('global-search');
+  if (input) { input.value = ''; document.getElementById('search-clear').style.display = 'none'; }
+  document.getElementById('dash-date-picker').value = date;
+  currentDate = date;
+  updateHeaderDate();
+  showPage('dashboard');
+}
+
 // ── RÉCAP CDF ─────────────────────────────────────────
 let recapData = null;
 let recapPeriod = 7;
@@ -832,7 +945,9 @@ function closeRecap() {
 }
 
 // Fermer avec Échap
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRecap(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeRecap(); closeSearch(); }
+});
 
 async function setRecapPeriod(days) {
   recapPeriod = days;
