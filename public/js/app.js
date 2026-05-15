@@ -5,6 +5,19 @@ let currentM1Ref = null;
 let currentM3Ref = null;
 let currentTrendsMode = 'month';
 
+// ── AUTO-RESIZE TEXTAREAS ─────────────────────────────
+function autoResize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+function autoResizeAll() {
+  document.querySelectorAll('textarea').forEach(autoResize);
+}
+// Grandir à chaque frappe
+document.addEventListener('input', e => {
+  if (e.target.tagName === 'TEXTAREA') autoResize(e.target);
+});
+
 // ── INIT ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().slice(0, 10);
@@ -14,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHeaderDate();
   checkStatus();
   initForms();
+  autoResizeAll();
 });
 
 function updateHeaderDate() {
@@ -39,6 +53,9 @@ function showPage(name) {
   if (services.includes(name)) {
     const form = document.getElementById('form-' + name);
     if (form) loadFormData(name, form);
+    else autoResizeAll();
+  } else {
+    autoResizeAll();
   }
   window.scrollTo(0, 0);
 }
@@ -98,6 +115,9 @@ async function loadFormData(service, form) {
         if (commentEl) { commentEl.style.display = 'block'; commentEl.classList.add('zone-comment-visible'); }
       }
     });
+
+    // Ajuster la hauteur de toutes les textareas après remplissage
+    autoResizeAll();
 
   } catch(e) {
     console.error('loadFormData error:', e);
