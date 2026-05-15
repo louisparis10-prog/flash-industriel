@@ -15,7 +15,7 @@
   <div class="header-logo">
     <span>FLASH</span> INDUSTRIEL
   </div>
-  <nav class="header-nav">
+  <nav class="header-nav" id="header-nav">
     <button class="nav-btn active" data-page="home" onclick="showPage('home')">Accueil</button>
     <button class="nav-btn" data-page="securite" onclick="showPage('securite')" style="--accent:var(--securite)">Sécurité</button>
     <button class="nav-btn" data-page="production" onclick="showPage('production')" style="--accent:var(--production)">Production</button>
@@ -24,6 +24,9 @@
     <button class="nav-btn" data-page="utilites" onclick="showPage('utilites')" style="--accent:#06b6d4">Utilités</button>
     <button class="nav-btn" data-page="dashboard" onclick="showPage('dashboard')">Tableau de bord</button>
   </nav>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
   <div class="header-search">
     <div class="header-search-wrap">
       <svg class="search-icon" viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.7"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -35,6 +38,22 @@
   </div>
   <div class="header-date" id="header-date">—</div>
 </header>
+
+<!-- ── Menu mobile (hamburger) ── -->
+<div id="mobile-menu" class="mobile-menu">
+  <button class="mob-nav-btn" data-page="home"        onclick="showPage('home')">🏠 Accueil</button>
+  <button class="mob-nav-btn" data-page="securite"    onclick="showPage('securite')">🛡️ Sécurité</button>
+  <button class="mob-nav-btn" data-page="production"  onclick="showPage('production')">⚙️ Production</button>
+  <button class="mob-nav-btn" data-page="qualite"     onclick="showPage('qualite')">🔬 Qualité</button>
+  <button class="mob-nav-btn" data-page="maintenance" onclick="showPage('maintenance')">🔧 Maintenance</button>
+  <button class="mob-nav-btn" data-page="utilites"    onclick="showPage('utilites')">💧 Utilités</button>
+  <button class="mob-nav-btn" data-page="dashboard"   onclick="showPage('dashboard')">📊 Tableau de bord</button>
+  <div class="mob-search-row">
+    <svg style="width:15px;height:15px;color:rgba(255,255,255,.6);flex-shrink:0" viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.7"/><path d="M13 13l3.5 3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    <input type="search" id="mobile-search" autocomplete="off" spellcheck="false" placeholder="Rechercher…" oninput="onMobileSearch(this.value)">
+  </div>
+  <div id="mobile-search-results" class="mob-search-results"></div>
+</div>
 
 <!-- ═══════════════════ ACCUEIL ═══════════════════ -->
 <div id="page-home" class="page active">
@@ -235,12 +254,12 @@
           </div>
 
           <!-- KPIs visuels -->
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+          <div class="mob-grid-2" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
 
             <!-- Production -->
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid var(--blue)">
               <div style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🏷 Production (t)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m1_prod_cumul" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m1_prod_j1" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m1_prod_cible" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
@@ -250,7 +269,7 @@
             <!-- PHNR -->
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid #8b5cf6">
               <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⚡ PHNR (kg/h)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m1_phnr_cumul" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m1_phnr_j1" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m1_phnr_cible" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
@@ -260,7 +279,7 @@
             <!-- Rendement -->
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid var(--vert)">
               <div style="font-size:11px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">📈 Rendement (%)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m1_rdt_cumul" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m1_rdt_j1" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="text" name="m1_rdt_cible" placeholder="70/90%" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;font-weight:700;text-align:center;"></div>
@@ -270,7 +289,7 @@
             <!-- Arrêts + Casse -->
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid var(--rouge)">
               <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🛑 Arrêts & Casse</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="mob-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div>
                   <div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% Arrêt global</div>
                   <input type="text" name="m1_arret_cumul" placeholder="ex: 8%" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;">
@@ -285,7 +304,7 @@
             <!-- Vitesse + Laize -->
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid #06b6d4">
               <div style="font-size:11px;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🚀 Vitesse & Laize</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:8px;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:8px;">
                 <div style="font-size:10px;color:var(--text2)">J-1 5H/5H</div>
                 <div style="font-size:10px;color:var(--orange);font-weight:700;">Cible</div>
                 <div></div>
@@ -301,7 +320,7 @@
             <!-- CDC -->
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid var(--jaune)">
               <div style="font-size:11px;font-weight:700;color:var(--jaune);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⏱ CDC</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="mob-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div>
                   <div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Réel cumul</div>
                   <input type="text" name="m1_cdc_cumul" placeholder="ex: 4:25" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:16px;font-weight:700;text-align:center;">
@@ -346,11 +365,11 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+          <div class="mob-grid-2" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid #10b981">
               <div style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🏷 Production (t)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m3_prod_cumul" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m3_prod_j1" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m3_prod_cible" step="0.1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
@@ -359,7 +378,7 @@
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid #8b5cf6">
               <div style="font-size:11px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⚡ PHNR (kg/h)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m3_phnr_cumul" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m3_phnr_j1" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="number" name="m3_phnr_cible" step="1" min="0" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
@@ -368,7 +387,7 @@
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid var(--vert)">
               <div style="font-size:11px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">📈 Rendement (%)</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Cumul</div><input type="number" name="m3_rdt_cumul" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">J-1 5H/5H</div><input type="number" name="m3_rdt_j1" step="0.1" placeholder="—" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:14px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="text" name="m3_rdt_cible" placeholder="94/104%" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:13px;font-weight:700;text-align:center;"></div>
@@ -377,7 +396,7 @@
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid var(--rouge)">
               <div style="font-size:11px;font-weight:700;color:var(--rouge);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🛑 Arrêts & Casse</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="mob-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% Arrêt global</div><input type="text" name="m3_arret_cumul" placeholder="ex: 5%" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">% DE CASSE</div><input type="text" name="m3_casse_cumul" placeholder="ex: 2%" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:13px;text-align:center;"></div>
               </div>
@@ -385,7 +404,7 @@
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid #06b6d4">
               <div style="font-size:11px;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🚀 Vitesse & Laize</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+              <div class="mob-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
                 <div style="font-size:10px;color:var(--text2)">J-1 5H/5H</div>
                 <div style="font-size:10px;color:var(--orange);font-weight:700;">Cible</div>
                 <div></div>
@@ -400,7 +419,7 @@
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:3px solid var(--jaune)">
               <div style="font-size:11px;font-weight:700;color:var(--jaune);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">⏱ CDC</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="mob-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
                 <div><div style="font-size:10px;color:var(--text2);margin-bottom:4px;">Réel cumul</div><input type="text" name="m3_cdc_cumul" placeholder="ex: 3:36" style="width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:6px;border-radius:6px;font-size:16px;font-weight:700;text-align:center;"></div>
                 <div><div style="font-size:10px;color:var(--orange);margin-bottom:4px;font-weight:700;">Cible</div><input type="text" name="m3_cdc_cible" placeholder="ex: 3:00" style="width:100%;background:var(--bg2);border:1px solid var(--orange);color:var(--orange);padding:6px;border-radius:6px;font-size:16px;font-weight:700;text-align:center;"></div>
               </div>
@@ -675,7 +694,7 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="mob-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group">
               <label>MT1</label>
               <div class="statut-group">
@@ -936,7 +955,7 @@
           </div>
 
           <!-- Clarification -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
             <div style="font-size:14px;font-weight:600;">Clarification</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="clarification_statut" data-val="vert">🟢</button>
@@ -948,7 +967,7 @@
           </div>
 
           <!-- Zone déchets -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
             <div style="font-size:14px;font-weight:600;">Zone déchets</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="zone_dechets_statut" data-val="vert">🟢</button>
@@ -960,7 +979,7 @@
           </div>
 
           <!-- Protection incendie -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
             <div style="font-size:14px;font-weight:600;">Protection incendie</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="incendie_statut" data-val="vert">🟢</button>
@@ -972,7 +991,7 @@
           </div>
 
           <!-- STEP ligne 1 -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.06);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.06);">
             <div style="font-size:14px;font-weight:600;">STEP</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="step1_statut" data-val="vert">🟢</button>
@@ -984,7 +1003,7 @@
           </div>
 
           <!-- Chaufferies - Biomasse -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.06);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.06);">
             <div style="font-size:14px;font-weight:600;">Chaufferies — <span style="font-weight:400;color:var(--text2)">Biomasse</span></div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="biomasse_statut" data-val="vert">🟢</button>
@@ -995,7 +1014,7 @@
             <input type="text" name="biomasse_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
           </div>
           <!-- Chaufferies - Gaz -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.06);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.06);">
             <div style="font-size:14px;font-weight:400;color:var(--text2);padding-left:12px;">Gaz</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="gaz_statut" data-val="vert">🟢</button>
@@ -1006,7 +1025,7 @@
             <input type="text" name="gaz_delai" placeholder="Délai..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;">
           </div>
           <!-- Chaufferies - Dalkia -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
             <div style="font-size:14px;font-weight:400;color:var(--text2);padding-left:12px;">Dalkia</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="dalkia_statut" data-val="vert">🟢</button>
@@ -1018,7 +1037,7 @@
           </div>
 
           <!-- Air Comprimé -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
             <div style="font-size:14px;font-weight:600;">Air Comprimé</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="air_statut" data-val="vert">🟢</button>
@@ -1030,7 +1049,7 @@
           </div>
 
           <!-- Climatisation -->
-          <div style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
+          <div class="util-row" style="display:grid;grid-template-columns:180px 110px 1fr 110px;gap:8px 20px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--border);">
             <div style="font-size:14px;font-weight:600;">Climatisation / cond.</div>
             <div class="statut-group">
               <button type="button" class="statut-btn" data-field="clim_statut" data-val="vert">🟢</button>

@@ -28,6 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
   checkStatus();
   initForms();
   autoResizeAll();
+
+  // Fermer le menu mobile en cliquant en dehors
+  document.addEventListener('click', e => {
+    const menu = document.getElementById('mobile-menu');
+    const hamburger = document.getElementById('hamburger');
+    if (menu?.classList.contains('open') && !menu.contains(e.target) && !hamburger?.contains(e.target)) {
+      closeMobileMenu();
+    }
+  });
 });
 
 function updateHeaderDate() {
@@ -57,7 +66,86 @@ function showPage(name) {
   } else {
     autoResizeAll();
   }
+  // Fermer le menu mobile si ouvert
+  closeMobileMenu();
+  // Sync active state des boutons mobile
+  document.querySelectorAll('.mob-nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === name);
+  });
   window.scrollTo(0, 0);
+}
+
+// ── MENU MOBILE ───────────────────────────────────────
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const btn  = document.getElementById('hamburger');
+  const isOpen = menu.classList.contains('open');
+  if (isOpen) {
+    closeMobileMenu();
+  } else {
+    menu.classList.add('open');
+    btn.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const btn  = document.getElementById('hamburger');
+  if (!menu) return;
+  menu.classList.remove('open');
+  btn?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function onMobileSearch(value) {
+  const q = value.trim();
+  const panel = document.getElementById('mobile-search-results');
+  if (!panel) return;
+  clearTimeout(_searchTimer);
+  if (q.length < 2) { panel.innerHTML = ''; return; }
+  _searchTimer = setTimeout(async () => {
+    panel.innerHTML = `<div class="sr-loading">Recherche…</div>`;
+    try {
+      const res  = await fetch('/api/search?q=' + encodeURIComponent(q));
+      const data = await res.json();
+      if (!data.length) {
+        panel.innerHTML = `<div class="sr-empty">Aucun résultat pour "<strong>${q}</strong>"</div>`;
+        return;
+      }
+      const byDate = {};
+      data.forEach(r => { (byDate[r.date] = byDate[r.date] || []).push(r); });
+      let html = '';
+      Object.entries(byDate).forEach(([date, items]) => {
+        html += `<div class="sr-group">
+          <div class="sr-date" onclick="selectMobileSearchDate('${date}')">${formatDateLabel(date)}</div>`;
+        items.forEach(item => {
+          const snippets = extractSnippets(item.data, q);
+          const col = svcColors[item.service] || 'var(--text2)';
+          html += `<div class="sr-item" onclick="selectMobileSearchDate('${item.date}')">
+            <span class="sr-badge" style="background:${col}20;color:${col}">${svcLabels[item.service]||item.service}</span>
+            ${snippets.length
+              ? snippets.map(s => `<div class="sr-snippet">${s}</div>`).join('')
+              : `<div class="sr-snippet" style="color:var(--text2);font-style:italic">Correspondance dans les données</div>`}
+          </div>`;
+        });
+        html += '</div>';
+      });
+      panel.innerHTML = html;
+    } catch(e) {
+      panel.innerHTML = '<div class="sr-empty" style="color:var(--rouge)">Erreur de connexion.</div>';
+    }
+  }, 380);
+}
+
+function selectMobileSearchDate(date) {
+  closeMobileMenu();
+  const mInput = document.getElementById('mobile-search');
+  if (mInput) { mInput.value = ''; document.getElementById('mobile-search-results').innerHTML = ''; }
+  document.getElementById('dash-date-picker').value = date;
+  currentDate = date;
+  updateHeaderDate();
+  showPage('dashboard');
 }
 
 // ── PRÉ-REMPLISSAGE DES FORMULAIRES ───────────────────
@@ -946,7 +1034,7 @@ function closeRecap() {
 
 // Fermer avec Échap
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeRecap(); closeSearch(); }
+  if (e.key === 'Escape') { closeRecap(); closeSearch(); closeMobileMenu(); }
 });
 
 async function setRecapPeriod(days) {
