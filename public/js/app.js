@@ -777,25 +777,6 @@ function renderDashboard(d, status, date) {
         <div class="acc-body" id="acc-body-trends" style="display:none">${trendsBody}</div>
       </div>
 
-      <!-- Récap CDF -->
-      <div class="acc-panel" id="acc-recap">
-        <div class="acc-header" onclick="toggleRecap()">
-          <div class="acc-left">
-            <div class="dot" style="background:#6366f1"></div>
-            <span class="acc-name">Récap CDF</span>
-            <span class="acc-animateur">Historique production</span>
-          </div>
-          <div class="acc-right"><span class="acc-chevron" id="recap-chevron">›</span></div>
-        </div>
-        <div class="acc-body" id="acc-body-recap" style="display:none">
-          <div class="recap-period-btns">
-            <button class="recap-period-btn active" data-days="7"  onclick="setRecapPeriod(7)">7 jours</button>
-            <button class="recap-period-btn"         data-days="14" onclick="setRecapPeriod(14)">14 jours</button>
-            <button class="recap-period-btn"         data-days="30" onclick="setRecapPeriod(30)">30 jours</button>
-          </div>
-          <div id="recap-content"></div>
-        </div>
-      </div>
 
     </div>
   `;
@@ -811,16 +792,27 @@ let recapData = null;
 let recapPeriod = 7;
 
 function toggleRecap() {
-  const body    = document.getElementById('acc-body-recap');
-  const panel   = document.getElementById('acc-recap');
-  const chevron = document.getElementById('recap-chevron');
-  if (!body) return;
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
-  panel?.classList.toggle('open', !isOpen);
-  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(90deg)';
-  if (!isOpen) loadRecap();
+  const drawer  = document.getElementById('recap-drawer');
+  const overlay = document.getElementById('recap-overlay');
+  const isOpen  = drawer?.classList.contains('open');
+  if (isOpen) {
+    closeRecap();
+  } else {
+    drawer?.classList.add('open');
+    overlay?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (!recapData) loadRecap();
+  }
 }
+
+function closeRecap() {
+  document.getElementById('recap-drawer')?.classList.remove('open');
+  document.getElementById('recap-overlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Fermer avec Échap
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRecap(); });
 
 async function setRecapPeriod(days) {
   recapPeriod = days;

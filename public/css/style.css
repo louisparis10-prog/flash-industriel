@@ -900,14 +900,78 @@ body {
   50%       { opacity:.5; transform:scale(1.3); }
 }
 
-/* ── Récap CDF ──────────────────────────────────────────────── */
+/* ── Récap CDF — Drawer latéral ─────────────────────────────── */
+.recap-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+.recap-overlay.open { display: block; }
+
+.recap-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 580px;
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -6px 0 32px rgba(0,0,0,.15);
+}
+.recap-drawer.open { transform: translateX(0); }
+
+.recap-drawer-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.recap-drawer-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.recap-drawer-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.recap-close-btn {
+  background: none;
+  border: 1px solid var(--border);
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text2);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+}
+.recap-close-btn:hover { background: var(--bg3); color: var(--text); }
+
+.recap-drawer-period {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.recap-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
 .recap-period-btns {
   display: flex;
   gap: 8px;
-  margin-bottom: 18px;
 }
 .recap-period-btn {
-  padding: 6px 16px;
+  padding: 5px 14px;
   border-radius: 20px;
   border: 1px solid var(--border);
   background: var(--bg);
@@ -918,7 +982,7 @@ body {
   transition: all .15s;
 }
 .recap-period-btn:hover { border-color: var(--text2); color: var(--text); }
-.recap-period-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+.recap-period-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
 
 .recap-day {
   border: 1px solid var(--border);
