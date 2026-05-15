@@ -777,6 +777,26 @@ function renderDashboard(d, status, date) {
         <div class="acc-body" id="acc-body-trends" style="display:none">${trendsBody}</div>
       </div>
 
+      <!-- Récap CDF -->
+      <div class="acc-panel" id="acc-recap">
+        <div class="acc-header" onclick="toggleRecap()">
+          <div class="acc-left">
+            <div class="dot" style="background:#6366f1"></div>
+            <span class="acc-name">Récap CDF</span>
+            <span class="acc-animateur">Historique production</span>
+          </div>
+          <div class="acc-right"><span class="acc-chevron" id="recap-chevron">›</span></div>
+        </div>
+        <div class="acc-body" id="acc-body-recap" style="display:none">
+          <div class="recap-period-btns">
+            <button class="recap-period-btn active" data-days="7"  onclick="setRecapPeriod(7)">7 jours</button>
+            <button class="recap-period-btn"         data-days="14" onclick="setRecapPeriod(14)">14 jours</button>
+            <button class="recap-period-btn"         data-days="30" onclick="setRecapPeriod(30)">30 jours</button>
+          </div>
+          <div id="recap-content"></div>
+        </div>
+      </div>
+
     </div>
   `;
 
@@ -785,6 +805,147 @@ function renderDashboard(d, status, date) {
 
 // ── ACCORDION TOGGLE ──────────────────────────────────
 let trendsLoaded = false;
+
+// ── RÉCAP CDF ─────────────────────────────────────────
+let recapData = null;
+let recapPeriod = 7;
+
+function toggleRecap() {
+  const body    = document.getElementById('acc-body-recap');
+  const panel   = document.getElementById('acc-recap');
+  const chevron = document.getElementById('recap-chevron');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  panel?.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(90deg)';
+  if (!isOpen) loadRecap();
+}
+
+async function setRecapPeriod(days) {
+  recapPeriod = days;
+  document.querySelectorAll('.recap-period-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.days === days);
+  });
+  if (recapData) renderRecap();
+  else await loadRecap();
+}
+
+async function loadRecap() {
+  const el = document.getElementById('recap-content');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text2)">Chargement…</div>';
+  try {
+    const res = await fetch('/api/recap?days=30');
+    recapData = await res.json();
+    renderRecap();
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--rouge);padding:16px">Erreur de chargement du récap.</div>';
+  }
+}
+
+function formatDateLabel(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  const mois = ['','jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  const jours = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  const dow = jours[new Date(dateStr).getDay()];
+  return `${dow} ${parseInt(d)} ${mois[parseInt(m)]} ${y}`;
+}
+
+function renderRecapDay(entry) {
+  const prod  = entry.production;
+  const sec   = entry.securite;
+  const maint = entry.maintenance;
+  if (!prod) return '';
+
+  const globalStatut = prod.statut_global || 'vert';
+  const globalLabel  = globalStatut === 'vert' ? 'Production OK' : globalStatut === 'orange' ? 'Écarts' : 'Critique';
+
+  // Impacts maintenance
+  const impacts = [];
+  for (let i = 0; i < 10; i++) {
+    const desc = maint?.[`impact_${i}_desc`];
+    if (!desc) break;
+    impacts.push({ desc, machine: maint[`impact_${i}_machine`]||'', urgence: maint[`impact_${i}_urgence`]||'rouge' });
+  }
+
+  // Métriques M1
+  const m1kpis = [
+    prod.m1_rdt_cumul != null && prod.m1_rdt_cumul !== '' ? `Rdt ${prod.m1_rdt_cumul}%${prod.m1_rdt_cible ? ' <span class="recap-kpi-obj">/ obj. '+prod.m1_rdt_cible+'</span>' : ''}` : null,
+    prod.m1_phnr_cumul ? `PHNR ${Number(prod.m1_phnr_cumul).toLocaleString('fr-FR')} kg/h` : null,
+    prod.m1_cdc_cumul  ? `CDC ${prod.m1_cdc_cumul}${prod.m1_cdc_cible ? ' <span class="recap-kpi-obj">obj. '+prod.m1_cdc_cible+'</span>' : ''}` : null,
+    prod.m1_arret_cumul && prod.m1_arret_cumul !== '' ? `<span style="color:var(--rouge)">Arrêts ${prod.m1_arret_cumul}</span>` : null,
+    prod.m1_casse_cumul && prod.m1_casse_cumul !== '' ? `<span style="color:var(--orange)">Casse ${prod.m1_casse_cumul}</span>` : null,
+  ].filter(Boolean);
+
+  // Métriques M3
+  const m3kpis = [
+    prod.m3_rdt_cumul != null && prod.m3_rdt_cumul !== '' ? `Rdt ${prod.m3_rdt_cumul}%${prod.m3_rdt_cible ? ' <span class="recap-kpi-obj">/ obj. '+prod.m3_rdt_cible+'</span>' : ''}` : null,
+    prod.m3_phnr_cumul ? `PHNR ${Number(prod.m3_phnr_cumul).toLocaleString('fr-FR')} kg/h` : null,
+    prod.m3_cdc_cumul  ? `CDC ${prod.m3_cdc_cumul}${prod.m3_cdc_cible ? ' <span class="recap-kpi-obj">obj. '+prod.m3_cdc_cible+'</span>' : ''}` : null,
+    prod.m3_arret_cumul && prod.m3_arret_cumul !== '' ? `<span style="color:var(--rouge)">Arrêts ${prod.m3_arret_cumul}</span>` : null,
+    prod.m3_casse_cumul && prod.m3_casse_cumul !== '' ? `<span style="color:var(--orange)">Casse ${prod.m3_casse_cumul}</span>` : null,
+  ].filter(Boolean);
+
+  const infos       = prod.commentaire_general;
+  const hasM1       = m1kpis.length > 0 || prod.m1_ref;
+  const hasM3       = m3kpis.length > 0 || prod.m3_ref;
+  const hasPannes   = impacts.length > 0;
+  const hasSecu     = sec && +sec.nb_evenements > 0;
+
+  return `
+  <div class="recap-day">
+    <div class="recap-day-hd">
+      <span class="recap-day-date">${formatDateLabel(entry.date)}</span>
+      <span class="feu feu-${globalStatut}" style="width:9px;height:9px;flex-shrink:0"></span>
+      <span class="recap-global-label" style="color:var(--${globalStatut === 'vert' ? 'vert' : globalStatut})">${globalLabel}</span>
+      <span class="recap-refs">M1: ${prod.m1_ref||'—'} &nbsp;·&nbsp; M3: ${prod.m3_ref||'—'}</span>
+    </div>
+
+    ${hasM1 || hasM3 ? `
+    <div class="recap-machines">
+      ${hasM1 ? `<div class="recap-machine">
+        <div class="recap-mach-title">Machine 1 ${feu(prod.m1_statut)}</div>
+        ${m1kpis.map(k => `<div class="recap-kpi">${k}</div>`).join('')}
+      </div>` : ''}
+      ${hasM3 ? `<div class="recap-machine">
+        <div class="recap-mach-title">Machine 3 ${feu(prod.m3_statut)}</div>
+        ${m3kpis.map(k => `<div class="recap-kpi">${k}</div>`).join('')}
+      </div>` : ''}
+    </div>` : ''}
+
+    ${infos ? `
+    <div class="recap-info">
+      <div class="recap-info-label">📌 Informations importantes</div>
+      <div class="recap-info-body">${infos}</div>
+    </div>` : ''}
+
+    ${hasPannes || hasSecu ? `
+    <div class="recap-alerts">
+      ${hasPannes ? impacts.map(ev => `
+        <div class="recap-alert-item" style="border-left-color:var(--${ev.urgence})">
+          <span class="feu feu-${ev.urgence}" style="width:8px;height:8px;flex-shrink:0"></span>
+          <span>${ev.desc}${ev.machine ? ' <span class="recap-kpi-obj">('+ev.machine+')</span>' : ''}</span>
+        </div>`).join('') : ''}
+      ${hasSecu ? `
+        <div class="recap-alert-item" style="border-left-color:var(--orange)">
+          <span class="feu feu-orange" style="width:8px;height:8px;flex-shrink:0"></span>
+          <span>Sécurité : ${sec.evenements || sec.nb_evenements+' évènement(s)'}</span>
+        </div>` : ''}
+    </div>` : ''}
+  </div>`;
+}
+
+function renderRecap() {
+  const el = document.getElementById('recap-content');
+  if (!el || !recapData) return;
+  const filtered = recapData.slice(0, recapPeriod);
+  if (!filtered.length) {
+    el.innerHTML = '<div style="color:var(--text2);padding:20px;text-align:center">Aucune donnée de production disponible.</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(renderRecapDay).join('');
+}
 
 function toggleAcc(id) {
   const body  = document.getElementById('acc-body-' + id);

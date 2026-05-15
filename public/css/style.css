@@ -899,3 +899,132 @@ body {
   0%, 100% { opacity:1; transform:scale(1); }
   50%       { opacity:.5; transform:scale(1.3); }
 }
+
+/* ── Récap CDF ──────────────────────────────────────────────── */
+.recap-period-btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.recap-period-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  transition: all .15s;
+}
+.recap-period-btn:hover { border-color: var(--text2); color: var(--text); }
+.recap-period-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+.recap-day {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.recap-day-hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.recap-day-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+.recap-global-label {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.recap-refs {
+  font-size: 11px;
+  color: var(--text2);
+  margin-left: auto;
+}
+.recap-machines {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 12px 14px;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+.recap-machine + .recap-machine {
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
+}
+.recap-machine:first-child {
+  padding-right: 14px;
+}
+.recap-mach-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text2);
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.recap-kpi {
+  font-size: 12px;
+  color: var(--text);
+  padding: 2px 0;
+  line-height: 1.5;
+}
+.recap-kpi-obj {
+  color: var(--text2);
+  font-weight: 400;
+}
+.recap-info {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.recap-info-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text2);
+  margin-bottom: 5px;
+}
+.recap-info-body {
+  font-size: 13px;
+  color: var(--text);
+  white-space: pre-line;
+  line-height: 1.65;
+}
+.recap-alerts {
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.recap-alert-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  padding: 5px 10px;
+  background: var(--bg3);
+  border-radius: 6px;
+  border-left: 3px solid var(--border);
+  line-height: 1.4;
+}
+@media(max-width:600px) {
+  .recap-machines { grid-template-columns: 1fr; }
+  .recap-machine + .recap-machine { padding-left: 0; border-left: none; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
+  .recap-machine:first-child { padding-right: 0; }
+  .recap-refs { display: none; }
+}

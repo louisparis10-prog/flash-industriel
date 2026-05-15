@@ -141,6 +141,38 @@ app.get('/api/grade', async (req, res) => {
   }
 });
 
+// Récap CDF — derniers N jours de production avec sécurité & maintenance
+app.get('/api/recap', async (req, res) => {
+  const days = Math.min(parseInt(req.query.days) || 30, 60);
+  try {
+    const datesRes = await pool.query(
+      `SELECT DISTINCT session_date FROM submissions
+       WHERE service = 'production'
+       ORDER BY session_date DESC LIMIT $1`,
+      [days]
+    );
+    const dates = datesRes.rows.map(r => r.session_date);
+    if (!dates.length) return res.json([]);
+
+    const dataRes = await pool.query(
+      `SELECT session_date, service, data FROM submissions
+       WHERE session_date = ANY($1::text[])
+         AND service IN ('production', 'securite', 'maintenance')`,
+      [dates]
+    );
+
+    const byDate = {};
+    dates.forEach(d => { byDate[d] = { date: d }; });
+    dataRes.rows.forEach(r => {
+      byDate[r.session_date][r.service] = JSON.parse(r.data);
+    });
+
+    res.json(dates.map(d => byDate[d]));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Tous les jours de production (pour comparatif inter-grades)
 app.get('/api/all-grades', async (req, res) => {
   try {
