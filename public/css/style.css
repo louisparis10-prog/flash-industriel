@@ -1332,6 +1332,37 @@ mark.sh {
   width: fit-content;
 }
 
+/* ── Expand / collapse machines vertes ── */
+.recap-expandable {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.recap-expandable.open { display: block; }
+
+.recap-expand-bar {
+  padding: 6px 18px 10px;
+  display: flex;
+  justify-content: center;
+  border-top: 1px dashed var(--border);
+}
+.recap-expand-btn {
+  background: none;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 20px;
+  transition: background .15s, color .15s;
+  letter-spacing: .02em;
+}
+.recap-expand-btn:hover { background: var(--bg3); color: var(--text); }
+
+/* En-tête cliquable */
+.recap-day-hd { cursor: pointer; }
+.recap-day-hd:hover { background: var(--bg2); }
+
 @media(max-width:600px) {
   .recap-machines { grid-template-columns: 1fr; }
   .recap-day-num { font-size: 26px; }

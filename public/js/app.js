@@ -1082,14 +1082,25 @@ function recapKpiChip(label, value, accent) {
   return `<div class="recap-chip" style="${style}"><span class="recap-chip-label">${label}</span><span class="recap-chip-value">${value}</span></div>`;
 }
 
+function toggleRecapDay(id, btn) {
+  const body = document.getElementById('recap-body-' + id);
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  btn.textContent = open ? 'Réduire ▲' : 'Voir tout ▼';
+}
+
+let _recapDayIdx = 0;
+
 function renderRecapDay(entry) {
   const prod  = entry.production;
   const sec   = entry.securite;
   const maint = entry.maintenance;
   if (!prod) return '';
 
-  const gStatut = prod.statut_global || 'vert';
-  const secStatut = sec?.couleur_globale || (sec && +sec.nb_evenements > 0 ? 'orange' : 'vert');
+  const id = 'rd' + (_recapDayIdx++);
+
+  const gStatut    = prod.statut_global || 'vert';
+  const secStatut  = sec?.couleur_globale || (sec && +sec.nb_evenements > 0 ? 'orange' : 'vert');
   const maintStatut = maint?.statut_global || 'vert';
 
   // Impacts maintenance
@@ -1100,114 +1111,129 @@ function renderRecapDay(entry) {
     impacts.push({ desc, machine: maint[`impact_${i}_machine`]||'', urgence: maint[`impact_${i}_urgence`]||'rouge' });
   }
 
-  // KPI chips M1
-  const m1chips = [];
-  if (prod.m1_rdt_cumul != null && prod.m1_rdt_cumul !== '') {
-    const underTarget = prod.m1_rdt_cible && parseFloat(prod.m1_rdt_cumul) < parseFloat(prod.m1_rdt_cible);
-    m1chips.push(recapKpiChip('Rdt', `${prod.m1_rdt_cumul}%${prod.m1_rdt_cible ? ' / '+prod.m1_rdt_cible : ''}`, underTarget ? 'var(--orange)' : null));
+  // KPI chips builder
+  function buildChips(prefix) {
+    const chips = [];
+    const rdt = prod[`${prefix}_rdt_cumul`];
+    if (rdt != null && rdt !== '') {
+      const under = prod[`${prefix}_rdt_cible`] && parseFloat(rdt) < parseFloat(prod[`${prefix}_rdt_cible`]);
+      chips.push(recapKpiChip('Rdt', `${rdt}%${prod[`${prefix}_rdt_cible`] ? ' / '+prod[`${prefix}_rdt_cible`] : ''}`, under ? 'var(--orange)' : null));
+    }
+    if (prod[`${prefix}_phnr_cumul`]) chips.push(recapKpiChip('PHNR', `${Number(prod[`${prefix}_phnr_cumul`]).toLocaleString('fr-FR')} kg/h`));
+    if (prod[`${prefix}_cdc_cumul`])  chips.push(recapKpiChip('CDC',  `${prod[`${prefix}_cdc_cumul`]}${prod[`${prefix}_cdc_cible`] ? ' / '+prod[`${prefix}_cdc_cible`] : ''}`));
+    if (prod[`${prefix}_vitesse_j1`]) chips.push(recapKpiChip('Vitesse', `${prod[`${prefix}_vitesse_j1`]}${prod[`${prefix}_vitesse_cible`] ? ' / '+prod[`${prefix}_vitesse_cible`] : ''} m/min`));
+    if (prod[`${prefix}_arret_cumul`] && prod[`${prefix}_arret_cumul`] !== '') chips.push(recapKpiChip('Arrêts', prod[`${prefix}_arret_cumul`], 'var(--rouge)'));
+    if (prod[`${prefix}_casse_cumul`] && prod[`${prefix}_casse_cumul`] !== '') chips.push(recapKpiChip('Casse',  prod[`${prefix}_casse_cumul`],  'var(--orange)'));
+    return chips;
   }
-  if (prod.m1_phnr_cumul) m1chips.push(recapKpiChip('PHNR', `${Number(prod.m1_phnr_cumul).toLocaleString('fr-FR')} kg/h`));
-  if (prod.m1_cdc_cumul)  m1chips.push(recapKpiChip('CDC',  `${prod.m1_cdc_cumul}${prod.m1_cdc_cible ? ' / '+prod.m1_cdc_cible : ''}`));
-  if (prod.m1_vitesse_j1) m1chips.push(recapKpiChip('Vitesse', `${prod.m1_vitesse_j1}${prod.m1_vitesse_cible ? ' / '+prod.m1_vitesse_cible : ''} m/min`));
-  if (prod.m1_arret_cumul && prod.m1_arret_cumul !== '') m1chips.push(recapKpiChip('Arrêts', prod.m1_arret_cumul, 'var(--rouge)'));
-  if (prod.m1_casse_cumul && prod.m1_casse_cumul !== '') m1chips.push(recapKpiChip('Casse',  prod.m1_casse_cumul, 'var(--orange)'));
 
-  // KPI chips M3
-  const m3chips = [];
-  if (prod.m3_rdt_cumul != null && prod.m3_rdt_cumul !== '') {
-    const underTarget = prod.m3_rdt_cible && parseFloat(prod.m3_rdt_cumul) < parseFloat(prod.m3_rdt_cible);
-    m3chips.push(recapKpiChip('Rdt', `${prod.m3_rdt_cumul}%${prod.m3_rdt_cible ? ' / '+prod.m3_rdt_cible : ''}`, underTarget ? 'var(--orange)' : null));
-  }
-  if (prod.m3_phnr_cumul) m3chips.push(recapKpiChip('PHNR', `${Number(prod.m3_phnr_cumul).toLocaleString('fr-FR')} kg/h`));
-  if (prod.m3_cdc_cumul)  m3chips.push(recapKpiChip('CDC',  `${prod.m3_cdc_cumul}${prod.m3_cdc_cible ? ' / '+prod.m3_cdc_cible : ''}`));
-  if (prod.m3_vitesse_j1) m3chips.push(recapKpiChip('Vitesse', `${prod.m3_vitesse_j1}${prod.m3_vitesse_cible ? ' / '+prod.m3_vitesse_cible : ''} m/min`));
-  if (prod.m3_arret_cumul && prod.m3_arret_cumul !== '') m3chips.push(recapKpiChip('Arrêts', prod.m3_arret_cumul, 'var(--rouge)'));
-  if (prod.m3_casse_cumul && prod.m3_casse_cumul !== '') m3chips.push(recapKpiChip('Casse',  prod.m3_casse_cumul, 'var(--orange)'));
+  const m1chips = buildChips('m1');
+  const m3chips = buildChips('m3');
 
-  const infos     = prod.commentaire_general;
-  const hasM1     = prod.m1_ref || m1chips.length > 0;
-  const hasM3     = prod.m3_ref || m3chips.length > 0;
-  const hasPannes = impacts.length > 0;
-  const hasSecu   = sec && +sec.nb_evenements > 0;
+  const m1statut = prod.m1_statut || 'vert';
+  const m3statut = prod.m3_statut || 'vert';
+  const infos    = prod.commentaire_general;
 
-  // Couleur bordure gauche selon statut global
+  // Ce qui est "impactant" (à montrer par défaut)
+  const m1impactant = m1statut !== 'vert';
+  const m3impactant = m3statut !== 'vert';
+  const hasPannes   = impacts.length > 0;
+  const hasSecu     = sec && +sec.nb_evenements > 0;
+  const hasVisible  = m1impactant || m3impactant || hasPannes || hasSecu || !!infos;
+
+  // Ce qui est masqué (machines vertes + leurs KPIs)
+  const hasHidden   = (!m1impactant && (prod.m1_ref || m1chips.length > 0))
+                   || (!m3impactant && (prod.m3_ref || m3chips.length > 0));
+
+  // Bordure gauche
   const borderColor = gStatut === 'rouge' ? 'var(--rouge)' : gStatut === 'orange' ? 'var(--orange)' : 'var(--vert)';
 
-  // Date formatée
-  const [y, m, d] = entry.date.split('-');
-  const mois = ['','jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-  const jours = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
-  const dow = jours[new Date(entry.date).getDay()];
+  // Date
+  const [y, mo, d] = entry.date.split('-');
+  const moisL = ['','jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  const joursL = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  const dow = joursL[new Date(entry.date).getDay()];
   const isToday = entry.date === new Date().toISOString().slice(0,10);
 
-  return `
-  <div class="recap-day" style="border-left:4px solid ${borderColor}" onclick="selectSearchDate('${entry.date}')" title="Ouvrir le tableau de bord du ${parseInt(d)} ${mois[parseInt(m)]}">
+  function machineBlock(prefix, statut, chips, ref) {
+    if (!ref && chips.length === 0) return '';
+    return `
+    <div class="recap-machine recap-machine-${statut}">
+      <div class="recap-mach-header">
+        <span class="recap-mach-num">${prefix === 'm1' ? 'M1' : 'M3'}</span>
+        <span class="recap-mach-ref">${ref||'—'}</span>
+        <span class="recap-mach-statut feu feu-${statut}"></span>
+      </div>
+      <div class="recap-chips">${chips.join('')}</div>
+    </div>`;
+  }
 
-    <!-- EN-TÊTE -->
-    <div class="recap-day-hd">
+  return `
+  <div class="recap-day" style="border-left:4px solid ${borderColor}">
+
+    <!-- EN-TÊTE — clic pour ouvrir le tableau de bord -->
+    <div class="recap-day-hd" onclick="selectSearchDate('${entry.date}')" title="Ouvrir le tableau de bord">
       <div class="recap-day-date-block">
         <span class="recap-day-num">${parseInt(d)}</span>
         <div class="recap-day-meta">
           <span class="recap-day-dow">${dow.toUpperCase()}</span>
-          <span class="recap-day-mois">${mois[parseInt(m)]} ${y}</span>
+          <span class="recap-day-mois">${moisL[parseInt(mo)]} ${y}</span>
         </div>
         ${isToday ? '<span class="recap-today-tag">Aujourd\'hui</span>' : ''}
       </div>
       <div class="recap-day-badges">
-        ${recapBadge(gStatut, gStatut === 'vert' ? '⚙ Production OK' : gStatut === 'orange' ? '⚙ Écarts prod.' : '⚙ Production critique')}
-        ${sec ? recapBadge(secStatut, secStatut === 'vert' ? '🛡 Sécu OK' : '🛡 Sécu ' + (sec.nb_evenements||'') + ' évèn.') : ''}
-        ${maint ? recapBadge(maintStatut, maintStatut === 'rouge' ? '🔧 Maint. critique' : maintStatut === 'orange' ? '🔧 Maint. écarts' : '🔧 Maint. OK') : ''}
+        ${recapBadge(gStatut,    gStatut    === 'vert' ? 'Production OK'  : gStatut    === 'orange' ? 'Écarts prod.'     : 'Prod. critique')}
+        ${sec   ? recapBadge(secStatut,   secStatut   === 'vert' ? 'Sécu OK'        : 'Sécu ' + (sec.nb_evenements||'') + ' évèn.') : ''}
+        ${maint ? recapBadge(maintStatut, maintStatut === 'vert' ? 'Maintenance OK' : maintStatut === 'orange' ? 'Maint. écarts' : 'Maint. critique') : ''}
       </div>
     </div>
 
-    <!-- MACHINES -->
-    ${hasM1 || hasM3 ? `
-    <div class="recap-machines">
-      ${hasM1 ? `
-      <div class="recap-machine recap-machine-${prod.m1_statut||'vert'}">
-        <div class="recap-mach-header">
-          <span class="recap-mach-num">M1</span>
-          <span class="recap-mach-ref">${prod.m1_ref||'—'}</span>
-          <span class="recap-mach-statut feu feu-${prod.m1_statut||'vert'}"></span>
-        </div>
-        <div class="recap-chips">${m1chips.join('')}</div>
+    <!-- CONTENU VISIBLE : uniquement les écarts + infos importantes -->
+    ${hasVisible ? `<div class="recap-visible">
+
+      ${(m1impactant && (prod.m1_ref || m1chips.length > 0)) || (m3impactant && (prod.m3_ref || m3chips.length > 0)) ? `
+      <div class="recap-machines">
+        ${m1impactant ? machineBlock('m1', m1statut, m1chips, prod.m1_ref) : ''}
+        ${m3impactant ? machineBlock('m3', m3statut, m3chips, prod.m3_ref) : ''}
       </div>` : ''}
-      ${hasM3 ? `
-      <div class="recap-machine recap-machine-${prod.m3_statut||'vert'}">
-        <div class="recap-mach-header">
-          <span class="recap-mach-num">M3</span>
-          <span class="recap-mach-ref">${prod.m3_ref||'—'}</span>
-          <span class="recap-mach-statut feu feu-${prod.m3_statut||'vert'}"></span>
-        </div>
-        <div class="recap-chips">${m3chips.join('')}</div>
+
+      ${infos ? `
+      <div class="recap-info">
+        <div class="recap-info-label">📌 Informations importantes</div>
+        <div class="recap-info-body">${infos}</div>
       </div>` : ''}
+
+      ${hasPannes || hasSecu ? `
+      <div class="recap-alerts">
+        ${hasPannes ? impacts.map(ev => `
+          <div class="recap-alert-item recap-alert-${ev.urgence}">
+            <span class="recap-alert-icon">${ev.urgence === 'rouge' ? '🔴' : '🟠'}</span>
+            <div class="recap-alert-body">
+              <span class="recap-alert-desc">${ev.desc}</span>
+              ${ev.machine ? `<span class="recap-alert-machine">${ev.machine}</span>` : ''}
+            </div>
+          </div>`).join('') : ''}
+        ${hasSecu ? `
+          <div class="recap-alert-item recap-alert-orange">
+            <span class="recap-alert-icon">⚠</span>
+            <div class="recap-alert-body">
+              <span class="recap-alert-desc">Sécurité : ${sec.evenements || sec.nb_evenements + ' évènement(s)'}</span>
+            </div>
+          </div>` : ''}
+      </div>` : ''}
+
     </div>` : ''}
 
-    <!-- INFORMATIONS IMPORTANTES -->
-    ${infos ? `
-    <div class="recap-info">
-      <div class="recap-info-label">📌 Informations importantes</div>
-      <div class="recap-info-body">${infos}</div>
-    </div>` : ''}
-
-    <!-- ALERTES MAINTENANCE + SÉCU -->
-    ${hasPannes || hasSecu ? `
-    <div class="recap-alerts">
-      ${hasPannes ? impacts.map(ev => `
-        <div class="recap-alert-item recap-alert-${ev.urgence}">
-          <span class="recap-alert-icon">${ev.urgence === 'rouge' ? '🔴' : '🟠'}</span>
-          <div class="recap-alert-body">
-            <span class="recap-alert-desc">${ev.desc}</span>
-            ${ev.machine ? `<span class="recap-alert-machine">${ev.machine}</span>` : ''}
-          </div>
-        </div>`).join('') : ''}
-      ${hasSecu ? `
-        <div class="recap-alert-item recap-alert-orange">
-          <span class="recap-alert-icon">🛡</span>
-          <div class="recap-alert-body">
-            <span class="recap-alert-desc">Sécurité : ${sec.evenements || sec.nb_evenements + ' évènement(s)'}</span>
-          </div>
-        </div>` : ''}
+    <!-- CONTENU CACHÉ : machines vertes -->
+    ${hasHidden ? `
+    <div class="recap-expandable" id="recap-body-${id}">
+      <div class="recap-machines">
+        ${!m1impactant ? machineBlock('m1', m1statut, m1chips, prod.m1_ref) : ''}
+        ${!m3impactant ? machineBlock('m3', m3statut, m3chips, prod.m3_ref) : ''}
+      </div>
+    </div>
+    <div class="recap-expand-bar">
+      <button class="recap-expand-btn" onclick="toggleRecapDay('${id}', this)">Voir tout ▼</button>
     </div>` : ''}
 
   </div>`;
@@ -1216,6 +1242,7 @@ function renderRecapDay(entry) {
 function renderRecap() {
   const el = document.getElementById('recap-content');
   if (!el || !recapData) return;
+  _recapDayIdx = 0;
   const filtered = recapData.slice(0, recapPeriod);
   if (!filtered.length) {
     el.innerHTML = '<div style="color:var(--text2);padding:20px;text-align:center">Aucune donnée de production disponible.</div>';
