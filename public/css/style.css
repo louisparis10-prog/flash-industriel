@@ -1120,6 +1120,7 @@ mark.sh {
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   align-content: start;
+  align-items: start;
 }
 .recap-period-btns { display: flex; gap: 6px; }
 .recap-period-btn {
@@ -1141,7 +1142,7 @@ mark.sh {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
   overflow: hidden;
   cursor: pointer;
   transition: box-shadow .2s, transform .15s;
