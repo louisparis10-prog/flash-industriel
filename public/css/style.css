@@ -1116,11 +1116,9 @@ mark.sh {
   overflow-y: auto;
   padding: 20px;
   background: var(--bg2);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
-  align-content: start;
-  align-items: start;
 }
 .recap-period-btns { display: flex; gap: 6px; }
 .recap-period-btn {
@@ -1217,7 +1215,7 @@ mark.sh {
 /* ── Machines ── */
 .recap-machines {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1px;
   background: var(--border);
   border-bottom: 1px solid var(--border);
@@ -1368,15 +1366,9 @@ mark.sh {
 .recap-day-hd { cursor: pointer; }
 .recap-day-hd:hover { background: var(--bg2); }
 
-/* Le message vide prend toute la largeur */
-.recap-drawer-body > [style*="text-align:center"] { grid-column: 1 / -1; }
-
-/* Les cartes ne doivent pas avoir margin-bottom en mode grille */
+/* Les cartes n'ont pas de margin-bottom (gap gère l'espacement) */
 .recap-day { margin-bottom: 0; }
 
-@media(max-width:580px) {
-  .recap-drawer-body { grid-template-columns: 1fr; }
-}
 @media(max-width:600px) {
   .recap-machines { grid-template-columns: 1fr; }
   .recap-day-num { font-size: 26px; }
