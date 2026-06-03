@@ -1146,7 +1146,7 @@ mark.sh {
   transition: box-shadow .2s, transform .15s;
   /* border-left overridden inline avec la couleur statut */
 }
-.recap-day:hover { box-shadow: 0 4px 20px rgba(0,0,0,.10); transform: translateY(-1px); }
+.recap-day:hover { box-shadow: 0 4px 20px rgba(0,0,0,.10); }
 
 /* ── En-tête jour ── */
 .recap-day-hd {
