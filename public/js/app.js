@@ -40,69 +40,83 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* ── Légendes permanentes sous tous les groupes de boutons couleur ── */
+/* ── Légendes visuelles par indicateur ── */
 const STATUT_LEGENDS = {
-  // Sécurité
-  couleur_globale:    ['Aucun incident',        'Événement signalé',        'Incident grave'],
-  gravite:            ['Sans conséquence',       'Soins / presque-accident', 'Accident / danger grave'],
-  // Sécurité Environnement
-  clarification_statut: ['Turbidité conforme',  'Paramètre à surveiller',   'Hors normes'],
-  zone_dechets_statut:  ['Zone propre, tri OK', 'Écart de tri / désordre',  'Déchets dangereux mal stockés'],
-  incendie_statut:      ['Équipements opérationnels', 'Équipement non critique HS', 'Équipement vital hors service'],
-  step1_statut:         ['Fonctionnement conforme',   'Anomalie en traitement',     'Rejet non conforme'],
-  // Utilités
-  statut_global:      ['Tous équipements nominaux',  'Équipement(s) en anomalie',   'Équipement vital en panne'],
-  biomasse_statut:    ['En fonctionnement',          'Fonctionnement dégradé',       'Arrêt non planifié'],
-  gaz_statut:         ['Disponible / en marche',     'Disponibilité partielle',      'Indisponible'],
-  dalkia_statut:      ['Toutes chaudières OK',       'Fonctionnement dégradé',       'Absence de vapeur'],
-  air_statut:         ['Pression nominale',          'Pression basse / anomalie',    'Panne compresseur'],
-  clim_statut:        ['Temp. & hygro. nominales',   'Température hors consigne',    'Climatisation hors service'],
-  effacement_statut:  ['Capacité nominale',          'Capacité partielle',           'Effacement impossible'],
-  // Production
-  m1_statut:          ['Objectifs atteints',         'Écart de production',          'Arrêt / prod. très dégradée'],
-  m3_statut:          ['Objectifs atteints',         'Écart de production',          'Arrêt / prod. très dégradée'],
-  // Qualité — résultat machine
-  m1_resultat:        ['Qualité conforme',           'Non-conformité mineure',       'Hors spécifications'],
-  m3_resultat:        ['Qualité conforme',           'Non-conformité mineure',       'Hors spécifications'],
-  // Qualité — taux de casse
-  m1_tc_statut:       ['Taux dans l\'objectif',      'Taux au-dessus objectif',      'Taux critique'],
-  m3_tc_statut:       ['Taux dans l\'objectif',      'Taux au-dessus objectif',      'Taux critique'],
-  // Qualité — zones
-  zone_mt1:           ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  zone_mt3:           ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  zone_charg1:        ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  zone_charg3:        ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  zone_prep1:         ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  zone_prep3:         ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  zone_fin1:          ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  zone_fin3:          ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
-  // Maintenance — urgence
-  impact_0_urgence:   [null,                         'Impact indirect production',   'Impact direct — sous 24h'],
-  // Maintenance — point d'action
-  point_0_statut:     ['Action réalisée et clôturée','Action en cours de traitement','Délai dépassé'],
+  couleur_globale:      { vert: ['Journée nominale',    'Aucun incident signalé'],          orange: ['Vigilance',        'Événement mineur déclaré'],            rouge: ['Alerte',           'Incident grave en cours']               },
+  gravite:              { vert: ['Faible',              'Sans conséquence sur les personnes'], orange: ['Modérée',         'Soins requis ou presque-accident'],    rouge: ['Grave',            'Accident avec arrêt ou danger immédiat'] },
+  clarification_statut: { vert: ['Conforme',            'Turbidité dans les normes'],        orange: ['Surveillance',     'Paramètre hors seuil'],                rouge: ['Hors normes',      'Action corrective requise']             },
+  zone_dechets_statut:  { vert: ['Conforme',            'Zone propre, tri respecté'],        orange: ['Écart',            'Désordre ou tri non respecté'],        rouge: ['Non-conforme',     'Déchets dangereux mal stockés']         },
+  incendie_statut:      { vert: ['Opérationnel',        'Tous équipements fonctionnels'],    orange: ['Vigilance',        'Équipement non critique défaillant'],  rouge: ['Critique',         'Équipement vital hors service']         },
+  step1_statut:         { vert: ['Nominal',             'Fonctionnement conforme'],          orange: ['Anomalie',         'Paramètre hors seuil, en traitement'], rouge: ['Critique',         'Risque de rejet non conforme']          },
+  statut_global:        { vert: ['Nominal',             'Tous équipements opérationnels'],   orange: ['Dégradé',          'Un ou plusieurs équipements en anomalie'], rouge: ['Critique',     'Équipement vital en panne']             },
+  biomasse_statut:      { vert: ['En marche',           'Production de vapeur nominale'],    orange: ['Dégradé',          'Fonctionnement en dessous du nominal'], rouge: ['Arrêt',            'Hors service non planifié']             },
+  gaz_statut:           { vert: ['Disponible',          'Prête ou en fonctionnement'],       orange: ['Partiel',          'Disponibilité réduite'],               rouge: ['Indisponible',     'Chaudière hors service']                },
+  dalkia_statut:        { vert: ['Normal',              'Toutes chaudières opérationnelles'],orange: ['Dégradé',          'Chaudière(s) en bouillotte ou arrêtée'],rouge: ['Critique',         'Absence de vapeur']                    },
+  air_statut:           { vert: ['Nominal',             'Pression dans les plages normales'],orange: ['Basse pression',   'Surveillance requise'],                rouge: ['Critique',         'Chute de pression / panne compresseur'] },
+  clim_statut:          { vert: ['Normal',              'Temp. & hygrométrie nominales'],    orange: ['Écart',            'Température hors consigne'],           rouge: ['Panne',            'Climatisation hors service']            },
+  effacement_statut:    { vert: ['Disponible',          'Capacité d\'effacement nominale'],  orange: ['Réduit',           'Capacité d\'effacement partielle'],    rouge: ['Indisponible',     'Effacement impossible']                 },
+  m1_statut:            { vert: ['Objectifs atteints',  'Production dans les cibles'],       orange: ['Écart',            'Un ou plusieurs objectifs non atteints'], rouge: ['Critique',     'Arrêt ou production très dégradée']     },
+  m3_statut:            { vert: ['Objectifs atteints',  'Production dans les cibles'],       orange: ['Écart',            'Un ou plusieurs objectifs non atteints'], rouge: ['Critique',     'Arrêt ou production très dégradée']     },
+  m1_resultat:          { vert: ['Conforme',            'Qualité dans les spécifications'],  orange: ['Écart',            'Non-conformité mineure en traitement'],rouge: ['Non-conforme',     'Qualité hors spécifications']           },
+  m3_resultat:          { vert: ['Conforme',            'Qualité dans les spécifications'],  orange: ['Écart',            'Non-conformité mineure en traitement'],rouge: ['Non-conforme',     'Qualité hors spécifications']           },
+  m1_tc_statut:         { vert: ['Dans l\'objectif',    'Taux de casse acceptable'],         orange: ['Élevé',            'Taux au-dessus de l\'objectif'],       rouge: ['Critique',         'Taux de casse très élevé']              },
+  m3_tc_statut:         { vert: ['Dans l\'objectif',    'Taux de casse acceptable'],         orange: ['Élevé',            'Taux au-dessus de l\'objectif'],       rouge: ['Critique',         'Taux de casse très élevé']              },
+  zone_mt1:             { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  zone_mt3:             { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  zone_charg1:          { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  zone_charg3:          { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  zone_prep1:           { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  zone_prep3:           { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  zone_fin1:            { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  zone_fin3:            { vert: ['Conforme',            'Aucune non-conformité relevée'],    orange: ['Écart mineur',     'Non-conformité en cours de traitement'],rouge: ['Non-conforme',     'Non-conformité grave non résolue']      },
+  impact_0_urgence:     {                                                                     orange: ['Moyen',            'Impact indirect sur la production'],   rouge: ['Urgent',           'Impact direct — intervention sous 24h'] },
+  point_0_statut:       { vert: ['Soldé',               'Action réalisée et clôturée'],      orange: ['En cours',         'Action engagée, dans les délais'],     rouge: ['En retard',        'Délai dépassé, escalade requise']       },
 };
 
 function injectStatutLegends() {
   document.querySelectorAll('.statut-group').forEach(group => {
     if (group.parentElement?.classList.contains('statut-group-wrap')) return;
 
-    // Trouver le data-field du groupe
     const field = group.querySelector('[data-field]')?.dataset.field || '';
-    const labels = STATUT_LEGENDS[field] || ['Normal', 'Écart mineur', 'Critique'];
+    const cfg = STATUT_LEGENDS[field];
 
     const legend = document.createElement('div');
-    legend.className = 'statut-legend';
+    legend.className = 'statut-legend-block';
+
+    const colorDefs = [
+      { key: 'vert',   cls: 'slb-vert'   },
+      { key: 'orange', cls: 'slb-orange' },
+      { key: 'rouge',  cls: 'slb-rouge'  },
+    ];
 
     let html = '';
-    const colors = ['vert', 'orange', 'rouge'];
-    colors.forEach((c, i) => {
-      if (!labels[i]) return; // champ urgence sans vert
-      if (i > 0 && html) html += '<span class="sl-sep">·</span>';
-      html += `<span class="sl-item"><span class="sl-dot sl-${c}"></span>${labels[i]}</span>`;
+    colorDefs.forEach(({ key, cls }) => {
+      const data = cfg?.[key];
+      const title = data?.[0] || (key === 'vert' ? 'Normal' : key === 'orange' ? 'Écart' : 'Critique');
+      const desc  = data?.[1] || '';
+      if (!data && !cfg) {
+        // fallback générique
+      }
+      if (cfg && !cfg[key]) return; // ex: urgence sans vert
+      html += `<div class="slb-item ${cls}">
+        <span class="slb-dot"></span>
+        <div>
+          <div class="slb-title">${key.charAt(0).toUpperCase() + key.slice(1)} — ${title}</div>
+          ${desc ? `<div class="slb-desc">${desc}</div>` : ''}
+        </div>
+      </div>`;
     });
+
+    // Fallback si champ non trouvé
+    if (!html) {
+      html =
+        '<div class="slb-item slb-vert"><span class="slb-dot"></span><div><div class="slb-title">Vert — Normal</div><div class="slb-desc">Situation nominale</div></div></div>' +
+        '<div class="slb-item slb-orange"><span class="slb-dot"></span><div><div class="slb-title">Orange — Écart</div><div class="slb-desc">Vigilance requise</div></div></div>' +
+        '<div class="slb-item slb-rouge"><span class="slb-dot"></span><div><div class="slb-title">Rouge — Critique</div><div class="slb-desc">Action immédiate requise</div></div></div>';
+    }
+
     legend.innerHTML = html;
 
-    // Envelopper dans un flex-colonne pour rester dans la même cellule de grille
     const wrap = document.createElement('div');
     wrap.className = 'statut-group-wrap';
     group.parentNode.insertBefore(wrap, group);
