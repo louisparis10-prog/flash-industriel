@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkStatus();
   initForms();
   autoResizeAll();
+  injectStatutLegends();
 
   // Fermer le menu mobile en cliquant en dehors
   document.addEventListener('click', e => {
@@ -38,6 +39,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+/* ── Légendes automatiques sur tous les groupes de boutons couleur ── */
+function injectStatutLegends() {
+  document.querySelectorAll('.statut-group').forEach(group => {
+    // Éviter les doublons
+    if (group.querySelector('.statut-legend-btn')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'statut-legend-btn';
+    btn.setAttribute('aria-label', 'Légende couleurs');
+    btn.innerHTML = 'ℹ';
+
+    const tip = document.createElement('div');
+    tip.className = 'statut-legend-tip';
+    tip.innerHTML =
+      '<div class="sl-row"><span class="sl-dot sl-vert"></span><div><strong>Vert</strong> — Situation normale, aucun écart</div></div>' +
+      '<div class="sl-row"><span class="sl-dot sl-orange"></span><div><strong>Orange</strong> — Écart mineur, vigilance requise</div></div>' +
+      '<div class="sl-row"><span class="sl-dot sl-rouge"></span><div><strong>Rouge</strong> — Situation critique, action immédiate</div></div>';
+
+    btn.appendChild(tip);
+
+    // Ouvrir / fermer au clic (accessible sur mobile)
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = btn.classList.toggle('open');
+      // Fermer les autres
+      if (open) {
+        document.querySelectorAll('.statut-legend-btn.open').forEach(other => {
+          if (other !== btn) other.classList.remove('open');
+        });
+      }
+    });
+
+    group.appendChild(btn);
+  });
+
+  // Fermer toutes les légendes en cliquant ailleurs
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.statut-legend-btn.open').forEach(b => b.classList.remove('open'));
+  });
+}
 
 function updateHeaderDate() {
   const d = new Date(currentDate + 'T12:00:00');
