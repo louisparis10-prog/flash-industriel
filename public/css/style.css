@@ -1193,7 +1193,6 @@ mark.sh {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  margin-left: auto;
 }
 .recap-badge {
   display: inline-flex;
@@ -1282,6 +1281,9 @@ mark.sh {
   color: var(--text);
   line-height: 1;
 }
+
+/* ── Contenu visible ── */
+.recap-visible { display: flex; flex-direction: column; }
 
 /* ── Informations importantes ── */
 .recap-info {
