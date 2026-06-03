@@ -1067,14 +1067,30 @@ function formatDateLabel(dateStr) {
   return `${dow} ${parseInt(d)} ${mois[parseInt(m)]} ${y}`;
 }
 
+function recapBadge(statut, label) {
+  const cfg = {
+    vert:   { bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
+    orange: { bg: '#ffedd5', color: '#9a3412', dot: '#f97316' },
+    rouge:  { bg: '#fee2e2', color: '#991b1b', dot: '#ef4444' },
+  };
+  const c = cfg[statut] || cfg.vert;
+  return `<span class="recap-badge" style="background:${c.bg};color:${c.color}"><span class="recap-badge-dot" style="background:${c.dot}"></span>${label}</span>`;
+}
+
+function recapKpiChip(label, value, accent) {
+  const style = accent ? `border-color:${accent};color:${accent}` : '';
+  return `<div class="recap-chip" style="${style}"><span class="recap-chip-label">${label}</span><span class="recap-chip-value">${value}</span></div>`;
+}
+
 function renderRecapDay(entry) {
   const prod  = entry.production;
   const sec   = entry.securite;
   const maint = entry.maintenance;
   if (!prod) return '';
 
-  const globalStatut = prod.statut_global || 'vert';
-  const globalLabel  = globalStatut === 'vert' ? 'Production OK' : globalStatut === 'orange' ? 'Écarts' : 'Critique';
+  const gStatut = prod.statut_global || 'vert';
+  const secStatut = sec?.couleur_globale || (sec && +sec.nb_evenements > 0 ? 'orange' : 'vert');
+  const maintStatut = maint?.statut_global || 'vert';
 
   // Impacts maintenance
   const impacts = [];
@@ -1084,70 +1100,116 @@ function renderRecapDay(entry) {
     impacts.push({ desc, machine: maint[`impact_${i}_machine`]||'', urgence: maint[`impact_${i}_urgence`]||'rouge' });
   }
 
-  // Métriques M1
-  const m1kpis = [
-    prod.m1_rdt_cumul != null && prod.m1_rdt_cumul !== '' ? `Rdt ${prod.m1_rdt_cumul}%${prod.m1_rdt_cible ? ' <span class="recap-kpi-obj">/ obj. '+prod.m1_rdt_cible+'</span>' : ''}` : null,
-    prod.m1_phnr_cumul ? `PHNR ${Number(prod.m1_phnr_cumul).toLocaleString('fr-FR')} kg/h` : null,
-    prod.m1_cdc_cumul  ? `CDC ${prod.m1_cdc_cumul}${prod.m1_cdc_cible ? ' <span class="recap-kpi-obj">obj. '+prod.m1_cdc_cible+'</span>' : ''}` : null,
-    prod.m1_arret_cumul && prod.m1_arret_cumul !== '' ? `<span style="color:var(--rouge)">Arrêts ${prod.m1_arret_cumul}</span>` : null,
-    prod.m1_casse_cumul && prod.m1_casse_cumul !== '' ? `<span style="color:var(--orange)">Casse ${prod.m1_casse_cumul}</span>` : null,
-  ].filter(Boolean);
+  // KPI chips M1
+  const m1chips = [];
+  if (prod.m1_rdt_cumul != null && prod.m1_rdt_cumul !== '') {
+    const underTarget = prod.m1_rdt_cible && parseFloat(prod.m1_rdt_cumul) < parseFloat(prod.m1_rdt_cible);
+    m1chips.push(recapKpiChip('Rdt', `${prod.m1_rdt_cumul}%${prod.m1_rdt_cible ? ' / '+prod.m1_rdt_cible : ''}`, underTarget ? 'var(--orange)' : null));
+  }
+  if (prod.m1_phnr_cumul) m1chips.push(recapKpiChip('PHNR', `${Number(prod.m1_phnr_cumul).toLocaleString('fr-FR')} kg/h`));
+  if (prod.m1_cdc_cumul)  m1chips.push(recapKpiChip('CDC',  `${prod.m1_cdc_cumul}${prod.m1_cdc_cible ? ' / '+prod.m1_cdc_cible : ''}`));
+  if (prod.m1_vitesse_j1) m1chips.push(recapKpiChip('Vitesse', `${prod.m1_vitesse_j1}${prod.m1_vitesse_cible ? ' / '+prod.m1_vitesse_cible : ''} m/min`));
+  if (prod.m1_arret_cumul && prod.m1_arret_cumul !== '') m1chips.push(recapKpiChip('Arrêts', prod.m1_arret_cumul, 'var(--rouge)'));
+  if (prod.m1_casse_cumul && prod.m1_casse_cumul !== '') m1chips.push(recapKpiChip('Casse',  prod.m1_casse_cumul, 'var(--orange)'));
 
-  // Métriques M3
-  const m3kpis = [
-    prod.m3_rdt_cumul != null && prod.m3_rdt_cumul !== '' ? `Rdt ${prod.m3_rdt_cumul}%${prod.m3_rdt_cible ? ' <span class="recap-kpi-obj">/ obj. '+prod.m3_rdt_cible+'</span>' : ''}` : null,
-    prod.m3_phnr_cumul ? `PHNR ${Number(prod.m3_phnr_cumul).toLocaleString('fr-FR')} kg/h` : null,
-    prod.m3_cdc_cumul  ? `CDC ${prod.m3_cdc_cumul}${prod.m3_cdc_cible ? ' <span class="recap-kpi-obj">obj. '+prod.m3_cdc_cible+'</span>' : ''}` : null,
-    prod.m3_arret_cumul && prod.m3_arret_cumul !== '' ? `<span style="color:var(--rouge)">Arrêts ${prod.m3_arret_cumul}</span>` : null,
-    prod.m3_casse_cumul && prod.m3_casse_cumul !== '' ? `<span style="color:var(--orange)">Casse ${prod.m3_casse_cumul}</span>` : null,
-  ].filter(Boolean);
+  // KPI chips M3
+  const m3chips = [];
+  if (prod.m3_rdt_cumul != null && prod.m3_rdt_cumul !== '') {
+    const underTarget = prod.m3_rdt_cible && parseFloat(prod.m3_rdt_cumul) < parseFloat(prod.m3_rdt_cible);
+    m3chips.push(recapKpiChip('Rdt', `${prod.m3_rdt_cumul}%${prod.m3_rdt_cible ? ' / '+prod.m3_rdt_cible : ''}`, underTarget ? 'var(--orange)' : null));
+  }
+  if (prod.m3_phnr_cumul) m3chips.push(recapKpiChip('PHNR', `${Number(prod.m3_phnr_cumul).toLocaleString('fr-FR')} kg/h`));
+  if (prod.m3_cdc_cumul)  m3chips.push(recapKpiChip('CDC',  `${prod.m3_cdc_cumul}${prod.m3_cdc_cible ? ' / '+prod.m3_cdc_cible : ''}`));
+  if (prod.m3_vitesse_j1) m3chips.push(recapKpiChip('Vitesse', `${prod.m3_vitesse_j1}${prod.m3_vitesse_cible ? ' / '+prod.m3_vitesse_cible : ''} m/min`));
+  if (prod.m3_arret_cumul && prod.m3_arret_cumul !== '') m3chips.push(recapKpiChip('Arrêts', prod.m3_arret_cumul, 'var(--rouge)'));
+  if (prod.m3_casse_cumul && prod.m3_casse_cumul !== '') m3chips.push(recapKpiChip('Casse',  prod.m3_casse_cumul, 'var(--orange)'));
 
-  const infos       = prod.commentaire_general;
-  const hasM1       = m1kpis.length > 0 || prod.m1_ref;
-  const hasM3       = m3kpis.length > 0 || prod.m3_ref;
-  const hasPannes   = impacts.length > 0;
-  const hasSecu     = sec && +sec.nb_evenements > 0;
+  const infos     = prod.commentaire_general;
+  const hasM1     = prod.m1_ref || m1chips.length > 0;
+  const hasM3     = prod.m3_ref || m3chips.length > 0;
+  const hasPannes = impacts.length > 0;
+  const hasSecu   = sec && +sec.nb_evenements > 0;
+
+  // Couleur bordure gauche selon statut global
+  const borderColor = gStatut === 'rouge' ? 'var(--rouge)' : gStatut === 'orange' ? 'var(--orange)' : 'var(--vert)';
+
+  // Date formatée
+  const [y, m, d] = entry.date.split('-');
+  const mois = ['','jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  const jours = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  const dow = jours[new Date(entry.date).getDay()];
+  const isToday = entry.date === new Date().toISOString().slice(0,10);
 
   return `
-  <div class="recap-day">
+  <div class="recap-day" style="border-left:4px solid ${borderColor}" onclick="selectSearchDate('${entry.date}')" title="Ouvrir le tableau de bord du ${parseInt(d)} ${mois[parseInt(m)]}">
+
+    <!-- EN-TÊTE -->
     <div class="recap-day-hd">
-      <span class="recap-day-date">${formatDateLabel(entry.date)}</span>
-      <span class="feu feu-${globalStatut}" style="width:9px;height:9px;flex-shrink:0"></span>
-      <span class="recap-global-label" style="color:var(--${globalStatut === 'vert' ? 'vert' : globalStatut})">${globalLabel}</span>
-      <span class="recap-refs">M1: ${prod.m1_ref||'—'} &nbsp;·&nbsp; M3: ${prod.m3_ref||'—'}</span>
+      <div class="recap-day-date-block">
+        <span class="recap-day-num">${parseInt(d)}</span>
+        <div class="recap-day-meta">
+          <span class="recap-day-dow">${dow.toUpperCase()}</span>
+          <span class="recap-day-mois">${mois[parseInt(m)]} ${y}</span>
+        </div>
+        ${isToday ? '<span class="recap-today-tag">Aujourd\'hui</span>' : ''}
+      </div>
+      <div class="recap-day-badges">
+        ${recapBadge(gStatut, gStatut === 'vert' ? '⚙ Production OK' : gStatut === 'orange' ? '⚙ Écarts prod.' : '⚙ Production critique')}
+        ${sec ? recapBadge(secStatut, secStatut === 'vert' ? '🛡 Sécu OK' : '🛡 Sécu ' + (sec.nb_evenements||'') + ' évèn.') : ''}
+        ${maint ? recapBadge(maintStatut, maintStatut === 'rouge' ? '🔧 Maint. critique' : maintStatut === 'orange' ? '🔧 Maint. écarts' : '🔧 Maint. OK') : ''}
+      </div>
     </div>
 
+    <!-- MACHINES -->
     ${hasM1 || hasM3 ? `
     <div class="recap-machines">
-      ${hasM1 ? `<div class="recap-machine">
-        <div class="recap-mach-title">Machine 1 ${feu(prod.m1_statut)}</div>
-        ${m1kpis.map(k => `<div class="recap-kpi">${k}</div>`).join('')}
+      ${hasM1 ? `
+      <div class="recap-machine recap-machine-${prod.m1_statut||'vert'}">
+        <div class="recap-mach-header">
+          <span class="recap-mach-num">M1</span>
+          <span class="recap-mach-ref">${prod.m1_ref||'—'}</span>
+          <span class="recap-mach-statut feu feu-${prod.m1_statut||'vert'}"></span>
+        </div>
+        <div class="recap-chips">${m1chips.join('')}</div>
       </div>` : ''}
-      ${hasM3 ? `<div class="recap-machine">
-        <div class="recap-mach-title">Machine 3 ${feu(prod.m3_statut)}</div>
-        ${m3kpis.map(k => `<div class="recap-kpi">${k}</div>`).join('')}
+      ${hasM3 ? `
+      <div class="recap-machine recap-machine-${prod.m3_statut||'vert'}">
+        <div class="recap-mach-header">
+          <span class="recap-mach-num">M3</span>
+          <span class="recap-mach-ref">${prod.m3_ref||'—'}</span>
+          <span class="recap-mach-statut feu feu-${prod.m3_statut||'vert'}"></span>
+        </div>
+        <div class="recap-chips">${m3chips.join('')}</div>
       </div>` : ''}
     </div>` : ''}
 
+    <!-- INFORMATIONS IMPORTANTES -->
     ${infos ? `
     <div class="recap-info">
       <div class="recap-info-label">📌 Informations importantes</div>
       <div class="recap-info-body">${infos}</div>
     </div>` : ''}
 
+    <!-- ALERTES MAINTENANCE + SÉCU -->
     ${hasPannes || hasSecu ? `
     <div class="recap-alerts">
       ${hasPannes ? impacts.map(ev => `
-        <div class="recap-alert-item" style="border-left-color:var(--${ev.urgence})">
-          <span class="feu feu-${ev.urgence}" style="width:8px;height:8px;flex-shrink:0"></span>
-          <span>${ev.desc}${ev.machine ? ' <span class="recap-kpi-obj">('+ev.machine+')</span>' : ''}</span>
+        <div class="recap-alert-item recap-alert-${ev.urgence}">
+          <span class="recap-alert-icon">${ev.urgence === 'rouge' ? '🔴' : '🟠'}</span>
+          <div class="recap-alert-body">
+            <span class="recap-alert-desc">${ev.desc}</span>
+            ${ev.machine ? `<span class="recap-alert-machine">${ev.machine}</span>` : ''}
+          </div>
         </div>`).join('') : ''}
       ${hasSecu ? `
-        <div class="recap-alert-item" style="border-left-color:var(--orange)">
-          <span class="feu feu-orange" style="width:8px;height:8px;flex-shrink:0"></span>
-          <span>Sécurité : ${sec.evenements || sec.nb_evenements+' évènement(s)'}</span>
+        <div class="recap-alert-item recap-alert-orange">
+          <span class="recap-alert-icon">🛡</span>
+          <div class="recap-alert-body">
+            <span class="recap-alert-desc">Sécurité : ${sec.evenements || sec.nb_evenements + ' évènement(s)'}</span>
+          </div>
         </div>` : ''}
     </div>` : ''}
+
   </div>`;
 }
 
