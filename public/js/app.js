@@ -40,44 +40,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* ── Légendes automatiques sur tous les groupes de boutons couleur ── */
+/* ── Légendes permanentes sous tous les groupes de boutons couleur ── */
 function injectStatutLegends() {
   document.querySelectorAll('.statut-group').forEach(group => {
-    // Éviter les doublons
-    if (group.querySelector('.statut-legend-btn')) return;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'statut-legend-btn';
-    btn.setAttribute('aria-label', 'Légende couleurs');
-    btn.innerHTML = 'ℹ';
+    if (group.parentElement?.classList.contains('statut-group-wrap')) return;
 
-    const tip = document.createElement('div');
-    tip.className = 'statut-legend-tip';
-    tip.innerHTML =
-      '<div class="sl-row"><span class="sl-dot sl-vert"></span><div><strong>Vert</strong> — Situation normale, aucun écart</div></div>' +
-      '<div class="sl-row"><span class="sl-dot sl-orange"></span><div><strong>Orange</strong> — Écart mineur, vigilance requise</div></div>' +
-      '<div class="sl-row"><span class="sl-dot sl-rouge"></span><div><strong>Rouge</strong> — Situation critique, action immédiate</div></div>';
+    const legend = document.createElement('div');
+    legend.className = 'statut-legend';
+    legend.innerHTML =
+      '<span class="sl-item"><span class="sl-dot sl-vert"></span>Normal</span>' +
+      '<span class="sl-sep">·</span>' +
+      '<span class="sl-item"><span class="sl-dot sl-orange"></span>Écart</span>' +
+      '<span class="sl-sep">·</span>' +
+      '<span class="sl-item"><span class="sl-dot sl-rouge"></span>Critique</span>';
 
-    btn.appendChild(tip);
-
-    // Ouvrir / fermer au clic (accessible sur mobile)
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const open = btn.classList.toggle('open');
-      // Fermer les autres
-      if (open) {
-        document.querySelectorAll('.statut-legend-btn.open').forEach(other => {
-          if (other !== btn) other.classList.remove('open');
-        });
-      }
-    });
-
-    group.appendChild(btn);
-  });
-
-  // Fermer toutes les légendes en cliquant ailleurs
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.statut-legend-btn.open').forEach(b => b.classList.remove('open'));
+    // Envelopper dans un flex-colonne pour rester dans la même cellule de grille
+    const wrap = document.createElement('div');
+    wrap.className = 'statut-group-wrap';
+    group.parentNode.insertBefore(wrap, group);
+    wrap.appendChild(group);
+    wrap.appendChild(legend);
   });
 }
 
