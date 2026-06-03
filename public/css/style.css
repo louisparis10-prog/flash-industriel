@@ -425,6 +425,39 @@ mark.sh {
   margin-bottom: 6px;
 }
 
+/* Légende compacte au-dessus des boutons (statut_global, couleur_globale, gravite) */
+.statut-legend-compact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.slc-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text2);
+  padding: 2px 6px 2px 4px;
+  border-radius: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+}
+.slc-item.slc-vert   { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.slc-item.slc-orange { color: #9a3412; background: #fff7ed; border-color: #fed7aa; }
+.slc-item.slc-rouge  { color: #991b1b; background: #fff5f5; border-color: #fecaca; }
+.slc-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.slc-item.slc-vert   .slc-dot { background: var(--vert); }
+.slc-item.slc-orange .slc-dot { background: var(--orange); }
+.slc-item.slc-rouge  .slc-dot { background: var(--rouge); }
+.slc-sep { font-size: 10px; color: var(--border); margin: 0 2px; }
+
 .statut-legend-block {
   display: flex;
   gap: 0;

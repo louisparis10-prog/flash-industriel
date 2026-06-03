@@ -107,59 +107,103 @@ function insertSharedLegend(selector, legendField, label) {
   anchor.parentNode.insertBefore(shared, anchor);
 }
 
-// Champs dont la légende est gérée par un bloc partagé ou déjà couverts ailleurs
+// Champs gérés par un bloc partagé ou déjà couverts (pas de légende individuelle)
 const LEGEND_NO_INDIVIDUAL = new Set([
-  // Maintenance — couverts par le bloc global "Risques équipements"
   'impact_0_urgence', 'point_0_statut',
-  // Production — légende partagée M1/M3
   'm1_statut', 'm3_statut',
-  // Qualité — légendes partagées par paire
   'm1_resultat', 'm3_resultat',
   'm1_tc_statut', 'm3_tc_statut',
-  // Maintenance zones — une seule légende pour toutes les zones
   'zone_mt1','zone_mt3','zone_charg1','zone_charg3',
   'zone_prep1','zone_prep3','zone_fin1','zone_fin3',
+  // Indicateurs dans les tableaux — couverts par un bloc de section
+  'clarification_statut','zone_dechets_statut','incendie_statut','step1_statut',
+  'biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut',
 ]);
 
+// Champs où la légende va AU-DESSUS des boutons, style compact
+const LEGEND_ABOVE_COMPACT = new Set(['statut_global', 'couleur_globale', 'gravite']);
+
 function injectStatutLegends() {
-  // ── Blocs partagés ──────────────────────────────────────────
+  // ── Blocs partagés avant sections ──────────────────────────
+
   // Production : statut M1 + M3
-  insertSharedLegend(
-    '#page-production .form-section:has([data-field="m1_statut"])',
-    'm1_statut', 'Statut machine — légende'
-  );
+  insertSharedLegend('#page-production .form-section:has([data-field="m1_statut"])', 'm1_statut', 'Statut machine');
+
   // Qualité : résultat M1 + M3
-  insertSharedLegend(
-    '#page-qualite .form-section:has([data-field="m1_resultat"])',
-    'm1_resultat', 'Résultat qualité — légende'
-  );
+  insertSharedLegend('#page-qualite .form-section:has([data-field="m1_resultat"])', 'm1_resultat', 'Résultat qualité');
+
   // Qualité : taux de casse M1 + M3
-  insertSharedLegend(
-    '#page-qualite .form-section:has([data-field="m1_tc_statut"])',
-    'm1_tc_statut', 'Taux de casse — légende'
-  );
-  // Maintenance : toutes les zones (MT, Chargement, Préparation, Finition)
-  insertSharedLegend(
-    '#page-maintenance .form-section:has([data-field="zone_mt1"])',
-    'zone_mt1', 'Indicateurs zones — légende'
+  insertSharedLegend('#page-qualite .form-section:has([data-field="m1_tc_statut"])', 'm1_tc_statut', 'Taux de casse');
+
+  // Maintenance : toutes les zones
+  insertSharedLegend('#page-maintenance .form-section:has([data-field="zone_mt1"])', 'zone_mt1', 'Indicateurs zones');
+
+  // Sécurité Env : indicateurs environnement (légende générique)
+  insertSharedLegendCustom(
+    '#page-securite .form-section:has([data-field="clarification_statut"])',
+    'Indicateurs environnement',
+    { vert: ['Conforme', 'Situation nominale, aucun écart'], orange: ['Vigilance', 'Écart constaté, surveillance requise'], rouge: ['Non-conforme', 'Situation critique, action immédiate'] }
   );
 
-  // ── Légendes individuelles pour les champs restants ─────────
+  // Utilités : indicateurs utilités (légende générique)
+  insertSharedLegendCustom(
+    '#page-utilites .form-section:has([data-field="biomasse_statut"])',
+    'Indicateurs utilités',
+    { vert: ['Nominal', 'Équipement fonctionnel, aucun écart'], orange: ['Vigilance', 'Anomalie ou fonctionnement dégradé'], rouge: ['Critique', 'Équipement hors service ou défaillance grave'] }
+  );
+
+  // ── Légendes individuelles ──────────────────────────────────
   document.querySelectorAll('.statut-group').forEach(group => {
     if (group.parentElement?.classList.contains('statut-group-wrap')) return;
     const field = group.querySelector('[data-field]')?.dataset.field || '';
     if (LEGEND_NO_INDIVIDUAL.has(field)) return;
 
+    const above = LEGEND_ABOVE_COMPACT.has(field);
     const legend = document.createElement('div');
-    legend.className = 'statut-legend-block';
-    legend.innerHTML = buildLegendHTML(field);
+    legend.className = above ? 'statut-legend-compact' : 'statut-legend-block';
+    legend.innerHTML = above ? buildLegendCompact(field) : buildLegendHTML(field);
 
     const wrap = document.createElement('div');
     wrap.className = 'statut-group-wrap';
     group.parentNode.insertBefore(wrap, group);
-    wrap.appendChild(group);
-    wrap.appendChild(legend);
+    if (above) {
+      wrap.appendChild(legend);
+      wrap.appendChild(group);
+    } else {
+      wrap.appendChild(group);
+      wrap.appendChild(legend);
+    }
   });
+}
+
+function insertSharedLegendCustom(selector, label, cfg) {
+  const anchor = document.querySelector(selector);
+  if (!anchor || anchor.previousElementSibling?.classList.contains('statut-shared-legend')) return;
+  const colorDefs = [
+    { key: 'vert', cls: 'slb-vert' }, { key: 'orange', cls: 'slb-orange' }, { key: 'rouge', cls: 'slb-rouge' }
+  ];
+  let html = '';
+  colorDefs.forEach(({ key, cls }) => {
+    const d = cfg[key];
+    if (!d) return;
+    html += `<div class="slb-item ${cls}"><span class="slb-dot"></span><div><div class="slb-title">${key.charAt(0).toUpperCase()+key.slice(1)} — ${d[0]}</div>${d[1] ? `<div class="slb-desc">${d[1]}</div>` : ''}</div></div>`;
+  });
+  const shared = document.createElement('div');
+  shared.className = 'statut-shared-legend';
+  shared.innerHTML = `<div class="ssl-title">${label}</div><div class="statut-legend-block">${html}</div>`;
+  anchor.parentNode.insertBefore(shared, anchor);
+}
+
+function buildLegendCompact(field) {
+  const cfg = STATUT_LEGENDS[field];
+  const colorDefs = [
+    { key: 'vert', cls: 'slc-vert' }, { key: 'orange', cls: 'slc-orange' }, { key: 'rouge', cls: 'slc-rouge' }
+  ];
+  return colorDefs.map(({ key, cls }) => {
+    if (cfg && !cfg[key]) return '';
+    const title = cfg?.[key]?.[0] || (key === 'vert' ? 'Normal' : key === 'orange' ? 'Écart' : 'Critique');
+    return `<span class="slc-item ${cls}"><span class="slc-dot"></span>${title}</span>`;
+  }).join('<span class="slc-sep">·</span>');
 }
 
 function updateHeaderDate() {
