@@ -73,16 +73,6 @@ const STATUT_LEGENDS = {
   point_0_statut:       { vert: ['Soldé',               'Action réalisée et clôturée'],      orange: ['En cours',         'Action engagée, dans les délais'],     rouge: ['En retard',        'Délai dépassé, escalade requise']       },
 };
 
-// Champs sans légende individuelle (déjà couverts par un bloc global au-dessus)
-const LEGEND_SKIP = new Set(['impact_0_urgence', 'point_0_statut']);
-
-// Champs dont la légende est partagée entre plusieurs groupes (affichée une seule fois)
-// clé = field, valeur = sélecteur CSS de l'élément AVANT lequel insérer la légende partagée
-const LEGEND_SHARED = {
-  m1_statut: '#page-production .form-section:has([data-field="m1_statut"])',
-  m3_statut: null, // même légende que m1_statut, skip
-};
-
 function buildLegendHTML(field) {
   const cfg = STATUT_LEGENDS[field];
   const colorDefs = [
@@ -108,25 +98,57 @@ function buildLegendHTML(field) {
   return html;
 }
 
-function injectStatutLegends() {
-  // Légende partagée Production M1/M3 : une seule fois avant la section M1
-  const m1Section = document.querySelector('#page-production .form-section:has([data-field="m1_statut"])');
-  if (m1Section && !m1Section.previousElementSibling?.classList.contains('statut-shared-legend')) {
-    const shared = document.createElement('div');
-    shared.className = 'statut-shared-legend';
-    shared.innerHTML = `<div class="ssl-title">Statut machine — légende</div><div class="statut-legend-block">${buildLegendHTML('m1_statut')}</div>`;
-    m1Section.parentNode.insertBefore(shared, m1Section);
-  }
+function insertSharedLegend(selector, legendField, label) {
+  const anchor = document.querySelector(selector);
+  if (!anchor || anchor.previousElementSibling?.classList.contains('statut-shared-legend')) return;
+  const shared = document.createElement('div');
+  shared.className = 'statut-shared-legend';
+  shared.innerHTML = `<div class="ssl-title">${label}</div><div class="statut-legend-block">${buildLegendHTML(legendField)}</div>`;
+  anchor.parentNode.insertBefore(shared, anchor);
+}
 
+// Champs dont la légende est gérée par un bloc partagé ou déjà couverts ailleurs
+const LEGEND_NO_INDIVIDUAL = new Set([
+  // Maintenance — couverts par le bloc global "Risques équipements"
+  'impact_0_urgence', 'point_0_statut',
+  // Production — légende partagée M1/M3
+  'm1_statut', 'm3_statut',
+  // Qualité — légendes partagées par paire
+  'm1_resultat', 'm3_resultat',
+  'm1_tc_statut', 'm3_tc_statut',
+  // Maintenance zones — une seule légende pour toutes les zones
+  'zone_mt1','zone_mt3','zone_charg1','zone_charg3',
+  'zone_prep1','zone_prep3','zone_fin1','zone_fin3',
+]);
+
+function injectStatutLegends() {
+  // ── Blocs partagés ──────────────────────────────────────────
+  // Production : statut M1 + M3
+  insertSharedLegend(
+    '#page-production .form-section:has([data-field="m1_statut"])',
+    'm1_statut', 'Statut machine — légende'
+  );
+  // Qualité : résultat M1 + M3
+  insertSharedLegend(
+    '#page-qualite .form-section:has([data-field="m1_resultat"])',
+    'm1_resultat', 'Résultat qualité — légende'
+  );
+  // Qualité : taux de casse M1 + M3
+  insertSharedLegend(
+    '#page-qualite .form-section:has([data-field="m1_tc_statut"])',
+    'm1_tc_statut', 'Taux de casse — légende'
+  );
+  // Maintenance : toutes les zones (MT, Chargement, Préparation, Finition)
+  insertSharedLegend(
+    '#page-maintenance .form-section:has([data-field="zone_mt1"])',
+    'zone_mt1', 'Indicateurs zones — légende'
+  );
+
+  // ── Légendes individuelles pour les champs restants ─────────
   document.querySelectorAll('.statut-group').forEach(group => {
     if (group.parentElement?.classList.contains('statut-group-wrap')) return;
     const field = group.querySelector('[data-field]')?.dataset.field || '';
-
-    // Pas de légende pour ces champs
-    if (LEGEND_SKIP.has(field)) return;
-
-    // Pas de légende individuelle pour m1/m3 (couverts par le bloc partagé)
-    if (field === 'm1_statut' || field === 'm3_statut') return;
+    if (LEGEND_NO_INDIVIDUAL.has(field)) return;
 
     const legend = document.createElement('div');
     legend.className = 'statut-legend-block';
