@@ -1373,7 +1373,7 @@ mark.sh {
 /* Les cartes ne doivent pas avoir margin-bottom en mode grille */
 .recap-day { margin-bottom: 0; }
 
-@media(max-width:900px) {
+@media(max-width:580px) {
   .recap-drawer-body { grid-template-columns: 1fr; }
 }
 @media(max-width:600px) {
