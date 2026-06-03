@@ -1141,7 +1141,7 @@ mark.sh {
   border: 1px solid var(--border);
   border-radius: 12px;
   margin-bottom: 0;
-  overflow: hidden;
+  overflow: clip;
   cursor: pointer;
   transition: box-shadow .2s, transform .15s;
   /* border-left overridden inline avec la couleur statut */
@@ -1283,7 +1283,7 @@ mark.sh {
 }
 
 /* ── Contenu visible ── */
-.recap-visible { display: flex; flex-direction: column; }
+.recap-visible { display: block; }
 
 /* ── Informations importantes ── */
 .recap-info {
