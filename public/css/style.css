@@ -413,6 +413,18 @@ mark.sh {
   gap: 0;
 }
 
+.statut-shared-legend {
+  padding: 0 20px 12px;
+}
+.ssl-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+
 .statut-legend-block {
   display: flex;
   gap: 0;

@@ -73,49 +73,64 @@ const STATUT_LEGENDS = {
   point_0_statut:       { vert: ['Soldé',               'Action réalisée et clôturée'],      orange: ['En cours',         'Action engagée, dans les délais'],     rouge: ['En retard',        'Délai dépassé, escalade requise']       },
 };
 
+// Champs sans légende individuelle (déjà couverts par un bloc global au-dessus)
+const LEGEND_SKIP = new Set(['impact_0_urgence', 'point_0_statut']);
+
+// Champs dont la légende est partagée entre plusieurs groupes (affichée une seule fois)
+// clé = field, valeur = sélecteur CSS de l'élément AVANT lequel insérer la légende partagée
+const LEGEND_SHARED = {
+  m1_statut: '#page-production .form-section:has([data-field="m1_statut"])',
+  m3_statut: null, // même légende que m1_statut, skip
+};
+
+function buildLegendHTML(field) {
+  const cfg = STATUT_LEGENDS[field];
+  const colorDefs = [
+    { key: 'vert',   cls: 'slb-vert'   },
+    { key: 'orange', cls: 'slb-orange' },
+    { key: 'rouge',  cls: 'slb-rouge'  },
+  ];
+  let html = '';
+  colorDefs.forEach(({ key, cls }) => {
+    if (cfg && !cfg[key]) return;
+    const data = cfg?.[key];
+    const title = data?.[0] || (key === 'vert' ? 'Normal' : key === 'orange' ? 'Écart' : 'Critique');
+    const desc  = data?.[1] || '';
+    html += `<div class="slb-item ${cls}"><span class="slb-dot"></span><div>
+      <div class="slb-title">${key.charAt(0).toUpperCase() + key.slice(1)} — ${title}</div>
+      ${desc ? `<div class="slb-desc">${desc}</div>` : ''}
+    </div></div>`;
+  });
+  if (!html) html =
+    '<div class="slb-item slb-vert"><span class="slb-dot"></span><div><div class="slb-title">Vert — Normal</div><div class="slb-desc">Situation nominale</div></div></div>' +
+    '<div class="slb-item slb-orange"><span class="slb-dot"></span><div><div class="slb-title">Orange — Écart</div><div class="slb-desc">Vigilance requise</div></div></div>' +
+    '<div class="slb-item slb-rouge"><span class="slb-dot"></span><div><div class="slb-title">Rouge — Critique</div><div class="slb-desc">Action immédiate requise</div></div></div>';
+  return html;
+}
+
 function injectStatutLegends() {
+  // Légende partagée Production M1/M3 : une seule fois avant la section M1
+  const m1Section = document.querySelector('#page-production .form-section:has([data-field="m1_statut"])');
+  if (m1Section && !m1Section.previousElementSibling?.classList.contains('statut-shared-legend')) {
+    const shared = document.createElement('div');
+    shared.className = 'statut-shared-legend';
+    shared.innerHTML = `<div class="ssl-title">Statut machine — légende</div><div class="statut-legend-block">${buildLegendHTML('m1_statut')}</div>`;
+    m1Section.parentNode.insertBefore(shared, m1Section);
+  }
+
   document.querySelectorAll('.statut-group').forEach(group => {
     if (group.parentElement?.classList.contains('statut-group-wrap')) return;
-
     const field = group.querySelector('[data-field]')?.dataset.field || '';
-    const cfg = STATUT_LEGENDS[field];
+
+    // Pas de légende pour ces champs
+    if (LEGEND_SKIP.has(field)) return;
+
+    // Pas de légende individuelle pour m1/m3 (couverts par le bloc partagé)
+    if (field === 'm1_statut' || field === 'm3_statut') return;
 
     const legend = document.createElement('div');
     legend.className = 'statut-legend-block';
-
-    const colorDefs = [
-      { key: 'vert',   cls: 'slb-vert'   },
-      { key: 'orange', cls: 'slb-orange' },
-      { key: 'rouge',  cls: 'slb-rouge'  },
-    ];
-
-    let html = '';
-    colorDefs.forEach(({ key, cls }) => {
-      const data = cfg?.[key];
-      const title = data?.[0] || (key === 'vert' ? 'Normal' : key === 'orange' ? 'Écart' : 'Critique');
-      const desc  = data?.[1] || '';
-      if (!data && !cfg) {
-        // fallback générique
-      }
-      if (cfg && !cfg[key]) return; // ex: urgence sans vert
-      html += `<div class="slb-item ${cls}">
-        <span class="slb-dot"></span>
-        <div>
-          <div class="slb-title">${key.charAt(0).toUpperCase() + key.slice(1)} — ${title}</div>
-          ${desc ? `<div class="slb-desc">${desc}</div>` : ''}
-        </div>
-      </div>`;
-    });
-
-    // Fallback si champ non trouvé
-    if (!html) {
-      html =
-        '<div class="slb-item slb-vert"><span class="slb-dot"></span><div><div class="slb-title">Vert — Normal</div><div class="slb-desc">Situation nominale</div></div></div>' +
-        '<div class="slb-item slb-orange"><span class="slb-dot"></span><div><div class="slb-title">Orange — Écart</div><div class="slb-desc">Vigilance requise</div></div></div>' +
-        '<div class="slb-item slb-rouge"><span class="slb-dot"></span><div><div class="slb-title">Rouge — Critique</div><div class="slb-desc">Action immédiate requise</div></div></div>';
-    }
-
-    legend.innerHTML = html;
+    legend.innerHTML = buildLegendHTML(field);
 
     const wrap = document.createElement('div');
     wrap.className = 'statut-group-wrap';
