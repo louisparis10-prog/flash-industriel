@@ -41,18 +41,66 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── Légendes permanentes sous tous les groupes de boutons couleur ── */
+const STATUT_LEGENDS = {
+  // Sécurité
+  couleur_globale:    ['Aucun incident',        'Événement signalé',        'Incident grave'],
+  gravite:            ['Sans conséquence',       'Soins / presque-accident', 'Accident / danger grave'],
+  // Sécurité Environnement
+  clarification_statut: ['Turbidité conforme',  'Paramètre à surveiller',   'Hors normes'],
+  zone_dechets_statut:  ['Zone propre, tri OK', 'Écart de tri / désordre',  'Déchets dangereux mal stockés'],
+  incendie_statut:      ['Équipements opérationnels', 'Équipement non critique HS', 'Équipement vital hors service'],
+  step1_statut:         ['Fonctionnement conforme',   'Anomalie en traitement',     'Rejet non conforme'],
+  // Utilités
+  statut_global:      ['Tous équipements nominaux',  'Équipement(s) en anomalie',   'Équipement vital en panne'],
+  biomasse_statut:    ['En fonctionnement',          'Fonctionnement dégradé',       'Arrêt non planifié'],
+  gaz_statut:         ['Disponible / en marche',     'Disponibilité partielle',      'Indisponible'],
+  dalkia_statut:      ['Toutes chaudières OK',       'Fonctionnement dégradé',       'Absence de vapeur'],
+  air_statut:         ['Pression nominale',          'Pression basse / anomalie',    'Panne compresseur'],
+  clim_statut:        ['Temp. & hygro. nominales',   'Température hors consigne',    'Climatisation hors service'],
+  effacement_statut:  ['Capacité nominale',          'Capacité partielle',           'Effacement impossible'],
+  // Production
+  m1_statut:          ['Objectifs atteints',         'Écart de production',          'Arrêt / prod. très dégradée'],
+  m3_statut:          ['Objectifs atteints',         'Écart de production',          'Arrêt / prod. très dégradée'],
+  // Qualité — résultat machine
+  m1_resultat:        ['Qualité conforme',           'Non-conformité mineure',       'Hors spécifications'],
+  m3_resultat:        ['Qualité conforme',           'Non-conformité mineure',       'Hors spécifications'],
+  // Qualité — taux de casse
+  m1_tc_statut:       ['Taux dans l\'objectif',      'Taux au-dessus objectif',      'Taux critique'],
+  m3_tc_statut:       ['Taux dans l\'objectif',      'Taux au-dessus objectif',      'Taux critique'],
+  // Qualité — zones
+  zone_mt1:           ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  zone_mt3:           ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  zone_charg1:        ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  zone_charg3:        ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  zone_prep1:         ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  zone_prep3:         ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  zone_fin1:          ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  zone_fin3:          ['Aucune non-conformité',      'Non-conformité mineure',       'Non-conformité grave'],
+  // Maintenance — urgence
+  impact_0_urgence:   [null,                         'Impact indirect production',   'Impact direct — sous 24h'],
+  // Maintenance — point d'action
+  point_0_statut:     ['Action réalisée et clôturée','Action en cours de traitement','Délai dépassé'],
+};
+
 function injectStatutLegends() {
   document.querySelectorAll('.statut-group').forEach(group => {
     if (group.parentElement?.classList.contains('statut-group-wrap')) return;
 
+    // Trouver le data-field du groupe
+    const field = group.querySelector('[data-field]')?.dataset.field || '';
+    const labels = STATUT_LEGENDS[field] || ['Normal', 'Écart mineur', 'Critique'];
+
     const legend = document.createElement('div');
     legend.className = 'statut-legend';
-    legend.innerHTML =
-      '<span class="sl-item"><span class="sl-dot sl-vert"></span>Normal</span>' +
-      '<span class="sl-sep">·</span>' +
-      '<span class="sl-item"><span class="sl-dot sl-orange"></span>Écart</span>' +
-      '<span class="sl-sep">·</span>' +
-      '<span class="sl-item"><span class="sl-dot sl-rouge"></span>Critique</span>';
+
+    let html = '';
+    const colors = ['vert', 'orange', 'rouge'];
+    colors.forEach((c, i) => {
+      if (!labels[i]) return; // champ urgence sans vert
+      if (i > 0 && html) html += '<span class="sl-sep">·</span>';
+      html += `<span class="sl-item"><span class="sl-dot sl-${c}"></span>${labels[i]}</span>`;
+    });
+    legend.innerHTML = html;
 
     // Envelopper dans un flex-colonne pour rester dans la même cellule de grille
     const wrap = document.createElement('div');
