@@ -135,9 +135,6 @@ function injectStatutLegends() {
   // Qualité : taux de casse M1 + M3
   insertSharedLegend('#page-qualite .form-section:has([data-field="m1_tc_statut"])', 'm1_tc_statut', 'Taux de casse');
 
-  // Maintenance : toutes les zones
-  insertSharedLegend('#page-maintenance .form-section:has([data-field="zone_mt1"])', 'zone_mt1', 'Indicateurs zones');
-
   // Sécurité Env : indicateurs environnement (légende générique)
   insertSharedLegendCustom(
     '#page-securite .form-section:has([data-field="clarification_statut"])',
