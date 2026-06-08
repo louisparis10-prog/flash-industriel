@@ -673,8 +673,8 @@ function renderDashboard(d, status, date) {
   const maint = d.maintenance || null;
   const util  = d.utilites    || null;
 
-  // Statut global Utilités dérivé des zones individuelles
-  const utilZoneKeys = ['clarification_statut','zone_dechets_statut','incendie_statut','step1_statut','biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
+  // Statut global Utilités dérivé des zones individuelles (sans les indicateurs env. passés dans Sécu)
+  const utilZoneKeys = ['biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
   const utilZoneVals = util ? utilZoneKeys.map(k => util[k]).filter(Boolean) : [];
   const utilStatutGlobal = util?.statut_global || (utilZoneVals.includes('rouge') ? 'rouge' : utilZoneVals.includes('orange') ? 'orange' : utilZoneVals.length > 0 ? 'vert' : null);
 
@@ -769,6 +769,10 @@ function renderDashboard(d, status, date) {
 
   // ── Corps Sécurité ──
   const secColor = +sec?.nb_evenements > 0 ? 'var(--rouge)' : 'var(--vert)';
+  const secEnvRows = [
+    ['Clarification','clarification'], ['Zone déchets','zone_dechets'],
+    ['Protection incendie','incendie'], ['STEP','step1'],
+  ].filter(([,k]) => sec && sec[k+'_statut']);
   const secBody = sec ? `
     <div class="db-sec-count">
       <div>
@@ -781,6 +785,25 @@ function renderDashboard(d, status, date) {
     </div>
     ${sec.gravite && sec.gravite !== 'vert' ? dbSimple('Gravité', sec.gravite, '', sec.gravite === 'rouge' ? 'var(--rouge)' : 'var(--orange)') : ''}
     ${sec.commentaire_general && sec.commentaire_general !== 'Aucun incident à signaler' ? dbInfo(sec.commentaire_general) : ''}
+    ${secEnvRows.length ? `
+    <div style="margin-top:12px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:6px;">Indicateurs environnement</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr>
+          <th style="text-align:left;padding:6px 10px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Indicateur</th>
+          <th style="padding:6px 10px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);text-align:center;">Statut</th>
+          <th style="text-align:left;padding:6px 10px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Information</th>
+        </tr></thead>
+        <tbody>
+          ${secEnvRows.map(([label, k]) => `
+            <tr>
+              <td style="padding:7px 10px;font-size:13px;border-bottom:1px solid var(--border);">${label}</td>
+              <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);"><span class="feu feu-${sec[k+'_statut']}"></span></td>
+              <td style="padding:7px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);">${sec[k+'_info'] || '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
   ` : '';
 
   // ── Corps Production ──
@@ -908,8 +931,6 @@ function renderDashboard(d, status, date) {
 
   // ── Corps Utilités ──
   const utilRows = [
-    ['Clarification','clarification'], ['Zone déchets','zone_dechets'],
-    ['Protection incendie','incendie'], ['STEP','step1'],
     ['Biomasse','biomasse'], ['Gaz','gaz'], ['Dalkia','dalkia'],
     ['Air Comprimé','air'], ['Climatisation','clim'], ['Effacement Énergétique','effacement'],
   ].filter(([,k]) => util && util[k+'_statut']);
@@ -1727,7 +1748,7 @@ async function printReport() {
   const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
   // Statut global
-  const utilZK = ['clarification_statut','zone_dechets_statut','incendie_statut','step1_statut','biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
+  const utilZK = ['biomasse_statut','gaz_statut','dalkia_statut','air_statut','clim_statut','effacement_statut'];
   const utilZV = util ? utilZK.map(k=>util[k]).filter(Boolean) : [];
   const utilSt = util?.statut_global || (utilZV.includes('rouge')?'rouge':utilZV.includes('orange')?'orange':utilZV.length?'vert':null);
   const allSt  = [sec?.couleur_globale, prod?.statut_global, qual?.statut_global, maint?.statut_global, utilSt].filter(Boolean);
@@ -1754,10 +1775,15 @@ async function printReport() {
     for(let i=0;i<10;i++){const desc=maint[`risque_${i}_desc`];if(desc)risques.push({desc,machine:maint[`risque_${i}_machine`]||'',delai:maint[`risque_${i}_delai`]||''});}
   }
 
-  // Zones utilités
+  // Indicateurs environnement (dans Sécurité)
+  const secEnvRowsPrint = [
+    ['Clarification','clarification'],['Zone déchets','zone_dechets'],
+    ['Protection incendie','incendie'],['STEP','step1'],
+  ].filter(([,k])=>sec&&sec[k+'_statut']);
+
+  // Indicateurs utilités
   const utilRows = [
-    ['Clarification','clarification'],['Zone déchets','zone_dechets'],['Protection incendie','incendie'],
-    ['STEP','step1'],['Biomasse','biomasse'],['Gaz','gaz'],['Dalkia','dalkia'],
+    ['Biomasse','biomasse'],['Gaz','gaz'],['Dalkia','dalkia'],
     ['Air Comprimé','air'],['Climatisation','clim'],['Effacement','effacement'],
   ].filter(([,k])=>util&&util[k+'_statut']);
 
@@ -1849,6 +1875,14 @@ async function printReport() {
       ${sec.evenements ? info(sec.evenements,'#9a3412','#fff7ed') : info('✓ Aucun incident à signaler','#166534','#f0fdf4')}
       ${sec.gravite&&sec.gravite!=='vert' ? row('Gravité', sec.gravite) : ''}
       ${sec.commentaire_general&&sec.commentaire_general!=='Aucun incident à signaler' ? info(sec.commentaire_general) : ''}
+      ${secEnvRowsPrint.length ? `${sect('Indicateurs environnement')}
+        <table style="width:100%;border-collapse:collapse;">
+          ${secEnvRowsPrint.map(([label,k])=>`<tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:4px 0;font-size:11px;color:#64748b;">${label}</td>
+            <td style="padding:4px 0;text-align:center;">${dot(sec[k+'_statut'])}</td>
+            <td style="padding:4px 0;font-size:11px;color:#0f172a;">${sec[k+'_info']||'—'}</td>
+          </tr>`).join('')}
+        </table>` : ''}
     ` : '<p style="color:#94a3b8;font-size:12px;">Non renseigné</p>'}
   </div>
 
