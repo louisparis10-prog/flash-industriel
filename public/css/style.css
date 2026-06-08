@@ -1077,7 +1077,7 @@ mark.sh {
 .acc-header:hover { background: var(--bg3); }
 .acc-panel.open > .acc-header { background: var(--bg3); border-bottom: 1px solid var(--border); }
 .acc-panel.acc-missing > .acc-header { cursor: default; opacity: .65; }
-.acc-left  { display: grid; grid-template-columns: 14px 145px 155px auto; align-items: center; justify-items: start; gap: 16px; flex: 1; min-width: 0; overflow: hidden; }
+.acc-left  { display: grid; grid-template-columns: 14px minmax(140px, 210px) minmax(120px, 155px) auto; align-items: center; justify-items: start; gap: 12px; flex: 1; min-width: 0; overflow: hidden; }
 @media(max-width:640px) { .acc-left { grid-template-columns: 14px 1fr auto; } .acc-animateur { display: none; } }
 .acc-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
 .acc-name  { font-weight: 700; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
