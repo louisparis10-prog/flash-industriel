@@ -398,7 +398,7 @@ async function checkStatus() {
 
 function updateStatusUI(data) {
   const services = ['securite', 'production', 'qualite', 'maintenance', 'utilites'];
-  const labels = { securite: 'Sécurité', production: 'Production', qualite: 'Qualité', maintenance: 'Maintenance', utilites: 'Utilités' };
+  const labels = { securite: 'Sécurité Environnement', production: 'Production', qualite: 'Qualité', maintenance: 'Maintenance', utilites: 'Utilités' };
   services.forEach(s => {
     const ok = data.submitted.includes(s);
     const el = document.getElementById('status-' + s);
@@ -689,7 +689,7 @@ function renderDashboard(d, status, date) {
   if (statuts.includes('rouge')) globalStatut = 'rouge';
   else if (statuts.includes('orange')) globalStatut = 'orange';
   const globalLabels = { vert: 'Situation normale', orange: 'Points de vigilance', rouge: 'Situation critique' };
-  const svcNames = { securite:'Sécurité', production:'Production', qualite:'Qualité', maintenance:'Maintenance', utilites:'Utilités' };
+  const svcNames = { securite:'Sécurité Environnement', production:'Production', qualite:'Qualité', maintenance:'Maintenance', utilites:'Utilités' };
 
   // Points à investiguer
   const points = [];
@@ -769,10 +769,12 @@ function renderDashboard(d, status, date) {
 
   // ── Corps Sécurité ──
   const secColor = +sec?.nb_evenements > 0 ? 'var(--rouge)' : 'var(--vert)';
+  // Rétrocompat : indicateurs env peuvent être dans sec (nouveau) ou util (ancien)
+  const envSrc = k => (sec && sec[k+'_statut']) ? sec : (util && util[k+'_statut']) ? util : null;
   const secEnvRows = [
     ['Clarification','clarification'], ['Zone déchets','zone_dechets'],
     ['Protection incendie','incendie'], ['STEP','step1'],
-  ].filter(([,k]) => sec && sec[k+'_statut']);
+  ].filter(([,k]) => envSrc(k));
   const secBody = sec ? `
     <div class="db-sec-count">
       <div>
@@ -795,12 +797,12 @@ function renderDashboard(d, status, date) {
           <th style="text-align:left;padding:6px 10px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;background:var(--bg3);border-bottom:1px solid var(--border);">Information</th>
         </tr></thead>
         <tbody>
-          ${secEnvRows.map(([label, k]) => `
+          ${secEnvRows.map(([label, k]) => { const src = envSrc(k); return `
             <tr>
               <td style="padding:7px 10px;font-size:13px;border-bottom:1px solid var(--border);">${label}</td>
-              <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);"><span class="feu feu-${sec[k+'_statut']}"></span></td>
-              <td style="padding:7px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);">${sec[k+'_info'] || '—'}</td>
-            </tr>`).join('')}
+              <td style="padding:7px 10px;text-align:center;border-bottom:1px solid var(--border);"><span class="feu feu-${src[k+'_statut']}"></span></td>
+              <td style="padding:7px 10px;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border);">${src[k+'_info'] || '—'}</td>
+            </tr>`; }).join('')}
         </tbody>
       </table>
     </div>` : ''}
@@ -1037,7 +1039,7 @@ function renderDashboard(d, status, date) {
 
     <!-- Accordéon services -->
     <div class="acc-stack">
-      ${acc('securite',   'var(--securite)',   'Sécurité',    sec?.animateur||'',  !!sec,
+      ${acc('securite',   'var(--securite)',   'Sécurité Environnement', sec?.animateur||'',  !!sec,
         sec  ? feu(sec.couleur_globale,  sec.couleur_globale==='vert'?'OK':sec.couleur_globale==='orange'?'Vigilance':'Critique')  : '<span class="feu feu-gris">En attente</span>',
         secBody)}
 
@@ -1081,7 +1083,7 @@ function renderDashboard(d, status, date) {
 let trendsLoaded = false;
 
 // ── RECHERCHE GLOBALE ─────────────────────────────────
-const svcLabels = { securite:'Sécurité', production:'Production', qualite:'Qualité', maintenance:'Maintenance', utilites:'Utilités' };
+const svcLabels = { securite:'Sécurité Environnement', production:'Production', qualite:'Qualité', maintenance:'Maintenance', utilites:'Utilités' };
 const svcColors = { securite:'var(--securite)', production:'var(--production)', qualite:'var(--qualite)', maintenance:'var(--maintenance)', utilites:'#0ea5e9' };
 
 function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
@@ -1279,6 +1281,7 @@ let _recapDayIdx = 0;
 function renderRecapDay(entry) {
   const prod  = entry.production;
   const sec   = entry.securite;
+  const util  = entry.utilites;
   const maint = entry.maintenance;
   if (!prod) return '';
 
@@ -1287,6 +1290,14 @@ function renderRecapDay(entry) {
   const gStatut    = prod.statut_global || 'vert';
   const secStatut  = sec?.couleur_globale || (sec && +sec.nb_evenements > 0 ? 'orange' : 'vert');
   const maintStatut = maint?.statut_global || 'vert';
+
+  // Indicateurs env — rétrocompat : sec (nouveau) ou util (ancien)
+  const recapEnvSrc = k => (sec && sec[k+'_statut']) ? sec : (util && util[k+'_statut']) ? util : null;
+  const recapEnvRows = [
+    ['Clarification','clarification'], ['Zone déchets','zone_dechets'],
+    ['Protection incendie','incendie'], ['STEP','step1'],
+  ].filter(([,k]) => recapEnvSrc(k) && recapEnvSrc(k)[k+'_statut'] !== 'vert');
+  const hasEnvEcart = recapEnvRows.length > 0;
 
   // Impacts maintenance
   const impacts = [];
@@ -1324,7 +1335,7 @@ function renderRecapDay(entry) {
   const m3impactant = m3statut !== 'vert';
   const hasPannes   = impacts.length > 0;
   const hasSecu     = sec && +sec.nb_evenements > 0;
-  const hasVisible  = m1impactant || m3impactant || hasPannes || hasSecu || !!infos;
+  const hasVisible  = m1impactant || m3impactant || hasPannes || hasSecu || !!infos || hasEnvEcart;
 
   // Ce qui est masqué (machines vertes + leurs KPIs)
   const hasHidden   = (!m1impactant && (prod.m1_ref || m1chips.length > 0))
@@ -1388,7 +1399,7 @@ function renderRecapDay(entry) {
         <div class="recap-info-body">${infos}</div>
       </div>` : ''}
 
-      ${hasPannes || hasSecu ? `
+      ${hasPannes || hasSecu || hasEnvEcart ? `
       <div class="recap-alerts">
         ${hasPannes ? impacts.map(ev => `
           <div class="recap-alert-item recap-alert-${ev.urgence}">
@@ -1405,6 +1416,16 @@ function renderRecapDay(entry) {
               <span class="recap-alert-desc">Sécurité : ${sec.evenements || sec.nb_evenements + ' évènement(s)'}</span>
             </div>
           </div>` : ''}
+        ${hasEnvEcart ? recapEnvRows.map(([label, k]) => {
+            const src = recapEnvSrc(k);
+            const st = src[k+'_statut'];
+            return `<div class="recap-alert-item recap-alert-${st}">
+              <span class="recap-alert-icon">${st === 'rouge' ? '🔴' : '🟠'}</span>
+              <div class="recap-alert-body">
+                <span class="recap-alert-desc">${label}${src[k+'_info'] ? ' : ' + src[k+'_info'] : ''}</span>
+              </div>
+            </div>`;
+          }).join('') : ''}
       </div>` : ''}
 
     </div>` : ''}
@@ -1775,11 +1796,12 @@ async function printReport() {
     for(let i=0;i<10;i++){const desc=maint[`risque_${i}_desc`];if(desc)risques.push({desc,machine:maint[`risque_${i}_machine`]||'',delai:maint[`risque_${i}_delai`]||''});}
   }
 
-  // Indicateurs environnement (dans Sécurité)
+  // Indicateurs environnement — rétrocompat sec (nouveau) ou util (ancien)
+  const envSrcPrint = k => (sec&&sec[k+'_statut']) ? sec : (util&&util[k+'_statut']) ? util : null;
   const secEnvRowsPrint = [
     ['Clarification','clarification'],['Zone déchets','zone_dechets'],
     ['Protection incendie','incendie'],['STEP','step1'],
-  ].filter(([,k])=>sec&&sec[k+'_statut']);
+  ].filter(([,k])=>envSrcPrint(k));
 
   // Indicateurs utilités
   const utilRows = [
@@ -1877,11 +1899,11 @@ async function printReport() {
       ${sec.commentaire_general&&sec.commentaire_general!=='Aucun incident à signaler' ? info(sec.commentaire_general) : ''}
       ${secEnvRowsPrint.length ? `${sect('Indicateurs environnement')}
         <table style="width:100%;border-collapse:collapse;">
-          ${secEnvRowsPrint.map(([label,k])=>`<tr style="border-bottom:1px solid #f1f5f9;">
+          ${secEnvRowsPrint.map(([label,k])=>{ const src=envSrcPrint(k); return `<tr style="border-bottom:1px solid #f1f5f9;">
             <td style="padding:4px 0;font-size:11px;color:#64748b;">${label}</td>
-            <td style="padding:4px 0;text-align:center;">${dot(sec[k+'_statut'])}</td>
-            <td style="padding:4px 0;font-size:11px;color:#0f172a;">${sec[k+'_info']||'—'}</td>
-          </tr>`).join('')}
+            <td style="padding:4px 0;text-align:center;">${dot(src[k+'_statut'])}</td>
+            <td style="padding:4px 0;font-size:11px;color:#0f172a;">${src[k+'_info']||'—'}</td>
+          </tr>`; }).join('')}
         </table>` : ''}
     ` : '<p style="color:#94a3b8;font-size:12px;">Non renseigné</p>'}
   </div>
